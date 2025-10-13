@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HWPML [
+	<!ENTITY nbsp	"&#160;">
+]>
+<HWPML Version="2.1"><HEAD SecCnt="1"><DOCSUMMARY><TITLE></TITLE>
+<AUTHOR>ELIS</AUTHOR>
+<DATE>2011.04.27</DATE>
+</DOCSUMMARY>
+<DOCSETTING>
+  <BEGINNUMBER Page="1" Footnote="1" Endnote="1" Picture="1" Table="1" Equation="1"/>
+  <CARETPOS List="0" Para="0" Pos="24"/>
+</DOCSETTING>
+<MAPPINGTABLE> 
+  <FACENAMELIST>
+    <FONTFACE Lang="Hangul" Count="6">
+    <FONT Id="0" Type="ttf" Name="굴림"><TYPEINFO FamilyType="2" SerifStyle="11" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="1" Type="ttf" Name="바탕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="2" Type="ttf" Name="HY견고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="3" Type="ttf" Name="HY신명조"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="4" Type="ttf" Name="HY중고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="5" Type="ttf" Name="돋움체"><TYPEINFO FamilyType="2" ArmStyle="1" Contrast="0" Letterform="1" Midline="1" Proportion="9" StrokeVariation="1" Weight="6" XHeight="1"/>    </FONT>
+    </FONTFACE>
+    <FONTFACE Lang="Latin" Count="5">
+    <FONT Id="0" Type="ttf" Name="굴림"><TYPEINFO FamilyType="2" SerifStyle="11" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="1" Type="ttf" Name="바탕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="2" Type="ttf" Name="HY견고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="3" Type="ttf" Name="HY신명조"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="4" Type="ttf" Name="HY중고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    </FONTFACE>
+    <FONTFACE Lang="Hanja" Count="4">
+    <FONT Id="0" Type="ttf" Name="굴림"><TYPEINFO FamilyType="2" SerifStyle="11" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="1" Type="ttf" Name="바탕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="2" Type="ttf" Name="HY견고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="3" Type="ttf" Name="HY중고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    </FONTFACE>
+    <FONTFACE Lang="Japanese" Count="4">
+    <FONT Id="0" Type="ttf" Name="굴림"><TYPEINFO FamilyType="2" SerifStyle="11" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="1" Type="ttf" Name="바탕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="2" Type="ttf" Name="HY견고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="3" Type="ttf" Name="HY중고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    </FONTFACE>
+    <FONTFACE Lang="Other" Count="5">
+    <FONT Id="0" Type="ttf" Name="굴림"><TYPEINFO FamilyType="2" SerifStyle="11" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="1" Type="ttf" Name="바탕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="2" Type="ttf" Name="HY견고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="3" Type="ttf" Name="HY신명조"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="4" Type="ttf" Name="HY중고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    </FONTFACE>
+    <FONTFACE Lang="Symbol" Count="5">
+    <FONT Id="0" Type="ttf" Name="굴림"><TYPEINFO FamilyType="2" SerifStyle="11" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="1" Type="ttf" Name="바탕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="2" Type="ttf" Name="HY견고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="3" Type="ttf" Name="HY신명조"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="4" Type="ttf" Name="HY중고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>
+    </FONT>
+    </FONTFACE>
+    <FONTFACE Lang="User" Count="5">
+    <FONT Id="0" Type="ttf" Name="굴림"><TYPEINFO FamilyType="2" SerifStyle="11" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="1" Type="ttf" Name="바탕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="2" Type="ttf" Name="HY견고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="3" Type="ttf" Name="HY신명조"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+    <FONT Id="4" Type="ttf" Name="HY중고딕"><TYPEINFO FamilyType="2" SerifStyle="3" Weight="6" Proportion="0" Contrast="0" StrokeVariation="1" ArmStyle="1" Letterform="1" Midline="1" XHeight="1"/>    </FONT>
+</FONTFACE>
+</FACENAMELIST>
+<BORDERFILLLIST Count="11">
+  <BORDERFILL Id="1" ThreeD="false" Shadow="false" Slash="0" BackSlash="0" CrookedSlash="0"><LEFTBORDER Type="None" Width="0.1mm" Color="0"/>
+    <RIGHTBORDER Type="None" Width="0.1mm" Color="0"/>
+    <TOPBORDER Type="None" Width="0.1mm" Color="0"/>
+    <BOTTOMBORDER Type="None" Width="0.1mm" Color="0"/>
+    <DIAGONAL Type="Solid" Width="0.1mm" Color="0"/>
+    <FILLBRUSH><WINDOWBRUSH FaceColor="4294967295" HatchColor="0"/>
+    </FILLBRUSH>
+  </BORDERFILL>
+  <BORDERFILL Id="2" ThreeD="false" Shadow="false" Slash="0" BackSlash="0" CrookedSlash="0"><LEFTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <RIGHTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <TOPBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <BOTTOMBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <DIAGONAL Type="Solid" Width="0.1mm" Color="0"/>
+  </BORDERFILL>
+  <BORDERFILL Id="3" ThreeD="false" Shadow="false" Slash="0" BackSlash="0" CrookedSlash="0"><LEFTBORDER Type="None" Width="0.12mm" Color="0"/>
+    <RIGHTBORDER Type="None" Width="0.12mm" Color="0"/>
+    <TOPBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <BOTTOMBORDER Type="None" Width="0.12mm" Color="0"/>
+    <DIAGONAL Type="Solid" Width="0.1mm" Color="0"/>
+  </BORDERFILL>
+  <BORDERFILL Id="4" ThreeD="false" Shadow="false" Slash="0" BackSlash="0" CrookedSlash="0"><LEFTBORDER Type="None" Width="0.12mm" Color="0"/>
+    <RIGHTBORDER Type="None" Width="0.12mm" Color="0"/>
+    <TOPBORDER Type="None" Width="0.12mm" Color="0"/>
+    <BOTTOMBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <DIAGONAL Type="Solid" Width="0.1mm" Color="0"/>
+  </BORDERFILL>
+  <BORDERFILL Id="5" ThreeD="false" Shadow="false" Slash="0" BackSlash="0" CrookedSlash="0"><LEFTBORDER Type="None" Width="0.12mm" Color="0"/>
+    <RIGHTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <TOPBORDER Type="None" Width="0.12mm" Color="0"/>
+    <BOTTOMBORDER Type="None" Width="0.12mm" Color="0"/>
+    <DIAGONAL Type="Solid" Width="0.1mm" Color="0"/>
+  </BORDERFILL>
+  <BORDERFILL Id="6" ThreeD="false" Shadow="false" Slash="0" BackSlash="0" CrookedSlash="0"><LEFTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <RIGHTBORDER Type="None" Width="0.12mm" Color="0"/>
+    <TOPBORDER Type="None" Width="0.12mm" Color="0"/>
+    <BOTTOMBORDER Type="None" Width="0.12mm" Color="0"/>
+    <DIAGONAL Type="Solid" Width="0.1mm" Color="0"/>
+  </BORDERFILL>
+  <BORDERFILL Id="7" ThreeD="false" Shadow="false" Slash="0" BackSlash="0" CrookedSlash="0"><LEFTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <RIGHTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <TOPBORDER Type="None" Width="0.12mm" Color="0"/>
+    <BOTTOMBORDER Type="None" Width="0.12mm" Color="0"/>
+    <DIAGONAL Type="Solid" Width="0.1mm" Color="0"/>
+  </BORDERFILL>
+  <BORDERFILL Id="8" ThreeD="false" Shadow="false" Slash="0" BackSlash="0" CrookedSlash="0"><LEFTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <RIGHTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <TOPBORDER Type="None" Width="0.12mm" Color="0"/>
+    <BOTTOMBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <DIAGONAL Type="Solid" Width="0.1mm" Color="0"/>
+  </BORDERFILL>
+  <BORDERFILL Id="9" ThreeD="false" Shadow="false" Slash="0" BackSlash="0" CrookedSlash="0"><LEFTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <RIGHTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <TOPBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <BOTTOMBORDER Type="None" Width="0.12mm" Color="0"/>
+    <DIAGONAL Type="Solid" Width="0.1mm" Color="0"/>
+  </BORDERFILL>
+  <BORDERFILL Id="10" ThreeD="false" Shadow="false" Slash="0" BackSlash="0" CrookedSlash="0"><LEFTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <RIGHTBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <TOPBORDER Type="Solid" Width="0.12mm" Color="0"/>
+    <BOTTOMBORDER Type="Solid" Width="0.12mm" Color="0"/>
+  </BORDERFILL>
+  <BORDERFILL Id="11" ThreeD="false" Shadow="false" Slash="0" BackSlash="0" CrookedSlash="0"><LEFTBORDER Type="None" Width="0.12mm" Color="0"/>
+    <RIGHTBORDER Type="None" Width="0.12mm" Color="0"/>
+    <TOPBORDER Type="None" Width="0.12mm" Color="0"/>
+    <BOTTOMBORDER Type="None" Width="0.12mm" Color="0"/>
+  </BORDERFILL>
+</BORDERFILLLIST>
+<CHARSHAPELIST Count="21">
+  <CHARSHAPE Id="0" Height="1000" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RATIO Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="1" Height="1000" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="1" Latin="1" Hanja="1" Japanese="1" Other="1" Symbol="1" User="1"/>
+    <RATIO Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="2" Height="900" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RATIO Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="3" Height="900" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="1" Latin="1" Hanja="1" Japanese="1" Other="1" Symbol="1" User="1"/>
+    <RATIO Hangul="95" Latin="95" Hanja="95" Japanese="95" Other="95" Symbol="95" User="95"/>
+    <CHARSPACING Hangul="-5" Latin="-5" Hanja="-5" Japanese="-5" Other="-5" Symbol="-5" User="-5"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="4" Height="900" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RATIO Hangul="95" Latin="95" Hanja="95" Japanese="95" Other="95" Symbol="95" User="95"/>
+    <CHARSPACING Hangul="-5" Latin="-5" Hanja="-5" Japanese="-5" Other="-5" Symbol="-5" User="-5"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="5" Height="900" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0"><!--조문-->
+    <FONTID Hangul="0" Latin="3" Hanja="0" Japanese="0" Other="3" Symbol="3" User="3"/>
+    <RATIO Hangul="97" Latin="97" Hanja="97" Japanese="97" Other="97" Symbol="97" User="97"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="6" Height="1000" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="2" Latin="2" Hanja="2" Japanese="2" Other="2" Symbol="2" User="2"/>
+    <RATIO Hangul="97" Latin="97" Hanja="97" Japanese="97" Other="97" Symbol="97" User="97"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="7" Height="1300" TextColor="16711680" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="3" Latin="3" Hanja="0" Japanese="0" Other="3" Symbol="3" User="3"/>
+    <RATIO Hangul="97" Latin="97" Hanja="97" Japanese="97" Other="97" Symbol="97" User="97"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="8" Height="1000" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="3" Latin="3" Hanja="0" Japanese="0" Other="3" Symbol="3" User="3"/>
+    <RATIO Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="9" Height="1000" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="3" Latin="3" Hanja="0" Japanese="0" Other="3" Symbol="3" User="3"/>
+    <RATIO Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHARSPACING Hangul="-50" Latin="-50" Hanja="-50" Japanese="-50" Other="-50" Symbol="-50" User="-50"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="10" Height="1400" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="2" Latin="2" Hanja="2" Japanese="2" Other="2" Symbol="2" User="2"/>
+    <RATIO Hangul="97" Latin="97" Hanja="97" Japanese="97" Other="97" Symbol="97" User="97"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="11" Height="1200" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="2" Latin="2" Hanja="2" Japanese="2" Other="2" Symbol="2" User="2"/>
+    <RATIO Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="12" Height="1100" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="3" Latin="3" Hanja="0" Japanese="0" Other="3" Symbol="3" User="3"/>
+    <RATIO Hangul="97" Latin="97" Hanja="97" Japanese="97" Other="97" Symbol="97" User="97"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="13" Height="1100" TextColor="255" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="3" Latin="3" Hanja="0" Japanese="0" Other="3" Symbol="3" User="3"/>
+    <RATIO Hangul="97" Latin="97" Hanja="97" Japanese="97" Other="97" Symbol="97" User="97"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="14" Height="1600" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="2" Latin="2" Hanja="2" Japanese="2" Other="2" Symbol="2" User="2"/>
+    <RATIO Hangul="97" Latin="97" Hanja="97" Japanese="97" Other="97" Symbol="97" User="97"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="15" Height="1400" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="3" Latin="3" Hanja="0" Japanese="0" Other="3" Symbol="3" User="3"/>
+    <RATIO Hangul="97" Latin="97" Hanja="97" Japanese="97" Other="97" Symbol="97" User="97"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="16" Height="1000" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="true" SymMark="0">
+    <FONTID Hangul="3" Latin="3" Hanja="0" Japanese="0" Other="3" Symbol="3" User="3"/>
+    <RATIO Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="17" Height="1200" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="true" SymMark="0">
+    <FONTID Hangul="3" Latin="3" Hanja="0" Japanese="0" Other="3" Symbol="3" User="3"/>
+    <RATIO Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="18" Height="1400" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="3" Latin="3" Hanja="3" Japanese="3" Other="3" Symbol="3" User="3"/>
+    <RATIO Hangul="97" Latin="97" Hanja="97" Japanese="97" Other="97" Symbol="97" User="97"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <BOLD/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="19" Height="1200" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="4" Latin="4" Hanja="3" Japanese="3" Other="4" Symbol="4" User="4"/>
+    <RATIO Hangul="97" Latin="97" Hanja="97" Japanese="97" Other="97" Symbol="97" User="97"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+  </CHARSHAPE>
+  <CHARSHAPE Id="20" Height="1200" TextColor="0" ShadeColor="4294967295" UseFontSpace="false" UseKerning="false" SymMark="0">
+    <FONTID Hangul="3" Latin="3" Hanja="3" Japanese="3" Other="3" Symbol="3" User="3"/>
+    <RATIO Hangul="97" Latin="97" Hanja="97" Japanese="97" Other="97" Symbol="97" User="97"/>
+    <CHARSPACING Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <RELSIZE Hangul="100" Latin="100" Hanja="100" Japanese="100" Other="100" Symbol="100" User="100"/>
+    <CHAROFFSET Hangul="0" Latin="0" Hanja="0" Japanese="0" Other="0" Symbol="0" User="0"/>
+    <BOLD/>
+  </CHARSHAPE>
+</CHARSHAPELIST>
+<TABDEFLIST Count="3">
+  <TABDEF Id="0" AutoTabLeft="false" AutoTabRight="false"/>
+  <TABDEF Id="1" AutoTabLeft="true" AutoTabRight="false"/>
+  <TABDEF Id="2" AutoTabLeft="false" AutoTabRight="true"/>
+</TABDEFLIST>
+<NUMBERINGLIST Count="1">
+  <NUMBERING Id="1" Start="0">
+    <PARAHEAD Level="1" Alignment="Left" UseInstWidth="true" AutoIndent="true" WidthAdjust="0" TextOffsetType="percent" TextOffset="50" NumFormat="Digit">^1.</PARAHEAD>
+    <PARAHEAD Level="2" Alignment="Left" UseInstWidth="true" AutoIndent="true" WidthAdjust="0" TextOffsetType="percent" TextOffset="50" NumFormat="HangulSyllable">^2.</PARAHEAD>
+    <PARAHEAD Level="3" Alignment="Left" UseInstWidth="true" AutoIndent="true" WidthAdjust="0" TextOffsetType="percent" TextOffset="50" NumFormat="Digit">^3)</PARAHEAD>
+    <PARAHEAD Level="4" Alignment="Left" UseInstWidth="true" AutoIndent="true" WidthAdjust="0" TextOffsetType="percent" TextOffset="50" NumFormat="HangulSyllable">^4)</PARAHEAD>
+    <PARAHEAD Level="5" Alignment="Left" UseInstWidth="false" AutoIndent="true" WidthAdjust="0" TextOffsetType="percent" TextOffset="50" NumFormat="Digit"></PARAHEAD>
+    <PARAHEAD Level="6" Alignment="Left" UseInstWidth="false" AutoIndent="true" WidthAdjust="0" TextOffsetType="percent" TextOffset="50" NumFormat="Digit"></PARAHEAD>
+    <PARAHEAD Level="7" Alignment="Left" UseInstWidth="false" AutoIndent="true" WidthAdjust="0" TextOffsetType="percent" TextOffset="50" NumFormat="Digit"></PARAHEAD>
+  </NUMBERING>
+</NUMBERINGLIST>
+<PARASHAPELIST Count="33"><PARASHAPE Id="0" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="1" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="-2620" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="130"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="1" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="true"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="2" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="3" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="3000" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="4" Align="Justify" VerAlign="Baseline" HeadingType="Outline" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="20" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="2000" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="5" Align="Justify" VerAlign="Baseline" HeadingType="Outline" Heading="0" Level="1" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="20" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="4000" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="6" Align="Justify" VerAlign="Baseline" HeadingType="Outline" Heading="0" Level="2" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="20" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="6000" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="7" Align="Justify" VerAlign="Baseline" HeadingType="Outline" Heading="0" Level="3" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="20" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="8000" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="8" Align="Justify" VerAlign="Baseline" HeadingType="Outline" Heading="0" Level="4" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="20" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="10000" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="9" Align="Justify" VerAlign="Baseline" HeadingType="Outline" Heading="0" Level="5" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="20" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="12000" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="10" Align="Justify" VerAlign="Baseline" HeadingType="Outline" Heading="0" Level="6" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="20" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="14000" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="11" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="2" BreakLatinWord="KeepWord" BreakNonLatinWord="false" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="150"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="12" Align="Right" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="false" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="13" Align="Right" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="false" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="100"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="14" Align="Right" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="false" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="130"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="15" Align="Center" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="false" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="130"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="16" Align="Center" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="false" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="180"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="17" Align="Right" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="false" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="180"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="18" Align="Center" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="2" BreakLatinWord="KeepWord" BreakNonLatinWord="false" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="150"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="19" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="2" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="150"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="20" Align="Right" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="2" BreakLatinWord="KeepWord" BreakNonLatinWord="false" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="150"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="21" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="-4600" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="22" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="-2400" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="23" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="-1936" Left="0" Right="0" Prev="1000" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="24" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="-2336" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="25" Align="Center" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="false" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="26" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="-3904" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="27" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="-2400" Left="0" Right="0" Prev="1400" Next="0" LineSpacingType="Percent" LineSpacing="180"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="28" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="-4600" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="180"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="29" Align="Right" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="false" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="0" Right="2296" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="180"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="30" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="-7800" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="31" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="-10400" Left="0" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+  <PARASHAPE Id="32" Align="Justify" VerAlign="Baseline" HeadingType="None" Heading="0" Level="0" TabDef="0" BreakLatinWord="KeepWord" BreakNonLatinWord="true" Condense="0" WidowOrphan="false" KeepWithNext="false" KeepLines="false" PageBreakBefore="false" FontLineHeight="false" SnapToGrid="false"><PARAMARGIN Indent="0" Left="2000" Right="0" Prev="0" Next="0" LineSpacingType="Percent" LineSpacing="160"/>
+  <PARABORDER BorderFill="1" OffsetLeft="0" OffsetRight="0" OffsetTop="0" OffsetBottom="0" Connect="false" IgnoreMargin="false"/>
+  </PARASHAPE>
+</PARASHAPELIST>
+<STYLELIST Count="14"><STYLE Id="0" Type="Para" Name="바탕글" EngName="Normal" ParaShape="2" CharShape="1" NextStyle="0" LangId="1042"/>
+<STYLE Id="1" Type="Para" Name="본문" EngName="Body" ParaShape="3" CharShape="1" NextStyle="1" LangId="1042"/>
+<STYLE Id="2" Type="Para" Name="개요 1" EngName="Outline 1" ParaShape="4" CharShape="1" NextStyle="2" LangId="1042"/>
+<STYLE Id="3" Type="Para" Name="개요 2" EngName="Outline 2" ParaShape="5" CharShape="1" NextStyle="3" LangId="1042"/>
+<STYLE Id="4" Type="Para" Name="개요 3" EngName="Outline 3" ParaShape="6" CharShape="1" NextStyle="4" LangId="1042"/>
+<STYLE Id="5" Type="Para" Name="개요 4" EngName="Outline 4" ParaShape="7" CharShape="1" NextStyle="5" LangId="1042"/>
+<STYLE Id="6" Type="Para" Name="개요 5" EngName="Outline 5" ParaShape="8" CharShape="1" NextStyle="6" LangId="1042"/>
+<STYLE Id="7" Type="Para" Name="개요 6" EngName="Outline 6" ParaShape="9" CharShape="1" NextStyle="7" LangId="1042"/>
+<STYLE Id="8" Type="Para" Name="개요 7" EngName="Outline 7" ParaShape="10" CharShape="1" NextStyle="8" LangId="1042"/>
+<STYLE Id="9" Type="Para" Name="쪽 번호" EngName="Page Number" ParaShape="2" CharShape="0" NextStyle="9" LangId="1042"/>
+<STYLE Id="10" Type="Para" Name="머리말" EngName="Header" ParaShape="11" CharShape="2" NextStyle="10" LangId="1042"/>
+<STYLE Id="11" Type="Para" Name="각주" EngName="Footnote" ParaShape="0" CharShape="3" NextStyle="11" LangId="1042"/>
+<STYLE Id="12" Type="Para" Name="미주" EngName="Endnote" ParaShape="0" CharShape="3" NextStyle="12" LangId="1042"/>
+<STYLE Id="13" Type="Para" Name="메모" EngName="Memo" ParaShape="1" CharShape="4" NextStyle="13" LangId="1042"/>
+</STYLELIST>
+</MAPPINGTABLE>
+</HEAD>
+<BODY>
+<SECTION Id="0">
+<SECDEF SpaceColumns="1134" TabStop="8000" OutlineShape="1">
+<STARTNUMBER PageStartsOn="Both" Page="0" Figure="0" Table="0" Equation="0"/>
+<HIDE Header="false" Footer="false" MasterPage="false" Border="false" Fill="false" PageNumPos="false" EmptyLine="false"/>
+<PAGEDEF GutterType="LeftOnly" Height="84188" Landscape="0" Width="59528">
+<PAGEMARGIN Bottom="4252" Footer="4252" Gutter="0" Header="4252" Left="5669" Right="5669" Top="5668"/></PAGEDEF>
+<PAGEBORDERFILL Type="Both" BorferFill="0" TextBorder="true" HeaderInside="false" FooterInside="false" FillArea="Paper"><PAGEOFFSET Left="1417" Right="1417" Top="1417" Bottom="1417"/>
+</PAGEBORDERFILL>
+<PAGEBORDERFILL Type="Even" BorferFill="0" TextBorder="true" HeaderInside="false" FooterInside="false" FillArea="Paper"><PAGEOFFSET Left="1417" Right="1417" Top="1417" Bottom="1417"/>
+</PAGEBORDERFILL>
+<PAGEBORDERFILL Type="Odd" BorferFill="0" TextBorder="true" HeaderInside="false" FooterInside="false" FillArea="Paper"><PAGEOFFSET Left="1417" Right="1417" Top="1417" Bottom="1417"/>
+</PAGEBORDERFILL>
+</SECDEF>
+<P ParaShape="16"><TEXT CharShape="10"><CHAR>함양군 다문화가족 지원 조례</CHAR></TEXT></P>
+<P ParaShape="17"><TEXT CharShape="5"><CHAR>(    제정) 2009.05.26 조례 제1843호</CHAR></TEXT></P>
+<P ParaShape="17"><TEXT CharShape="5"><CHAR>(일부개정) 2011.07.20 조례 제1925호 함양군 행정기구 설치조례 일부개정조례</CHAR></TEXT></P>
+<P ParaShape="17"><TEXT CharShape="5"><CHAR>(전부개정) 2015.12.03 조례 제2220호 다문화가족지원법」제12조 및 제16조, 「다문화가족지원법 시행령」제12조, 제12조의2,「다문화가족지원법시행규칙」제3조 및 제4조</CHAR></TEXT></P>
+<P ParaShape="17"><TEXT CharShape="5"/></P><P ParaShape="17"><TEXT CharShape="5"/></P><P ParaShape="2"><TEXT CharShape="5"/></P>
+<P ParaShape="2"><TEXT CharShape="6"><CHAR>        제1장 총칙</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제1조(목적)</CHAR></TEXT><TEXT CharShape="5"><CHAR> 이 조례는 「다문화가족지원법」에 따라 함양군 내 거주자 중 다문화가족 구성원이 안정적인 가족생활 영위와 지역사회의 일원으로 정착할 수 있도록 필요한 사항을 규정함을 목적으로 한다.</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제2조(정의)</CHAR></TEXT><TEXT CharShape="5"><CHAR> 이 조례에서 사용하는 용어의 뜻은 다음과 같다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  　1. "다문화가족"이란 다음 각 목의 어느 하나에 해당하는 가족을 말한다.</CHAR></TEXT></P>
+<P ParaShape="30" Style="0"><TEXT CharShape="5"><CHAR>     가.「재한외국인 처우 기본법」제2조제3호에 따른 결혼이민자와 「국적법」 제2조, 제3조, 제4조에 따라 대한민국 국적을 취득한 사람으로 구성된 가족</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>    　나.「국적법」제3조와 제4조에 따라 대한민국 국적을 취득한 사람과 같은 법 제2조, 제3조, 제4조에 따라 대한민국 국적을 취득한 사람으로 구성된 가족</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   2. "결혼이민자 등"이란 다문화가족의 구성원으로서 다음 각 목의 어느 하나에 해당하는 사람을 말한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>    　가. 「재한외국인 처우 기본법」제2조제3호에 따른 결혼이민자</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>    　나. 「국적법」제4조에 따라 귀화허가를 받은 사람</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제3조(군수의 책무)</CHAR></TEXT><TEXT CharShape="5"><CHAR> 함양군수(이하 "군수"라 한다)는 함양군 내 다문화가족 구성원이 안정적인 가족생활을 영위할 수 있도록 필요한 제도와 여건을 조성하고 이를 위한 시책을 수립·시행하여야 한다.</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제4조(실태조사 등)</CHAR></TEXT><TEXT CharShape="5"><CHAR> ① 군수는 3년마다 다문화가족 현황 및 실태를 조사하여야 한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ② 군수는 제1항의 조사 결과를 활용하여 다문화가족 지원 사업을 추진하여야 한다.</CHAR></TEXT></P>
+<P ParaShape="2"><TEXT CharShape="5"/></P>
+<P ParaShape="2"><TEXT CharShape="6"><CHAR>        제2장 다문화가족 지원 사업</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제5조(다문화가족 지원 사업)</CHAR></TEXT><TEXT CharShape="5"><CHAR> ① 군수는 다음 각 호의 사업을 수행하는 비영리법인 또는 단체나 개인에게 예산의 범위에서 그 사업에 필요한 비용의 일부나 전부를 지원할 수 있다.</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   1. 결혼이민자에 대한 사회 적응 정보 제공과 교육 지원, 직업·훈련   사업</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   2. 결혼이민자 등에 대한 외국어 통역·번역 서비스 제공 사업</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   3. 다문화가족 내 가정폭력 예방 및 가정폭력으로 피해를 입은 결혼이민자 등의 보호 사업</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   4. 다문화가족 아동의 보육·교육 및 한국어교육 등 언어능력 제고에      필요한 사업</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   5. 결혼이민자(배우자 등 가족을 포함한다)의 가족기능 보강 및 경제적 지원을 위한 친정어머니 맺어주기, 모국 방문 및 해외 가족 초청 사업</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   6. 결혼이민자 등의 한국생활 조기정착을 위한 우리말 대회 사업</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   7. 다문화가족 한국문화 체험행사 및 문화·체육 행사 사업</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   8. 결혼이민자 등이 건강하게 생활할 수 있도록 영양 건강에 대한 교     육 및 산전·산후 도우미 사업, 건강검진 등 의료서비스 제공 사업</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   9. 그 밖에 다문화가족과 결혼이민자 등을 위하여 그 필요성이 인정되고 함양군 다문화가족지원협의회의 협의와 조정을 거친 사업</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ② 군수는 예산의 범위에서 결혼이민자 등이 상부상조하기 위한 단체의 구성·운영 등을 지원할 수 있다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ③ 이 조례에 규정되지 않은 지방보조금의 교부결정, 지방보조금의 반환 등에 관하여는 「함양군 지방보조금 관리 조례」에 따른다.</CHAR></TEXT></P>
+<P ParaShape="2"><TEXT CharShape="5"/></P>
+<P ParaShape="2"><TEXT CharShape="6"><CHAR>        제3장 함양군 다문화가족지원협의회</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제6조(다문화가족지원협의회 설치 및 운영)</CHAR></TEXT><TEXT CharShape="5"><CHAR> ① 군수는 다문화가족의 삶의 질 향상과 사회통합에 관한 중요한 사항을 협의·조정하기 위하여 함양군 다문화가족지원협의회(이하 “협의회” 라 한다)를 설치·운영할 수 있다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ② 협의회는 위원장 1명을 포함하여 10명 이내의 위원으로 구성한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ③ 위원장은 부군수가 되고 부위원장은 위원 중에서 호선한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ④ 위원은 당연직 위원과 위촉직 위원으로 구성한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ⑤ 당연직 위원은 다문화가족 업무담당 부서장, 행정과장, 보건소장, 농축산과장으로 한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ⑥ 위촉직 위원은 다음 각 호에 해당하는 사람 중에서 군수가 위촉한다. 다만, 특정 성(性)이 위촉직 위원 수의 10분의 6을 초과하지 아니하도록 하여야 한다.</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   1. 함양군의회 의장이 추천하는 군의원</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   2. 함양경찰서와 함양교육지원청의 과장급 이상 직원 중 해당 기관장의 추천을 받은 사람</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   3. 다문화가족지원센터장 또는 관련 단체의 대표</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   4. 다문화가족 관련 사회단체를 대표할 수 있는 사람</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   5. 결혼 이민자 당사자 중 다문화가족지원센터장의 추천을 받은 사람</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   6. 그 밖에 다문화가족 지원 관련 분야에 풍부한 경험과 전문적 식견을 갖춘 사람</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ⑦ 협의회의 사무를 효율적으로 처리하기 위하여 간사와 서기를 둔다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ⑧ 간사는 관련 업무 담당으로 하고, 서기는 관련 업무 담당자로 한다.</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제7조(기능)</CHAR></TEXT><TEXT CharShape="5"><CHAR> 협의회는 다음 각 호의 사항을 협의 · 조정한다.</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   1. 제5조의 지원 사업</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   2. 다문화가족 지원 사업의 조정에 관한 사항</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   3. 다문화가족 지원 사업을 위한 협력에 관한 사항</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   4. 그 밖에 다문화가족의 삶의 질 향상과 사회통합에 관한 중요한 사항으로 다문화가족 지원에 필요하다고 인정되는 사업</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제8조(위원의 임기)</CHAR></TEXT><TEXT CharShape="5"><CHAR> ① 위촉된 위원의 임기는 2년으로 하고, 연임할 수 있다</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ② 공무원인 위원의 임기는 해당 직에 재직하는 기간으로 한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ③ 보궐 위원의 임기는 전임위원 임기의 남은 기간으로 한다.</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제9조(위원장의 직무 등)</CHAR></TEXT><TEXT CharShape="5"><CHAR> ① 위원장은 협의회를 대표하고 협의회의 업무를 총괄한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ② 부위원장은 위원장을 보좌하며 위원장이 부득이한 사유로 직무를 수행할 수 없을 때에는 그 직무를 대행한다.</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제10조(회의)</CHAR></TEXT><TEXT CharShape="5"><CHAR> ① 협의회 회의는 위원장이 필요하다고 인정하거나 재적위원 3분의 1 이상이 요구하는 경우에 위원장이 소집한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ② 협의회의 회의는 재적위원 과반수의 출석으로 개회하고 출석위원 과반수의 찬성으로 의결한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ③ 협의회는 회의록을 작성ㆍ비치하여야 한다.</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제11조(수당)</CHAR></TEXT><TEXT CharShape="5"><CHAR> 위원이 협의회에 참석하였을 때에는 예산의 범위에서 「함양군 각종위원회 실비변상조례」에 따라 수당을 지급할 수 있다. 다만, 군 소속 공무원이 위원인 경우에는 예외로 한다.</CHAR></TEXT></P>
+<P ParaShape="2"><TEXT CharShape="5"/></P>
+<P ParaShape="2"><TEXT CharShape="6"><CHAR>        제4장 함양군 다문화가족지원센터</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제12조(다문화가족지원센터의 설치·운영 등)</CHAR></TEXT><TEXT CharShape="5"><CHAR> ① 군수는 「다문화가족지원법」제12조에 따라 함양군 다문화가족지원센터를(이하 “지원센터”라 한다) 설치하여 운영할 수 있다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ② 지원센터는 다음 각 호의 업무를 수행한다.</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   1. 다문화가족을 위한 교육·상담 등 지원사업 실시</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   2. 결혼이민자 등에 대한 한국어 교육</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   3. 다문화가족 지원 서비스 정보 제공 및 홍보</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   4. 다문화가족 지원 관련 기관·단체와 서비스 연계</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   5. 일자리 관련 정보 제공 및 일자리 알선</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   6. 다문화가족을 위한 통역·번역 지원 사업</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   7. 그 밖에 다문화가족 지원을 위하여 필요한 사업</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ③ 이 조례에 규정되지 않는 지원센터에 관한 사항은 「다문화가족지원법」관계 법령에 따른다.</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제13조(위탁)</CHAR></TEXT><TEXT CharShape="5"><CHAR> ① 군수는 지원센터의 설치·운영을 「다문화가족지원법  시행령」제12조의2에 따라 법인이나 단체(이하 “수탁기관”이라 한다)에 위탁할 수 있다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ② 제1항의 수탁기관은 다문화가족 지원에 필요한 전문 인력과 시설을 갖추어야 한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ③ 지원센터의 위탁·운영 기간은 3년으로 한다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ④ 군수는 필요하다고 인정할 경우 계약 만료 3개월 이전에 수탁기관선정위원회의 심의를 거쳐 3년 이내의 기간으로 위탁운영계약을 갱신할 수 있다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ⑤ 위탁기간 중 관계 법령의 제·개정 등으로 조정·변경·폐쇄 사유가 발생한 때에는 그에 따른다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ⑥ 군수는 위탁·운영에 관한 사항에 대해 관계 공무원으로 하여금 매년 1회 이상 정기점검을 실시하거나 필요한 경우에는 수시로 지도·점검하게 할 수 있다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ⑦ 군수는 다음 각 호의 어느 하나에 해당하는 경우 위탁운영계약을 해지할 수 있다.</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   1. 보조금을 목적 외의 용도에 사용한 경우</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   2. 허위 등 부정한 방법으로 보조금을 교부받는 경우</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   3. 위탁받은 법인·단체가 파산하거나 해산한 경우</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   4. 의무 및 약정 조건을 이행하지 않거나 위반한 경우</CHAR></TEXT></P>
+<P ParaShape="21" Style="0"><TEXT CharShape="5"><CHAR>   5. 지원센터의 기능을 제대로 수행할 수 없다고 판단되는 경우</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ⑨ 이 조례에 규정되지 않은 위탁 관련 사항에 대해서는「다문화가족지원법」 관계 법령과 「함양군 사무의 민간위탁 촉진 및 관리조례」에 따른다.</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제14조(지방보조금의 지원)</CHAR></TEXT><TEXT CharShape="5"><CHAR> ① 군수는 예산의 범위에서 제12조제2항 각 호의 업무를 수행하는 수탁기관에게 업무 수행에 필요한 비용의 전부 또는 일부를 보조할 수 있다.</CHAR></TEXT></P>
+<P ParaShape="22" Style="0"><TEXT CharShape="5"><CHAR>  ② 이 조례에 규정되지 않은 지방보조금의 교부결정, 지방보조금의 반환 등에 관하여는 「함양군 지방보조금 관리 조례」에 따른다.</CHAR></TEXT></P>
+<P ParaShape="2"><TEXT CharShape="5"/></P>
+<P ParaShape="2"><TEXT CharShape="6"><CHAR>        제5장 보칙</CHAR></TEXT></P>
+<P ParaShape="23"><TEXT CharShape="6"><CHAR>제15조(시행규칙)</CHAR></TEXT><TEXT CharShape="5"><CHAR> 이 조례의 시행에 필요한 사항은 규칙으로 정한다.</CHAR></TEXT></P>
+<P ParaShape="2"><TEXT CharShape="5"/></P>
+<P ParaShape="2"><TEXT CharShape="6"><CHAR>    부 칙&lt;전부개정 2015. 12. 3. 제2220호&gt;</CHAR></TEXT></P><P ParaShape="23" Style="0"><TEXT CharShape="5"><CHAR>제1조(시행일) 이 조례는 공포한 날부터 시행한다.</CHAR></TEXT></P><P ParaShape="23" Style="0"><TEXT CharShape="5"><CHAR>제2조(경과조치) 이 조례 시행 당시 설치·운영 중인 함양군 다문화가족지원협의회는 이 조례에 따른 것으로 보며, 위원의 임기는 종전의 규정에 따른다.</CHAR></TEXT></P> 
+</SECTION>
+</BODY>
+<TAIL>
+</TAIL>
+</HWPML>
+
