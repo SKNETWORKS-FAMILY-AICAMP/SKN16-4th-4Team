@@ -1,0 +1,50 @@
+{
+  "timestamp": "2025-10-14T00:26:38.862059",
+  "system_info": {
+    "components": {
+      "text_extraction": {
+        "status": "success",
+        "error": null
+      },
+      "chunking": {
+        "status": "success",
+        "error": null
+      },
+      "embedding": {
+        "status": "success",
+        "error": null
+      },
+      "retrieval": {
+        "status": "success",
+        "error": null
+      }
+    }
+  },
+  "performance_analysis": {
+    "text_extraction": {
+      "pdf_extractors": 4,
+      "hwp_extractors": 1,
+      "status": "operational"
+    },
+    "pipeline": {
+      "integration_rate": 1.0,
+      "successful_components": 4,
+      "total_components": 4,
+      "status": "integrated"
+    }
+  },
+  "recommendations": [
+    {
+      "category": "HWP 처리",
+      "priority": "high",
+      "description": "HWP 파일 처리 품질 개선을 위해 전문 라이브러리 도입 검토",
+      "action": "hwp5, pyhwp 라이브러리 설치 및 통합"
+    },
+    {
+      "category": "성능 최적화",
+      "priority": "low",
+      "description": "PDF 추출 성능 양호 - 현재 구성 유지",
+      "action": "PyMuPDF 우선 사용으로 속도 최적화"
+    }
+  ]
+}

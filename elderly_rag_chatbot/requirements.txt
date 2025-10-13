@@ -1,0 +1,84 @@
+# 노인복지 정책 RAG 챗봇 시스템 - 최종 Requirements (2025-10-13)
+
+# Core Python packages
+python-dotenv>=1.0.0
+pandas>=2.0.0,<2.2.0
+numpy>=1.24.0,<1.26.0
+
+# LangChain ecosystem (안정적 버전)
+langchain-core>=0.1.20,<0.2.0
+langchain>=0.1.0,<0.2.0
+langchain-openai>=0.0.2,<0.1.0
+langchain-community>=0.0.10,<0.1.0
+
+# LangGraph workflow system
+langgraph>=0.0.20,<0.1.0
+
+# Vector database
+chromadb>=0.4.0,<0.5.0
+faiss-cpu>=1.7.0,<1.8.0
+
+# Text embeddings and transformers
+sentence-transformers>=2.2.0,<3.0.0
+transformers>=4.30.0,<5.0.0
+torch>=2.0.0,<2.2.0
+
+# PDF text extraction libraries
+PyPDF2>=3.0.0
+pdfplumber>=0.9.0
+PyMuPDF>=1.20.0
+pdfminer.six>=20220319
+
+# HWP text extraction libraries
+olefile>=0.46
+
+# Machine learning and NLP
+scikit-learn>=1.3.0,<1.4.0
+nltk>=3.8.0,<3.9.0
+
+# Web UI frameworks
+gradio>=4.0.0,<5.0.0
+streamlit>=1.25.0,<1.30.0
+
+# Data visualization
+plotly>=5.0.0,<6.0.0
+matplotlib>=3.6.0,<3.9.0
+seaborn>=0.11.0
+
+# API clients
+openai>=1.0.0,<2.0.0
+
+# Utilities
+tqdm>=4.60.0
+requests>=2.25.0,<3.0.0
+pyyaml>=6.0
+loguru>=0.7.0
+python-dotenv==1.0.0
+pandas==2.1.4
+numpy==1.24.3
+langchain==0.1.0
+langchain-openai==0.0.2
+langchain-community==0.0.10
+langgraph==0.0.20
+chromadb==0.4.22
+faiss-cpu==1.7.4
+sentence-transformers==2.2.2
+transformers==4.36.2
+torch==2.1.2
+PyPDF2==3.0.1
+pdfplumber==0.10.0
+PyMuPDF==1.23.14
+pdfminer.six==20221105
+olefile==0.46
+scikit-learn==1.3.2
+nltk==3.8.1
+gradio==4.15.0
+streamlit==1.29.0
+plotly==5.17.0
+matplotlib==3.8.2
+seaborn==0.13.0
+openai==1.6.1
+tqdm==4.66.1
+requests==2.31.0
+pyyaml==6.0.1
+loguru==0.7.2

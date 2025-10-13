@@ -1,0 +1,66 @@
+{
+  "test_files": [
+    "data/**/*.pdf",
+    "data/**/*.hwp"
+  ],
+  "evaluation_queries": [
+    "65세 이상 노인 의료비 지원에 대해 알려주세요",
+    "장애인 복지 서비스에는 어떤 것들이 있나요?",
+    "저소득층 주거 지원 정책을 설명해주세요",
+    "노인돌봄서비스 신청 방법을 알려주세요",
+    "복지급여 수급 조건은 무엇인가요?",
+    "독거노인 생활지원 서비스는 무엇인가요?",
+    "장기요양보험 신청 절차를 알려주세요",
+    "기초생활수급자 혜택에 대해 설명해주세요"
+  ],
+  "metrics": {
+    "accuracy_weight": 0.4,
+    "speed_weight": 0.3,
+    "relevance_weight": 0.3
+  },
+  "components": {
+    "text_extraction": ["PyPDF2", "pdfplumber", "PyMuPDF", "pdfminer", "olefile"],
+    "chunking": ["recursive", "semantic", "fixed_size", "sentence"],
+    "embedding": ["sentence-transformers", "openai", "huggingface"],
+    "vectorstore": ["chromadb", "faiss"],
+    "retrieval": ["similarity", "mmr", "diversity"],
+    "llm": ["openai", "claude", "local"]
+  },
+  "performance_thresholds": {
+    "text_extraction": {
+      "min_score": 0.5,
+      "max_time": 10.0
+    },
+    "chunking": {
+      "min_score": 0.6,
+      "max_time": 5.0
+    },
+    "embedding": {
+      "min_score": 0.7,
+      "max_time": 3.0
+    },
+    "vectorstore": {
+      "min_score": 0.6,
+      "max_time": 2.0
+    },
+    "retrieval": {
+      "min_score": 0.7,
+      "max_time": 1.0
+    },
+    "llm": {
+      "min_score": 0.8,
+      "max_time": 10.0
+    }
+  },
+  "output_settings": {
+    "save_detailed_results": true,
+    "create_charts": true,
+    "generate_report": true,
+    "export_csv": true
+  },
+  "test_settings": {
+    "sample_size": 5,
+    "repetitions": 3,
+    "timeout_seconds": 30
+  }
+}
