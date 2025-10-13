@@ -23,6 +23,9 @@ def main():
     print("노인 정책 안내 챗봇 - 초기 설정")
     print("=" * 60)
 
+    # OCR 사용 여부 확인
+    use_ocr = input("\nOCR을 사용하시겠습니까? (이미지 PDF 처리 가능, 시간 오래 걸림) (y/n): ").lower() == 'y'
+
     # 1. 문서 로드
     print("\n[1/3] 문서 로딩 중...")
     data_dir = Path("data")
@@ -30,7 +33,7 @@ def main():
         print("오류: data 폴더가 존재하지 않습니다.")
         return
 
-    loader = DocumentLoader(str(data_dir))
+    loader = DocumentLoader(str(data_dir), use_ocr=use_ocr)
     documents = loader.load_all_documents()
 
     if not documents:

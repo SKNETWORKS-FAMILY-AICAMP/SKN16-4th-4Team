@@ -40,6 +40,12 @@ class ChatHistory(models.Model):
     answer = models.TextField(verbose_name="답변")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
 
+    # 평가 필드 추가
+    relevance_score = models.FloatField(null=True, blank=True, verbose_name="관련성 점수")
+    accuracy_score = models.FloatField(null=True, blank=True, verbose_name="정확성 점수")
+    completeness_score = models.FloatField(null=True, blank=True, verbose_name="완전성 점수")
+    overall_score = models.FloatField(null=True, blank=True, verbose_name="종합 점수")
+
     class Meta:
         verbose_name = "채팅 이력"
         verbose_name_plural = "채팅 이력"
@@ -47,6 +53,14 @@ class ChatHistory(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+    def calculate_overall_score(self):
+        """종합 점수 계산"""
+        scores = [s for s in [self.relevance_score, self.accuracy_score, self.completeness_score] if s is not None]
+        if scores:
+            self.overall_score = sum(scores) / len(scores)
+            return self.overall_score
+        return None
 
 
 class Policy(models.Model):

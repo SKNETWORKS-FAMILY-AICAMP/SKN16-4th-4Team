@@ -10,14 +10,16 @@ import os
 import sys
 
 from .models import UserProfile, ChatHistory, Policy
-from documents.vectorstore import VectorStore, RAGSystem
+from documents.vectorstore import VectorStore
 from documents.embedder import DocumentEmbedder
+from documents.langgraph_rag import LangGraphRAG
 
-# RAG 시스템 초기화 (전역)
+# LangGraph RAG 시스템 초기화 (전역)
 try:
     embedder = DocumentEmbedder()
     vectorstore = VectorStore()
-    rag_system = RAGSystem(vectorstore, embedder)
+    rag_system = LangGraphRAG(vectorstore, embedder)
+    print("✓ LangGraph RAG 시스템이 초기화되었습니다.")
 except Exception as e:
     print(f"RAG 시스템 초기화 오류: {e}")
     rag_system = None
@@ -177,34 +179,168 @@ def chatbot_api(request):
                 'low_income': profile.low_income
             }
 
-        # RAG 시스템으로 관련 문서 검색
+        # LangGraph RAG 시스템으로 답변 생성
         if rag_system:
-            relevant_docs = rag_system.retrieve_relevant_docs(question, n_results=3, user_profile=user_profile)
-
-            # 간단한 답변 생성 (실제로는 LLM 사용)
-            context = "\n\n".join([doc['content'][:500] for doc in relevant_docs])
-
-            # 여기서는 간단한 답변을 생성합니다. 실제 프로덕션에서는 OpenAI API 등을 사용해야 합니다.
-            answer = f"질문에 대한 관련 정보를 찾았습니다:\n\n"
-            for i, doc in enumerate(relevant_docs, 1):
-                answer += f"{i}. {doc['file_name']}\n"
-                answer += f"   {doc['content'][:200]}...\n\n"
-
-            answer += "\n더 자세한 정보는 복지로 웹사이트를 참고해주세요."
+            result = rag_system.run(question, user_profile=user_profile)
+            answer = result['answer']
+            sources = result['sources']
+            quality_score = result['quality_score']
         else:
             answer = "죄송합니다. 현재 시스템이 초기화되지 않았습니다. 관리자에게 문의해주세요."
+            sources = []
+            quality_score = 0
 
-        # 대화 이력 저장
-        ChatHistory.objects.create(
+        # 대화 이력 저장 (품질 점수 포함)
+        chat = ChatHistory.objects.create(
             user=request.user,
             question=question,
             answer=answer
         )
 
+        # 자동 품질 평가 저장
+        if quality_score > 0:
+            chat.relevance_score = quality_score
+            chat.accuracy_score = quality_score * 0.9  # 약간 낮게 설정
+            chat.completeness_score = quality_score * 0.95
+            chat.calculate_overall_score()
+            chat.save()
+
         return JsonResponse({
             'answer': answer,
-            'sources': [doc['file_name'] for doc in relevant_docs] if rag_system else []
+            'sources': sources,
+            'quality_score': round(quality_score, 2)
         })
 
     except Exception as e:
         return JsonResponse({'error': f'오류가 발생했습니다: {str(e)}'}, status=500)
+
+
+# ============ 관리자 전용 기능 ============
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import User
+from django.db.models import Avg, Count, Q
+from django.core.paginator import Paginator
+
+
+@staff_member_required
+def admin_dashboard(request):
+    """관리자 대시보드"""
+    # 통계 데이터
+    total_users = User.objects.count()
+    total_chats = ChatHistory.objects.count()
+    avg_score = ChatHistory.objects.filter(overall_score__isnull=False).aggregate(Avg('overall_score'))['overall_score__avg']
+
+    # 최근 대화 (평가 필요)
+    recent_chats = ChatHistory.objects.filter(overall_score__isnull=True)[:10]
+
+    # 사용자별 활동 통계
+    user_stats = User.objects.annotate(
+        chat_count=Count('chat_history')
+    ).order_by('-chat_count')[:10]
+
+    context = {
+        'total_users': total_users,
+        'total_chats': total_chats,
+        'avg_score': round(avg_score, 2) if avg_score else 0,
+        'recent_chats': recent_chats,
+        'user_stats': user_stats,
+    }
+
+    return render(request, 'admin/dashboard.html', context)
+
+
+@staff_member_required
+def admin_user_management(request):
+    """사용자 관리 페이지"""
+    users = User.objects.all().select_related('profile').annotate(
+        chat_count=Count('chat_history')
+    )
+
+    # 검색
+    search_query = request.GET.get('search', '')
+    if search_query:
+        users = users.filter(
+            Q(username__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+
+    # 페이지네이션
+    paginator = Paginator(users, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'admin/user_management.html', {'page_obj': page_obj, 'search_query': search_query})
+
+
+@staff_member_required
+def admin_toggle_staff(request, user_id):
+    """사용자 관리자 권한 토글"""
+    if request.method == 'POST':
+        user = User.objects.get(id=user_id)
+        user.is_staff = not user.is_staff
+        user.save()
+        messages.success(request, f'{user.username}의 관리자 권한이 {"부여" if user.is_staff else "제거"}되었습니다.')
+
+    return redirect('admin_user_management')
+
+
+@staff_member_required
+def admin_chat_logs(request):
+    """사용자별 질의응답 로그"""
+    user_id = request.GET.get('user_id')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+
+    chats = ChatHistory.objects.all().select_related('user')
+
+    # 필터링
+    if user_id:
+        chats = chats.filter(user_id=user_id)
+    if date_from:
+        chats = chats.filter(created_at__gte=date_from)
+    if date_to:
+        chats = chats.filter(created_at__lte=date_to)
+
+    # 페이지네이션
+    paginator = Paginator(chats, 50)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # 사용자 목록
+    users = User.objects.all().order_by('username')
+
+    context = {
+        'page_obj': page_obj,
+        'users': users,
+        'selected_user_id': user_id,
+        'date_from': date_from,
+        'date_to': date_to,
+    }
+
+    return render(request, 'admin/chat_logs.html', context)
+
+
+@staff_member_required
+@csrf_exempt
+def admin_evaluate_response(request, chat_id):
+    """챗봇 응답 평가"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            chat = ChatHistory.objects.get(id=chat_id)
+
+            chat.relevance_score = float(data.get('relevance_score', 0))
+            chat.accuracy_score = float(data.get('accuracy_score', 0))
+            chat.completeness_score = float(data.get('completeness_score', 0))
+            chat.calculate_overall_score()
+            chat.save()
+
+            return JsonResponse({
+                'success': True,
+                'overall_score': chat.overall_score
+            })
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'POST 요청만 허용됩니다.'}, status=405)

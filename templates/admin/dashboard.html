@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">관리자 대시보드</h2>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5>총 사용자 수</h5>
+                <h2>{{ total_users }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5>총 대화 수</h5>
+                <h2>{{ total_chats }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5>평균 응답 점수</h5>
+                <h2>{{ avg_score }} / 100</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">최근 대화 (평가 필요)</div>
+            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                {% for chat in recent_chats %}
+                <div class="mb-3 pb-2 border-bottom">
+                    <strong>{{ chat.user.username }}</strong>
+                    <p class="small mb-1">Q: {{ chat.question|truncatechars:100 }}</p>
+                    <a href="{% url 'admin_chat_logs' %}?user_id={{ chat.user.id }}" class="btn btn-sm btn-primary">평가하기</a>
+                </div>
+                {% empty %}
+                <p class="text-muted">평가가 필요한 대화가 없습니다.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">사용자별 활동 순위</div>
+            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>순위</th>
+                            <th>사용자</th>
+                            <th>대화 수</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in user_stats %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.chat_count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

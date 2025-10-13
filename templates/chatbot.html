@@ -56,7 +56,7 @@ function askQuestion() {
     input.value = '';
 
     // 로딩 표시
-    const loadingDiv = addMessage('bot', '답변을 생성하는 중...');
+    const loadingDiv = addMessage('bot', '<div class="spinner-border spinner-border-sm" role="status"></div> 답변을 생성하는 중...', true);
 
     // API 호출
     fetch('/api/chatbot/', {
@@ -74,7 +74,22 @@ function askQuestion() {
         if (data.error) {
             addMessage('bot', '오류: ' + data.error);
         } else {
-            addMessage('bot', data.answer);
+            let message = data.answer;
+
+            // 품질 점수 표시 (관리자인 경우)
+            {% if user.is_staff %}
+            if (data.quality_score) {
+                const scoreColor = data.quality_score >= 70 ? 'success' : data.quality_score >= 50 ? 'warning' : 'danger';
+                message += `<br><br><span class="badge bg-${scoreColor}">품질 점수: ${data.quality_score}/100</span>`;
+            }
+            {% endif %}
+
+            // 출처 표시
+            if (data.sources && data.sources.length > 0) {
+                message += '<br><br><small class="text-muted"><i class="bi bi-file-text"></i> 출처: ' + data.sources.join(', ') + '</small>';
+            }
+
+            addMessage('bot', message, true);
         }
     })
     .catch(error => {
@@ -83,15 +98,22 @@ function askQuestion() {
     });
 }
 
-function addMessage(type, text) {
+function addMessage(type, text, allowHtml = false) {
     const container = document.getElementById('chatMessages');
     const div = document.createElement('div');
-    div.className = type === 'user' ? 'alert alert-primary text-end' : 'alert alert-secondary';
-    div.innerHTML = text.replace(/\n/g, '<br>');
+    div.className = type === 'user' ? 'alert alert-primary text-end mb-2' : 'alert alert-secondary mb-2';
+
+    if (allowHtml) {
+        div.innerHTML = text;
+    } else {
+        div.innerHTML = text.replace(/\n/g, '<br>');
+    }
+
     container.appendChild(div);
 
     // 스크롤 하단으로
-    document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight;
+    const chatContainer = document.getElementById('chatContainer');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 
     return div;
 }

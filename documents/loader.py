@@ -7,12 +7,22 @@ import PyPDF2
 import olefile
 from xml.etree import ElementTree as ET
 
+# OCR 관련 (선택적 import)
+try:
+    from pdf2image import convert_from_path
+    import pytesseract
+    OCR_AVAILABLE = True
+except ImportError:
+    OCR_AVAILABLE = False
+    print("경고: OCR 라이브러리가 설치되지 않았습니다. OCR 기능이 비활성화됩니다.")
+
 
 class DocumentLoader:
     """PDF와 HWP 파일을 로드하는 클래스"""
 
-    def __init__(self, data_dir: str):
+    def __init__(self, data_dir: str, use_ocr: bool = False):
         self.data_dir = Path(data_dir)
+        self.use_ocr = use_ocr and OCR_AVAILABLE
 
     def load_pdf(self, file_path: str) -> str:
         """PDF 파일을 읽어 텍스트로 반환"""
@@ -24,9 +34,44 @@ class DocumentLoader:
                     page_text = page.extract_text()
                     if page_text:
                         text += page_text + "\n"
+
+            # 텍스트가 거의 없으면 OCR 시도
+            if len(text.strip()) < 100 and self.use_ocr:
+                print(f"  → 텍스트가 부족합니다. OCR 시도 중...")
+                ocr_text = self.load_pdf_with_ocr(file_path)
+                if ocr_text:
+                    return ocr_text
+
             return text
         except Exception as e:
-            print(f"PDF 로드 오류 ({file_path}): {e} - 건너뜁니다.")
+            print(f"PDF 로드 오류 ({file_path}): {e}")
+            # 일반 로드 실패 시 OCR 시도
+            if self.use_ocr:
+                print(f"  → OCR로 재시도 중...")
+                try:
+                    return self.load_pdf_with_ocr(file_path)
+                except:
+                    print(f"  → OCR도 실패했습니다. 건너뜁니다.")
+            return ""
+
+    def load_pdf_with_ocr(self, file_path: str) -> str:
+        """OCR을 사용하여 PDF를 읽어 텍스트로 반환"""
+        if not self.use_ocr:
+            return ""
+
+        try:
+            # PDF를 이미지로 변환
+            images = convert_from_path(file_path, dpi=300)
+            text = ""
+
+            for i, image in enumerate(images):
+                # Tesseract OCR 실행 (한국어 + 영어)
+                page_text = pytesseract.image_to_string(image, lang='kor+eng')
+                text += page_text + "\n"
+
+            return text
+        except Exception as e:
+            print(f"OCR 오류 ({file_path}): {e}")
             return ""
 
     def load_hwp(self, file_path: str) -> str:
