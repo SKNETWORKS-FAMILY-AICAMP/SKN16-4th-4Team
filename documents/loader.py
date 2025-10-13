@@ -1,0 +1,297 @@
+import os
+import re
+import zipfile
+from pathlib import Path
+from typing import List, Dict, Optional
+import PyPDF2
+import olefile
+from xml.etree import ElementTree as ET
+
+# OCR 관련 (선택적 import)
+try:
+    from pdf2image import convert_from_path
+    import pytesseract
+    OCR_AVAILABLE = True
+except ImportError:
+    OCR_AVAILABLE = False
+    print("경고: OCR 라이브러리가 설치되지 않았습니다. OCR 기능이 비활성화됩니다.")
+
+
+def find_poppler_path() -> Optional[str]:
+    """Windows 환경에서 Poppler 설치 경로를 자동으로 찾습니다."""
+    if os.name != 'nt':  # Windows가 아니면 None 반환
+        return None
+
+    # 일반적인 Poppler 설치 경로들
+    possible_paths = [
+        r"C:\Program Files\poppler\Library\bin",
+        r"C:\Program Files\poppler-24.08.0\Library\bin",
+        r"C:\Program Files\poppler-23.11.0\Library\bin",
+        r"C:\Program Files (x86)\poppler\Library\bin",
+        r"C:\poppler\Library\bin",
+        r"C:\tools\poppler\Library\bin",
+        # Release 버전들
+        r"C:\Program Files\poppler\bin",
+        r"C:\Program Files (x86)\poppler\bin",
+        r"C:\poppler\bin",
+    ]
+
+    # PATH 환경변수에서도 검색
+    path_env = os.environ.get('PATH', '')
+    for path in path_env.split(';'):
+        if 'poppler' in path.lower() and 'bin' in path.lower():
+            possible_paths.insert(0, path)
+
+    # 각 경로 확인
+    for path in possible_paths:
+        if os.path.exists(path):
+            # pdftoppm.exe 파일이 있는지 확인
+            pdftoppm_path = os.path.join(path, 'pdftoppm.exe')
+            if os.path.exists(pdftoppm_path):
+                print(f"✓ Poppler 발견: {path}")
+                return path
+
+    return None
+
+
+class DocumentLoader:
+    """PDF와 HWP 파일을 로드하는 클래스"""
+
+    def __init__(self, data_dir: str, use_ocr: bool = False):
+        self.data_dir = Path(data_dir)
+        self.use_ocr = use_ocr and OCR_AVAILABLE
+        self.poppler_path = None
+
+        # OCR을 사용하는 경우 Poppler 경로 찾기
+        if self.use_ocr:
+            self.poppler_path = find_poppler_path()
+            if not self.poppler_path:
+                print("\n" + "="*60)
+                print("⚠️  경고: Poppler를 찾을 수 없습니다!")
+                print("="*60)
+                print("OCR 기능을 사용하려면 Poppler를 설치해야 합니다.")
+                print("\n설치 방법:")
+                print("1. https://github.com/oschwartz10612/poppler-windows/releases/")
+                print("2. 최신 Release에서 poppler-xx.xx.x.zip 다운로드")
+                print("3. C:\\Program Files\\poppler 에 압축 해제")
+                print("4. 환경변수 PATH에 추가: C:\\Program Files\\poppler\\Library\\bin")
+                print("\nOCR 없이 계속 진행합니다...\n")
+                self.use_ocr = False
+
+    def load_pdf(self, file_path: str) -> str:
+        """PDF 파일을 읽어 텍스트로 반환 (다중 전략)"""
+        text = ""
+
+        # 전략 1: PyPDF2로 일반 로드
+        try:
+            with open(file_path, 'rb') as file:
+                pdf_reader = PyPDF2.PdfReader(file, strict=False)
+                for page_num, page in enumerate(pdf_reader.pages):
+                    try:
+                        page_text = page.extract_text()
+                        if page_text:
+                            text += page_text + "\n"
+                    except Exception as page_error:
+                        print(f"  → 페이지 {page_num+1} 추출 오류: {page_error}")
+                        continue
+        except Exception as e:
+            print(f"  → PyPDF2 오류: {e}")
+
+        # 전략 2: 텍스트가 충분하면 반환
+        if len(text.strip()) > 100:
+            return text
+
+        # 전략 3: OCR 시도
+        if self.use_ocr:
+            print(f"  → 텍스트 부족. OCR 시도 중...")
+            try:
+                ocr_text = self.load_pdf_with_ocr(file_path)
+                if ocr_text and len(ocr_text.strip()) > len(text.strip()):
+                    return ocr_text
+            except Exception as ocr_error:
+                print(f"  → OCR 오류: {ocr_error}")
+
+        # 전략 4: 파일 이름이라도 저장
+        if len(text.strip()) == 0:
+            file_name = Path(file_path).stem
+            return f"[문서 내용 추출 실패]\n파일명: {file_name}\n이 문서는 텍스트 추출이 불가능합니다."
+
+        return text
+
+    def load_pdf_with_ocr(self, file_path: str) -> str:
+        """OCR을 사용하여 PDF를 읽어 텍스트로 반환"""
+        if not self.use_ocr:
+            return ""
+
+        try:
+            # PDF를 이미지로 변환 (Poppler 경로 지정)
+            if self.poppler_path:
+                images = convert_from_path(file_path, dpi=300, poppler_path=self.poppler_path)
+            else:
+                # Poppler 경로가 없으면 시스템 PATH에서 찾기 시도
+                images = convert_from_path(file_path, dpi=300)
+
+            text = ""
+
+            for i, image in enumerate(images):
+                # Tesseract OCR 실행 (한국어 + 영어)
+                page_text = pytesseract.image_to_string(image, lang='kor+eng')
+                text += page_text + "\n"
+
+            return text
+        except Exception as e:
+            print(f"  → OCR 오류: {e}")
+            if "Unable to get page count" in str(e) or "poppler" in str(e).lower():
+                print(f"  → Poppler 설치 또는 경로 설정이 필요합니다.")
+            return ""
+
+    def load_hwp(self, file_path: str) -> str:
+        """HWP 파일을 읽어 텍스트로 반환 (다중 전략)"""
+        text = ""
+
+        # 전략 1: OLE 구조로 읽기 시도
+        try:
+            if olefile.isOleFile(file_path):
+                f = olefile.OleFileIO(file_path)
+                dirs = f.listdir()
+
+                # HWP 파일 내의 텍스트 스트림 찾기
+                for dir_entry in dirs:
+                    if 'BodyText' in dir_entry[-1] or 'bodytext' in dir_entry[-1].lower():
+                        try:
+                            stream = f.openstream(dir_entry)
+                            data = stream.read()
+                            # 다양한 인코딩 시도
+                            for encoding in ['utf-16', 'utf-8', 'cp949', 'euc-kr']:
+                                try:
+                                    decoded = data.decode(encoding, errors='ignore')
+                                    if len(decoded) > len(text):
+                                        text = decoded
+                                    break
+                                except:
+                                    continue
+                        except Exception as stream_error:
+                            print(f"  → 스트림 읽기 오류: {stream_error}")
+                            continue
+
+                f.close()
+                # 제어 문자 제거
+                text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F]', '', text)
+            else:
+                print(f"  → OLE 파일이 아닙니다. HWPX로 시도합니다.")
+                # HWPX일 수 있음
+                text = self.load_hwpx(file_path)
+        except Exception as e:
+            print(f"  → HWP OLE 오류: {e}")
+            # HWPX로 재시도
+            try:
+                text = self.load_hwpx(file_path)
+            except:
+                pass
+
+        # 전략 2: 텍스트가 없으면 파일명이라도 저장
+        if len(text.strip()) == 0:
+            file_name = Path(file_path).stem
+            text = f"[문서 내용 추출 실패]\n파일명: {file_name}\n이 HWP 문서는 텍스트 추출이 불가능합니다."
+
+        return text
+
+    def load_hwpx(self, file_path: str) -> str:
+        """HWPX 파일을 읽어 텍스트로 반환 (ZIP 기반 XML)"""
+        try:
+            text = ""
+            with zipfile.ZipFile(file_path, 'r') as zf:
+                # HWPX는 ZIP 파일 형식
+                # Contents/section*.xml 파일들에 텍스트가 있음
+                for file_name in zf.namelist():
+                    if 'section' in file_name.lower() and file_name.endswith('.xml'):
+                        xml_content = zf.read(file_name)
+                        try:
+                            root = ET.fromstring(xml_content)
+                            # 모든 텍스트 노드 추출
+                            for elem in root.iter():
+                                if elem.text:
+                                    text += elem.text + " "
+                                if elem.tail:
+                                    text += elem.tail + " "
+                        except:
+                            # XML 파싱 실패 시 원본 텍스트 추출 시도
+                            text += xml_content.decode('utf-8', errors='ignore')
+
+            # 중복 공백 제거
+            text = re.sub(r'\s+', ' ', text)
+            return text.strip()
+        except Exception as e:
+            print(f"HWPX 로드 오류 ({file_path}): {e} - 건너뜁니다.")
+            return ""
+
+    def load_all_documents(self) -> List[Dict[str, str]]:
+        """data 폴더 내의 모든 PDF와 HWP 파일을 로드"""
+        documents = []
+        success_count = 0
+        fail_count = 0
+
+        # 모든 PDF 파일 찾기
+        print("\n=== PDF 파일 로딩 중 ===")
+        for pdf_file in self.data_dir.rglob("*.pdf"):
+            print(f"로딩 중: {pdf_file}")
+            content = self.load_pdf(str(pdf_file))
+            if content.strip():
+                documents.append({
+                    "file_path": str(pdf_file),
+                    "file_name": pdf_file.name,
+                    "content": content,
+                    "file_type": "pdf"
+                })
+                success_count += 1
+            else:
+                fail_count += 1
+
+        # 모든 HWP 파일 찾기
+        print("\n=== HWP 파일 로딩 중 ===")
+        for hwp_file in self.data_dir.rglob("*.hwp"):
+            print(f"로딩 중: {hwp_file}")
+            content = self.load_hwp(str(hwp_file))
+            if content.strip():
+                documents.append({
+                    "file_path": str(hwp_file),
+                    "file_name": hwp_file.name,
+                    "content": content,
+                    "file_type": "hwp"
+                })
+                success_count += 1
+            else:
+                fail_count += 1
+
+        # 모든 HWPX 파일 찾기
+        print("\n=== HWPX 파일 로딩 중 ===")
+        for hwpx_file in self.data_dir.rglob("*.hwpx"):
+            print(f"로딩 중: {hwpx_file}")
+            content = self.load_hwpx(str(hwpx_file))
+            if content.strip():
+                documents.append({
+                    "file_path": str(hwpx_file),
+                    "file_name": hwpx_file.name,
+                    "content": content,
+                    "file_type": "hwpx"
+                })
+                success_count += 1
+            else:
+                fail_count += 1
+
+        print(f"\n" + "="*60)
+        print(f"✓ 성공: {success_count}개 문서 로드")
+        print(f"✗ 실패: {fail_count}개 문서 건너뜀")
+        print(f"총 {len(documents)}개의 문서를 사용합니다.")
+        print("="*60)
+        return documents
+
+
+if __name__ == "__main__":
+    # 테스트
+    loader = DocumentLoader("data")
+    docs = loader.load_all_documents()
+    for doc in docs[:3]:  # 처음 3개만 출력
+        print(f"\n파일: {doc['file_name']}")
+        print(f"내용 길이: {len(doc['content'])} 문자")
+        print(f"내용 미리보기: {doc['content'][:200]}...")

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">문서 관리</h2>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <a href="{% url 'admin_document_upload' %}" class="btn btn-primary">
+            <i class="bi bi-cloud-upload"></i> 새 문서 업로드
+        </a>
+    </div>
+    <div class="col-md-6">
+        <form method="get" class="d-flex">
+            <input type="text" class="form-control me-2" name="search" placeholder="문서 검색" value="{{ search_query }}">
+            <select class="form-select me-2" name="category" style="max-width: 200px;">
+                <option value="">전체 카테고리</option>
+                {% for cat in categories %}
+                <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-secondary" type="submit">검색</button>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>제목</th>
+                <th>파일형식</th>
+                <th>카테고리</th>
+                <th>청크수</th>
+                <th>동기화</th>
+                <th>업로드일</th>
+                <th>작업</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in page_obj %}
+            <tr>
+                <td><strong>{{ doc.title }}</strong></td>
+                <td><span class="badge bg-info">{{ doc.file_type|upper }}</span></td>
+                <td>{{ doc.category }}</td>
+                <td>{{ doc.chunk_count }}</td>
+                <td>
+                    {% if doc.is_synced %}
+                    <span class="badge bg-success">동기화됨</span>
+                    {% else %}
+                    <span class="badge bg-warning">미동기화</span>
+                    {% endif %}
+                </td>
+                <td>{{ doc.created_at|date:"Y-m-d" }}</td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="resyncDocument({{ doc.id }})">
+                        <i class="bi bi-arrow-repeat"></i> 재동기화
+                    </button>
+                    <form method="post" action="{% url 'admin_document_delete' doc.id %}" style="display:inline;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-danger" type="submit">
+                            <i class="bi bi-trash"></i> 삭제
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">문서가 없습니다.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<nav>
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&category={{ selected_category }}">이전</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&category={{ selected_category }}">다음</a></li>
+        {% endif %}
+    </ul>
+</nav>
+
+<div id="statusMsg" class="mt-3"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function resyncDocument(docId) {
+    if (!confirm('이 문서를 재동기화하시겠습니까?')) return;
+
+    const statusDiv = document.getElementById('statusMsg');
+    statusDiv.innerHTML = '<div class="alert alert-info">재동기화 중...</div>';
+
+    fetch(`/api/admin/documents/${docId}/resync/`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            statusDiv.innerHTML = `<div class="alert alert-success">재동기화 완료! ${data.chunk_count}개 청크 생성</div>`;
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            statusDiv.innerHTML = `<div class="alert alert-danger">오류: ${data.error}</div>`;
+        }
+    })
+    .catch(error => {
+        statusDiv.innerHTML = `<div class="alert alert-danger">오류: ${error}</div>`;
+    });
+}
+</script>
+{% endblock %}
