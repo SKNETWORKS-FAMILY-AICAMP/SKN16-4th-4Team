@@ -24,7 +24,10 @@ def main():
     print("=" * 60)
 
     # OCR 사용 여부 확인
-    use_ocr = input("\nOCR을 사용하시겠습니까? (이미지 PDF 처리 가능, 시간 오래 걸림) (y/n): ").lower() == 'y'
+    print("\n📋 OCR (광학 문자 인식) 옵션:")
+    print("  - y: 이미지 PDF도 처리 (Poppler, Tesseract 필요, 시간 오래 걸림)")
+    print("  - n: 일반 텍스트 PDF만 처리 (빠름, 추천)")
+    use_ocr = input("\nOCR을 사용하시겠습니까? (y/n): ").lower() == 'y'
 
     # 1. 문서 로드
     print("\n[1/3] 문서 로딩 중...")

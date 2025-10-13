@@ -2,7 +2,7 @@ import os
 import re
 import zipfile
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 import PyPDF2
 import olefile
 from xml.etree import ElementTree as ET
@@ -17,12 +17,66 @@ except ImportError:
     print("경고: OCR 라이브러리가 설치되지 않았습니다. OCR 기능이 비활성화됩니다.")
 
 
+def find_poppler_path() -> Optional[str]:
+    """Windows 환경에서 Poppler 설치 경로를 자동으로 찾습니다."""
+    if os.name != 'nt':  # Windows가 아니면 None 반환
+        return None
+
+    # 일반적인 Poppler 설치 경로들
+    possible_paths = [
+        r"C:\Program Files\poppler\Library\bin",
+        r"C:\Program Files\poppler-24.08.0\Library\bin",
+        r"C:\Program Files\poppler-23.11.0\Library\bin",
+        r"C:\Program Files (x86)\poppler\Library\bin",
+        r"C:\poppler\Library\bin",
+        r"C:\tools\poppler\Library\bin",
+        # Release 버전들
+        r"C:\Program Files\poppler\bin",
+        r"C:\Program Files (x86)\poppler\bin",
+        r"C:\poppler\bin",
+    ]
+
+    # PATH 환경변수에서도 검색
+    path_env = os.environ.get('PATH', '')
+    for path in path_env.split(';'):
+        if 'poppler' in path.lower() and 'bin' in path.lower():
+            possible_paths.insert(0, path)
+
+    # 각 경로 확인
+    for path in possible_paths:
+        if os.path.exists(path):
+            # pdftoppm.exe 파일이 있는지 확인
+            pdftoppm_path = os.path.join(path, 'pdftoppm.exe')
+            if os.path.exists(pdftoppm_path):
+                print(f"✓ Poppler 발견: {path}")
+                return path
+
+    return None
+
+
 class DocumentLoader:
     """PDF와 HWP 파일을 로드하는 클래스"""
 
     def __init__(self, data_dir: str, use_ocr: bool = False):
         self.data_dir = Path(data_dir)
         self.use_ocr = use_ocr and OCR_AVAILABLE
+        self.poppler_path = None
+
+        # OCR을 사용하는 경우 Poppler 경로 찾기
+        if self.use_ocr:
+            self.poppler_path = find_poppler_path()
+            if not self.poppler_path:
+                print("\n" + "="*60)
+                print("⚠️  경고: Poppler를 찾을 수 없습니다!")
+                print("="*60)
+                print("OCR 기능을 사용하려면 Poppler를 설치해야 합니다.")
+                print("\n설치 방법:")
+                print("1. https://github.com/oschwartz10612/poppler-windows/releases/")
+                print("2. 최신 Release에서 poppler-xx.xx.x.zip 다운로드")
+                print("3. C:\\Program Files\\poppler 에 압축 해제")
+                print("4. 환경변수 PATH에 추가: C:\\Program Files\\poppler\\Library\\bin")
+                print("\nOCR 없이 계속 진행합니다...\n")
+                self.use_ocr = False
 
     def load_pdf(self, file_path: str) -> str:
         """PDF 파일을 읽어 텍스트로 반환 (다중 전략)"""
@@ -70,8 +124,13 @@ class DocumentLoader:
             return ""
 
         try:
-            # PDF를 이미지로 변환
-            images = convert_from_path(file_path, dpi=300)
+            # PDF를 이미지로 변환 (Poppler 경로 지정)
+            if self.poppler_path:
+                images = convert_from_path(file_path, dpi=300, poppler_path=self.poppler_path)
+            else:
+                # Poppler 경로가 없으면 시스템 PATH에서 찾기 시도
+                images = convert_from_path(file_path, dpi=300)
+
             text = ""
 
             for i, image in enumerate(images):
@@ -81,7 +140,9 @@ class DocumentLoader:
 
             return text
         except Exception as e:
-            print(f"OCR 오류 ({file_path}): {e}")
+            print(f"  → OCR 오류: {e}")
+            if "Unable to get page count" in str(e) or "poppler" in str(e).lower():
+                print(f"  → Poppler 설치 또는 경로 설정이 필요합니다.")
             return ""
 
     def load_hwp(self, file_path: str) -> str:
