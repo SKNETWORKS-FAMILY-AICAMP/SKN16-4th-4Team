@@ -25,34 +25,44 @@ class DocumentLoader:
         self.use_ocr = use_ocr and OCR_AVAILABLE
 
     def load_pdf(self, file_path: str) -> str:
-        """PDF 파일을 읽어 텍스트로 반환"""
+        """PDF 파일을 읽어 텍스트로 반환 (다중 전략)"""
+        text = ""
+
+        # 전략 1: PyPDF2로 일반 로드
         try:
-            text = ""
             with open(file_path, 'rb') as file:
                 pdf_reader = PyPDF2.PdfReader(file, strict=False)
-                for page in pdf_reader.pages:
-                    page_text = page.extract_text()
-                    if page_text:
-                        text += page_text + "\n"
-
-            # 텍스트가 거의 없으면 OCR 시도
-            if len(text.strip()) < 100 and self.use_ocr:
-                print(f"  → 텍스트가 부족합니다. OCR 시도 중...")
-                ocr_text = self.load_pdf_with_ocr(file_path)
-                if ocr_text:
-                    return ocr_text
-
-            return text
+                for page_num, page in enumerate(pdf_reader.pages):
+                    try:
+                        page_text = page.extract_text()
+                        if page_text:
+                            text += page_text + "\n"
+                    except Exception as page_error:
+                        print(f"  → 페이지 {page_num+1} 추출 오류: {page_error}")
+                        continue
         except Exception as e:
-            print(f"PDF 로드 오류 ({file_path}): {e}")
-            # 일반 로드 실패 시 OCR 시도
-            if self.use_ocr:
-                print(f"  → OCR로 재시도 중...")
-                try:
-                    return self.load_pdf_with_ocr(file_path)
-                except:
-                    print(f"  → OCR도 실패했습니다. 건너뜁니다.")
-            return ""
+            print(f"  → PyPDF2 오류: {e}")
+
+        # 전략 2: 텍스트가 충분하면 반환
+        if len(text.strip()) > 100:
+            return text
+
+        # 전략 3: OCR 시도
+        if self.use_ocr:
+            print(f"  → 텍스트 부족. OCR 시도 중...")
+            try:
+                ocr_text = self.load_pdf_with_ocr(file_path)
+                if ocr_text and len(ocr_text.strip()) > len(text.strip()):
+                    return ocr_text
+            except Exception as ocr_error:
+                print(f"  → OCR 오류: {ocr_error}")
+
+        # 전략 4: 파일 이름이라도 저장
+        if len(text.strip()) == 0:
+            file_name = Path(file_path).stem
+            return f"[문서 내용 추출 실패]\n파일명: {file_name}\n이 문서는 텍스트 추출이 불가능합니다."
+
+        return text
 
     def load_pdf_with_ocr(self, file_path: str) -> str:
         """OCR을 사용하여 PDF를 읽어 텍스트로 반환"""
@@ -75,31 +85,55 @@ class DocumentLoader:
             return ""
 
     def load_hwp(self, file_path: str) -> str:
-        """HWP 파일을 읽어 텍스트로 반환 (기본 텍스트 추출)"""
+        """HWP 파일을 읽어 텍스트로 반환 (다중 전략)"""
+        text = ""
+
+        # 전략 1: OLE 구조로 읽기 시도
         try:
-            # HWP 파일은 OLE 구조를 가짐
-            f = olefile.OleFileIO(file_path)
-            dirs = f.listdir()
+            if olefile.isOleFile(file_path):
+                f = olefile.OleFileIO(file_path)
+                dirs = f.listdir()
 
-            # HWP 파일 내의 텍스트 스트림 찾기
-            text = ""
-            for dir_entry in dirs:
-                if dir_entry[-1] == 'BodyText':
-                    stream = f.openstream(dir_entry)
-                    data = stream.read()
-                    # 간단한 디코딩 시도
-                    try:
-                        text += data.decode('utf-16', errors='ignore')
-                    except:
-                        text += data.decode('utf-8', errors='ignore')
+                # HWP 파일 내의 텍스트 스트림 찾기
+                for dir_entry in dirs:
+                    if 'BodyText' in dir_entry[-1] or 'bodytext' in dir_entry[-1].lower():
+                        try:
+                            stream = f.openstream(dir_entry)
+                            data = stream.read()
+                            # 다양한 인코딩 시도
+                            for encoding in ['utf-16', 'utf-8', 'cp949', 'euc-kr']:
+                                try:
+                                    decoded = data.decode(encoding, errors='ignore')
+                                    if len(decoded) > len(text):
+                                        text = decoded
+                                    break
+                                except:
+                                    continue
+                        except Exception as stream_error:
+                            print(f"  → 스트림 읽기 오류: {stream_error}")
+                            continue
 
-            f.close()
-            # 제어 문자 제거
-            text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F]', '', text)
-            return text
+                f.close()
+                # 제어 문자 제거
+                text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F]', '', text)
+            else:
+                print(f"  → OLE 파일이 아닙니다. HWPX로 시도합니다.")
+                # HWPX일 수 있음
+                text = self.load_hwpx(file_path)
         except Exception as e:
-            print(f"HWP 로드 오류 ({file_path}): {e} - 건너뜁니다.")
-            return ""
+            print(f"  → HWP OLE 오류: {e}")
+            # HWPX로 재시도
+            try:
+                text = self.load_hwpx(file_path)
+            except:
+                pass
+
+        # 전략 2: 텍스트가 없으면 파일명이라도 저장
+        if len(text.strip()) == 0:
+            file_name = Path(file_path).stem
+            text = f"[문서 내용 추출 실패]\n파일명: {file_name}\n이 HWP 문서는 텍스트 추출이 불가능합니다."
+
+        return text
 
     def load_hwpx(self, file_path: str) -> str:
         """HWPX 파일을 읽어 텍스트로 반환 (ZIP 기반 XML)"""

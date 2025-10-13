@@ -17,4 +17,10 @@ urlpatterns = [
     path('admin-users/<int:user_id>/toggle-staff/', views.admin_toggle_staff, name='admin_toggle_staff'),
     path('admin-chats/', views.admin_chat_logs, name='admin_chat_logs'),
     path('api/admin/evaluate/<int:chat_id>/', views.admin_evaluate_response, name='admin_evaluate_response'),
+
+    # 문서 관리 URL
+    path('admin-documents/', views.admin_documents, name='admin_documents'),
+    path('admin-documents/upload/', views.admin_document_upload, name='admin_document_upload'),
+    path('admin-documents/<int:doc_id>/delete/', views.admin_document_delete, name='admin_document_delete'),
+    path('api/admin/documents/<int:doc_id>/resync/', views.admin_document_resync, name='admin_document_resync'),
 ]

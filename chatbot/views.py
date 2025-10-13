@@ -344,3 +344,161 @@ def admin_evaluate_response(request, chat_id):
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'POST 요청만 허용됩니다.'}, status=405)
+
+
+# ============ 문서 관리 기능 ============
+
+from .models import Document
+from django.core.files.storage import FileSystemStorage
+from documents.document_manager import DocumentManager
+
+@staff_member_required
+def admin_documents(request):
+    """문서 관리 페이지"""
+    documents = Document.objects.all().order_by('-created_at')
+
+    # 검색
+    search_query = request.GET.get('search', '')
+    if search_query:
+        documents = documents.filter(
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
+
+    # 필터
+    category = request.GET.get('category', '')
+    if category:
+        documents = documents.filter(category=category)
+
+    # 페이지네이션
+    paginator = Paginator(documents, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # 카테고리 목록
+    categories = Document.objects.values_list('category', flat=True).distinct()
+
+    context = {
+        'page_obj': page_obj,
+        'categories': categories,
+        'search_query': search_query,
+        'selected_category': category,
+    }
+
+    return render(request, 'admin/documents.html', context)
+
+
+@staff_member_required
+def admin_document_upload(request):
+    """문서 업로드"""
+    if request.method == 'POST':
+        try:
+            title = request.POST.get('title')
+            category = request.POST.get('category')
+            description = request.POST.get('description', '')
+            file = request.FILES.get('file')
+
+            if not file:
+                messages.error(request, '파일을 선택해주세요.')
+                return redirect('admin_documents')
+
+            # 파일 확장자 확인
+            file_ext = file.name.split('.')[-1].lower()
+            if file_ext not in ['pdf', 'hwp', 'hwpx']:
+                messages.error(request, '지원하지 않는 파일 형식입니다. (PDF, HWP, HWPX만 가능)')
+                return redirect('admin_documents')
+
+            # 문서 생성
+            document = Document.objects.create(
+                title=title,
+                file=file,
+                file_type=file_ext,
+                category=category,
+                description=description,
+                uploaded_by=request.user
+            )
+
+            # ChromaDB 동기화
+            doc_manager = DocumentManager()
+            result = doc_manager.process_document(
+                file_path=document.file.path,
+                doc_id=document.id,
+                metadata={'title': title, 'category': category}
+            )
+
+            if result['success']:
+                document.is_synced = True
+                document.chunk_count = result['chunk_count']
+                document.extracted_text = result['extracted_text']
+                document.save()
+                messages.success(request, f'문서가 업로드되고 {result["chunk_count"]}개의 청크로 처리되었습니다.')
+            else:
+                messages.warning(request, f'문서는 저장되었지만 동기화 실패: {result.get("error")}')
+
+            return redirect('admin_documents')
+
+        except Exception as e:
+            messages.error(request, f'오류 발생: {str(e)}')
+            return redirect('admin_documents')
+
+    return render(request, 'admin/document_upload.html')
+
+
+@staff_member_required
+def admin_document_delete(request, doc_id):
+    """문서 삭제"""
+    if request.method == 'POST':
+        try:
+            document = Document.objects.get(id=doc_id)
+
+            # ChromaDB에서 삭제
+            doc_manager = DocumentManager()
+            doc_manager.delete_document_from_vectorstore(doc_id)
+
+            # 문서 삭제 (파일도 함께 삭제됨)
+            title = document.title
+            document.delete()
+
+            messages.success(request, f'문서 "{title}"이(가) 삭제되었습니다.')
+        except Exception as e:
+            messages.error(request, f'삭제 실패: {str(e)}')
+
+    return redirect('admin_documents')
+
+
+@staff_member_required
+@csrf_exempt
+def admin_document_resync(request, doc_id):
+    """문서 재동기화"""
+    if request.method == 'POST':
+        try:
+            document = Document.objects.get(id=doc_id)
+
+            # ChromaDB 재동기화
+            doc_manager = DocumentManager()
+            result = doc_manager.process_document(
+                file_path=document.file.path,
+                doc_id=document.id,
+                metadata={'title': document.title, 'category': document.category}
+            )
+
+            if result['success']:
+                document.is_synced = True
+                document.chunk_count = result['chunk_count']
+                document.extracted_text = result['extracted_text']
+                document.save()
+
+                return JsonResponse({
+                    'success': True,
+                    'chunk_count': result['chunk_count']
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'error': result.get('error')
+                })
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'error': 'POST 요청만 허용됩니다.'}, status=405)

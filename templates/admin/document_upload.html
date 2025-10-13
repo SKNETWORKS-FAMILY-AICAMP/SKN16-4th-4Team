@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4">문서 업로드</h2>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="title" class="form-label">문서 제목 *</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="category" class="form-label">카테고리 *</label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="">선택하세요</option>
+                            <option value="건강/의료">건강/의료</option>
+                            <option value="일자리">일자리</option>
+                            <option value="주거/생활">주거/생활</option>
+                            <option value="생활지원">생활지원</option>
+                            <option value="복지">복지</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">설명</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="file" class="form-label">파일 (PDF, HWP, HWPX) *</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".pdf,.hwp,.hwpx" required>
+                        <div class="form-text">최대 50MB, PDF/HWP/HWPX 형식만 가능</div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        업로드 후 자동으로 텍스트 추출 및 ChromaDB 동기화가 진행됩니다.
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'admin_documents' %}" class="btn btn-secondary">취소</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cloud-upload"></i> 업로드
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

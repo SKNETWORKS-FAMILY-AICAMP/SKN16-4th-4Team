@@ -82,3 +82,42 @@ class Policy(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Document(models.Model):
+    """업로드된 문서 관리 모델"""
+    title = models.CharField(max_length=500, verbose_name="문서 제목")
+    file = models.FileField(upload_to='documents/%Y/%m/', verbose_name="파일")
+    file_type = models.CharField(max_length=10, verbose_name="파일 형식")  # pdf, hwp, hwpx
+    category = models.CharField(max_length=100, verbose_name="카테고리")
+    description = models.TextField(blank=True, verbose_name="설명")
+
+    # 추출된 텍스트 내용 (캐시)
+    extracted_text = models.TextField(blank=True, verbose_name="추출된 텍스트")
+
+    # ChromaDB 동기화 상태
+    is_synced = models.BooleanField(default=False, verbose_name="ChromaDB 동기화 여부")
+    chunk_count = models.IntegerField(default=0, verbose_name="청크 수")
+
+    # 메타데이터
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name="업로드한 사용자")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="수정일")
+
+    class Meta:
+        verbose_name = "문서"
+        verbose_name_plural = "문서"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+    def get_file_extension(self):
+        """파일 확장자 반환"""
+        return self.file.name.split('.')[-1].lower()
+
+    def delete(self, *args, **kwargs):
+        """문서 삭제 시 파일도 함께 삭제"""
+        if self.file:
+            self.file.delete()
+        super().delete(*args, **kwargs)

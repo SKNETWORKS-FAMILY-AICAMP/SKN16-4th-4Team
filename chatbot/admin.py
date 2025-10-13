@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile, ChatHistory, Policy
+from .models import UserProfile, ChatHistory, Policy, Document
 
 
 @admin.register(UserProfile)
@@ -41,3 +41,25 @@ class PolicyAdmin(admin.ModelAdmin):
     list_display = ['title', 'category', 'target', 'created_at']
     list_filter = ['category']
     search_fields = ['title', 'description', 'target']
+
+
+@admin.register(Document)
+class DocumentAdmin(admin.ModelAdmin):
+    list_display = ['title', 'file_type', 'category', 'is_synced', 'chunk_count', 'uploaded_by', 'created_at']
+    list_filter = ['file_type', 'category', 'is_synced', 'created_at']
+    search_fields = ['title', 'description']
+    readonly_fields = ['is_synced', 'chunk_count', 'extracted_text', 'created_at', 'updated_at']
+
+    fieldsets = (
+        ('기본 정보', {
+            'fields': ('title', 'file', 'file_type', 'category', 'description')
+        }),
+        ('동기화 상태', {
+            'fields': ('is_synced', 'chunk_count', 'extracted_text'),
+            'classes': ('collapse',)
+        }),
+        ('메타데이터', {
+            'fields': ('uploaded_by', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
