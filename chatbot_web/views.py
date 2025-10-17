@@ -5,7 +5,7 @@ elderly_welfare_rag 통합 버전
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth import login as auth_login
+from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import JsonResponse
@@ -15,7 +15,7 @@ import uuid
 import json
 import logging
 
-from .models import ChatSession, ChatMessage, UserProfile, ElderlyPolicy
+from .models import ChatSession, ChatMessage, UserProfile, ElderlyPolicy, Bookmark
 from .rag_system.rag_service import get_main_rag_service, get_validation_rag_service
 
 logger = logging.getLogger(__name__)
@@ -80,10 +80,29 @@ def register(request):
     return render(request, 'chatbot_web/register.html')
 
 
+def logout_view(request):
+    """로그아웃"""
+    auth_logout(request)
+    messages.success(request, '로그아웃되었습니다.')
+    return redirect('chatbot_web:login')
+
+
 # ==================== 채팅 ====================
 @login_required
 def chat_view(request):
-    """채팅 메인"""
+    """채팅 메인 - localStorage에서 세션 ID 전달받아 복원"""
+    # 쿼리 파라미터로 세션 ID 받기 (localStorage에서 전달)
+    session_id = request.GET.get('session_id')
+
+    if session_id:
+        # 세션 존재 여부 확인
+        try:
+            session = ChatSession.objects.get(session_id=session_id, user=request.user)
+            return redirect('chatbot_web:chat_session', session_id=session_id)
+        except ChatSession.DoesNotExist:
+            pass
+
+    # 세션이 없으면 새로 생성
     return redirect('chatbot_web:chat_new_session')
 
 
@@ -107,11 +126,11 @@ def chat_session(request, session_id):
     session = get_object_or_404(ChatSession, session_id=session_id, user=request.user)
 
     # 메시지 로드
-    messages_list = ChatMessage.objects.filter(session=session).order_by('created_at')
+    chat_messages = ChatMessage.objects.filter(session=session).order_by('created_at')
 
     context = {
         'session': session,
-        'messages': messages_list,
+        'chat_messages': chat_messages,
     }
     return render(request, 'chatbot_web/chat.html', context)
 
@@ -209,7 +228,7 @@ def chat_session_delete(request, session_id):
     """채팅 세션 삭제"""
     session = get_object_or_404(ChatSession, session_id=session_id, user=request.user)
     session.delete()
-    messages.success(request, '대화 기록이 삭제되었습니다.')
+    # 알림 메시지 제거 - 사용자가 알림 원하지 않음
     return redirect('chatbot_web:home')
 
 
@@ -217,7 +236,19 @@ def chat_session_delete(request, session_id):
 @login_required
 @user_passes_test(is_admin)
 def validation_chat_view(request):
-    """검증용 채팅"""
+    """검증용 채팅 - localStorage에서 세션 ID 전달받아 복원"""
+    # 쿼리 파라미터로 세션 ID 받기
+    session_id = request.GET.get('session_id')
+
+    if session_id:
+        # 세션 존재 여부 확인
+        try:
+            session = ChatSession.objects.get(session_id=session_id, user=request.user)
+            return redirect('chatbot_web:validation_chat_session', session_id=session_id)
+        except ChatSession.DoesNotExist:
+            pass
+
+    # 세션이 없으면 새로 생성
     return redirect('chatbot_web:validation_chat_new_session')
 
 
@@ -241,11 +272,11 @@ def validation_chat_session(request, session_id):
     """검증용 채팅 세션"""
     session = get_object_or_404(ChatSession, session_id=session_id, user=request.user)
 
-    messages_list = ChatMessage.objects.filter(session=session).order_by('created_at')
+    chat_messages = ChatMessage.objects.filter(session=session).order_by('created_at')
 
     context = {
         'session': session,
-        'messages': messages_list,
+        'chat_messages': chat_messages,
         'is_validation': True,
     }
     return render(request, 'chatbot_web/validation/chat.html', context)
@@ -290,11 +321,30 @@ def validation_chat_api_message(request):
 
         try:
             result = rag_service.process_question(user_message, user_region=user_region)
-            ai_response = result.get('answer', '죄송합니다. 응답을 생성할 수 없습니다.')
+
+            # 검증용: 두 버전 모두 가져오기
+            answer_before = result.get('answer_before_llm', '')  # LLM 전
+            answer_after = result.get('answer_after_llm', '')    # LLM 후
             sources = result.get('sources', [])
 
+            # 두 버전을 구분하여 저장
+            if answer_before and answer_after:
+                # 두 버전이 모두 있으면 비교 형식으로 저장
+                ai_response = f"""## 🔍 답변 비교 (검증용)
+
+### ⚙️ LLM 수정 전 (Enhanced Policy Formatter)
+{answer_before}
+
+---
+
+### 🤖 LLM 수정 후 (OpenAI GPT)
+{answer_after}"""
+            else:
+                # 한 버전만 있으면 그대로 사용
+                ai_response = result.get('answer', '죄송합니다. 응답을 생성할 수 없습니다.')
+
             # 로그 추가
-            logger.info(f"[검증용] 질문: {user_message[:50]}... | 응답 길이: {len(ai_response)}자 | 소스 수: {len(sources)}개")
+            logger.info(f"[검증용] 질문: {user_message[:50]}... | LLM 전: {len(answer_before)}자 | LLM 후: {len(answer_after)}자 | 소스 수: {len(sources)}개")
 
             ChatMessage.objects.create(
                 session=session,
@@ -305,7 +355,9 @@ def validation_chat_api_message(request):
 
             return JsonResponse({
                 'response': ai_response,
-                'sources': sources
+                'sources': sources,
+                'answer_before_llm': answer_before,  # 프론트엔드에서 사용 가능
+                'answer_after_llm': answer_after
             })
 
         except Exception as e:
@@ -388,17 +440,41 @@ def profile_edit(request):
 # ==================== 정책 목록 ====================
 @login_required
 def policy_list(request):
-    """노년 복지 정책 목록 - PDF 파일 기반 (시도별-주제별 정리)"""
-    from .rag_system.policy_metadata import scan_policy_pdfs
+    """노년 복지 정책 목록 - policy_mapping.csv 기반 (시도명, 관심주제, 정책명, 링크)"""
+    import csv
+    from pathlib import Path
+    from collections import defaultdict
 
-    # PDF 파일들을 스캔하여 시도별-카테고리별로 정리
-    policies_by_region = scan_policy_pdfs()
+    # CSV 파일 경로
+    csv_path = Path(__file__).parent.parent / 'policy_mapping.csv'
 
-    # 총 정책 개수 계산
+    # 데이터 구조: {시도명: {관심주제: [정책 리스트]}}
+    policies_by_region = defaultdict(lambda: defaultdict(list))
     total_count = 0
-    for region_data in policies_by_region.values():
-        for category_policies in region_data.values():
-            total_count += len(category_policies)
+
+    try:
+        with open(csv_path, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                region = row.get('시도명', '').strip()
+                category = row.get('관심주제', '').strip()
+                policy_name = row.get('정책명', '').strip()
+                url = row.get('링크', '').strip()
+
+                if region and category and policy_name:
+                    policies_by_region[region][category].append({
+                        'name': policy_name,
+                        'url': url
+                    })
+                    total_count += 1
+    except FileNotFoundError:
+        logger.error(f"policy_mapping.csv 파일을 찾을 수 없습니다: {csv_path}")
+        messages.error(request, '정책 목록을 불러올 수 없습니다.')
+        policies_by_region = {}
+    except Exception as e:
+        logger.error(f"CSV 로드 실패: {e}")
+        messages.error(request, '정책 목록을 불러오는 중 오류가 발생했습니다.')
+        policies_by_region = {}
 
     # 템플릿에서 사용하기 쉽게 리스트로 변환
     regions_data = []
@@ -462,12 +538,52 @@ def chat_logs(request):
 
 @login_required
 @user_passes_test(is_admin)
+def chat_session_detail_api(request, session_id):
+    """채팅 세션 상세 API"""
+    try:
+        session = get_object_or_404(ChatSession, session_id=session_id)
+        messages_qs = ChatMessage.objects.filter(session=session).order_by('created_at')
+
+        messages_data = []
+        for msg in messages_qs:
+            messages_data.append({
+                'role': msg.role,
+                'content': msg.content,
+                'created_at': msg.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            })
+
+        session_data = {
+            'title': session.title,
+            'user': session.user.username,
+            'rag_config': session.rag_config.name if session.rag_config else None,
+            'created_at': session.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        }
+
+        return JsonResponse({
+            'session': session_data,
+            'messages': messages_data
+        })
+    except Exception as e:
+        logger.error(f"Session detail API error: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@user_passes_test(is_admin)
 def user_management(request):
     """사용자 관리"""
     users = User.objects.all().order_by('-date_joined')
 
+    # 통계 계산
+    total_users = users.count()
+    admin_users = users.filter(is_staff=True).count()
+    regular_users = total_users - admin_users
+
     context = {
         'users': users,
+        'total_users': total_users,
+        'admin_users': admin_users,
+        'regular_users': regular_users,
     }
     return render(request, 'chatbot_web/user_management.html', context)
 
@@ -476,19 +592,36 @@ def user_management(request):
 @user_passes_test(is_admin)
 @require_http_methods(["POST"])
 def user_toggle_admin(request, user_id):
-    """사용자 관리자 권한 토글"""
-    user = get_object_or_404(User, pk=user_id)
+    """사용자 관리자 권한 토글 (JSON 응답)"""
+    try:
+        user = get_object_or_404(User, pk=user_id)
 
-    if user == request.user:
-        messages.error(request, '자기 자신의 권한은 변경할 수 없습니다.')
-        return redirect('chatbot_web:user_management')
+        if user == request.user:
+            return JsonResponse({
+                'success': False,
+                'error': '자기 자신의 권한은 변경할 수 없습니다.'
+            })
 
-    user.is_staff = not user.is_staff
-    user.save()
+        if user.is_superuser:
+            return JsonResponse({
+                'success': False,
+                'error': '슈퍼유저의 권한은 변경할 수 없습니다.'
+            })
 
-    status = "관리자" if user.is_staff else "일반 사용자"
-    messages.success(request, f'{user.username}님의 권한이 {status}로 변경되었습니다.')
-    return redirect('chatbot_web:user_management')
+        user.is_staff = not user.is_staff
+        user.save()
+
+        return JsonResponse({
+            'success': True,
+            'is_admin': user.is_staff,
+            'username': user.username
+        })
+    except Exception as e:
+        logger.error(f"User toggle admin error: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 
 @login_required
@@ -504,3 +637,71 @@ def validation_chat_logs(request):
         'is_validation': True,
     }
     return render(request, 'chatbot_web/validation/chat_logs.html', context)
+
+
+# ==================== 북마크 ====================
+@login_required
+def bookmark_list(request):
+    """북마크 목록"""
+    bookmarks = Bookmark.objects.filter(user=request.user).order_by('-created_at')
+
+    context = {
+        'bookmarks': bookmarks,
+    }
+    return render(request, 'chatbot_web/bookmarks.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def bookmark_save(request):
+    """북마크 저장 API"""
+    try:
+        data = json.loads(request.body)
+        question = data.get('question', '').strip()
+        answer = data.get('answer', '').strip()
+        chatbot_type = data.get('chatbot_type', 'regular')
+
+        if not question or not answer:
+            return JsonResponse({'error': '질문과 답변을 입력해주세요.'}, status=400)
+
+        # 북마크 생성
+        bookmark = Bookmark.objects.create(
+            user=request.user,
+            question=question,
+            answer=answer,
+            chatbot_type=chatbot_type
+        )
+
+        return JsonResponse({
+            'success': True,
+            'bookmark_id': bookmark.id,
+            'message': '북마크가 저장되었습니다.'
+        })
+
+    except Exception as e:
+        logger.error(f"Bookmark save error: {e}")
+        return JsonResponse({'error': '북마크 저장 중 오류가 발생했습니다.'}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def bookmark_delete(request, bookmark_id):
+    """북마크 삭제"""
+    bookmark = get_object_or_404(Bookmark, id=bookmark_id, user=request.user)
+    bookmark.delete()
+    messages.success(request, '북마크가 삭제되었습니다.')
+    return redirect('chatbot_web:bookmark_list')
+
+
+# ==================== FAQ ====================
+@login_required
+def faq_view(request):
+    """FAQ 페이지"""
+    return render(request, 'chatbot_web/faq.html')
+
+
+# ==================== Quick Start ====================
+@login_required
+def quick_start_view(request):
+    """빠른 시작 도우미 페이지"""
+    return render(request, 'chatbot_web/quick_start.html')

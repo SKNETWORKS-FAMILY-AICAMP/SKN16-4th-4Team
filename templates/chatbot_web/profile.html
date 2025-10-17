@@ -3,13 +3,13 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <h2 class="mb-4"><i class="bi bi-person-circle"></i> 내 정보</h2>
+        <h2 class="mb-4"><i class="bi bi-person-circle text-primary"></i> 내 정보</h2>
 
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
+        <div class="card mb-4 shadow-sm" style="border-radius: 15px; border: none;">
+            <div class="card-header bg-primary text-white" style="border-radius: 15px 15px 0 0;">
                 <h5 class="mb-0"><i class="bi bi-info-circle"></i> 계정 정보</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body" style="padding: 30px;">
                 <div class="row mb-3">
                     <div class="col-md-4"><strong>아이디:</strong></div>
                     <div class="col-md-8"><code>{{ user.username }}</code></div>
@@ -37,11 +37,11 @@
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header bg-success text-white">
+        <div class="card shadow-sm" style="border-radius: 15px; border: none;">
+            <div class="card-header text-white" style="border-radius: 15px 15px 0 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 <h5 class="mb-0"><i class="bi bi-pencil-square"></i> 개인정보 수정</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body" style="padding: 30px;">
                 <form method="post" action="{% url 'chatbot_web:profile_edit' %}">
                     {% csrf_token %}
 
@@ -80,10 +80,10 @@
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg">
+                        <button type="submit" class="btn btn-lg text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 10px; font-weight: 600;">
                             <i class="bi bi-check-circle"></i> 정보 수정하기
                         </button>
-                        <a href="{% url 'chatbot_web:home' %}" class="btn btn-secondary">
+                        <a href="{% url 'chatbot_web:home' %}" class="btn btn-outline-secondary" style="border-radius: 10px; font-weight: 500;">
                             <i class="bi bi-x-circle"></i> 취소
                         </a>
                     </div>
@@ -91,11 +91,11 @@
             </div>
         </div>
 
-        <div class="card mt-4 border-warning">
-            <div class="card-header bg-warning">
+        <div class="card mt-4 shadow-sm" style="border-radius: 15px; border: 2px solid #ffc107;">
+            <div class="card-header bg-warning" style="border-radius: 13px 13px 0 0;">
                 <h6 class="mb-0"><i class="bi bi-shield-lock"></i> 개인정보 보호</h6>
             </div>
-            <div class="card-body">
+            <div class="card-body" style="padding: 20px;">
                 <p class="mb-0 small">
                     <i class="bi bi-check-circle text-success"></i> 비밀번호는 암호화되어 저장됩니다 (pbkdf2_sha256)<br>
                     <i class="bi bi-check-circle text-success"></i> 개인정보는 서비스 개선 목적으로만 사용됩니다<br>

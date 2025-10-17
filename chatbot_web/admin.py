@@ -5,7 +5,8 @@ from .models import (
     ChatSession,
     ChatMessage,
     UserFeedback,
-    ElderlyPolicy
+    ElderlyPolicy,
+    Bookmark
 )
 
 
@@ -54,3 +55,15 @@ class ElderlyPolicyAdmin(admin.ModelAdmin):
     list_filter = ['region', 'provider']
     search_fields = ['title', 'description', 'provider']
     ordering = ['region', 'title']
+
+
+@admin.register(Bookmark)
+class BookmarkAdmin(admin.ModelAdmin):
+    list_display = ['user', 'question_preview', 'chatbot_type', 'created_at']
+    list_filter = ['chatbot_type', 'created_at']
+    search_fields = ['user__username', 'question', 'answer']
+    ordering = ['-created_at']
+
+    def question_preview(self, obj):
+        return obj.question[:50] + '...' if len(obj.question) > 50 else obj.question
+    question_preview.short_description = '질문'

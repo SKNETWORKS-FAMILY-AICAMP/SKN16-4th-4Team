@@ -1,174 +1,100 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="text-center mb-5">
-    <h1 class="display-4"><i class="bi bi-robot"></i> 노인 복지 정책 RAG 챗봇</h1>
-    <p class="lead text-muted">AI 기반 노인 복지 정책 안내 시스템</p>
-</div>
-
-<div class="row mb-4">
-    <!-- 최근 질문 기록 -->
-    <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-clock-history"></i> 내 최근 질문 기록</h5>
-            </div>
-            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                {% if recent_sessions %}
-                    {% for session in recent_sessions %}
-                    <div class="border-bottom pb-2 mb-2">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">
-                                    <i class="bi bi-chat-dots"></i> {{ session.title|truncatechars:50 }}
-                                </h6>
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar"></i> {{ session.created_at|date:"m월 d일 H:i" }}
-                                    | <i class="bi bi-chat-left-text"></i> {{ session.messages.count }}개 메시지
-                                </small>
-                            </div>
-                            <div class="btn-group">
-                                <a href="{% url 'chatbot_web:chat_session' session.session_id %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-arrow-right"></i>
-                                </a>
-                                <form method="post" action="{% url 'chatbot_web:chat_session_delete' session.session_id %}" style="display:inline;" onsubmit="return confirm('정말 이 대화를 삭제하시겠습니까?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="text-center text-muted py-5">
-                        <i class="bi bi-chat-dots" style="font-size: 3rem;"></i>
-                        <p class="mt-2">아직 질문 기록이 없습니다.</p>
-                        <a href="{% url 'chatbot_web:chat' %}" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> 첫 질문하기
-                        </a>
-                    </div>
-                {% endif %}
-            </div>
-            <div class="card-footer text-center">
-                <a href="{% url 'chatbot_web:chat' %}" class="btn btn-primary w-100">
-                    <i class="bi bi-chat-dots-fill"></i> 챗봇 시작하기
-                </a>
-            </div>
+{% with hide_all_nav=True %}
+<!-- 상단 로고 및 슬로건 -->
+<div class="text-center mb-4 pt-3">
+    <div class="mb-2">
+        <!-- 대한민국 정부 로고 -->
+        <div style="display: inline-block; background: white; padding: 8px; border-radius: 50%;">
+            <img src="{% static 'photos/png-transparent-government-of-south-korea-ministry-of-employment-and-labor-emblem-of-south-korea-korea-miscellaneous-blue-logo-thumbnail.png' %}" alt="대한민국정부" style="width: 70px; height: 70px; object-fit: contain;">
         </div>
     </div>
-
-    <!-- 지역별 정책 미리보기 -->
-    <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="bi bi-geo-alt-fill"></i>
-                    {% if user.profile.region %}
-                    {{ user.profile.region }} 정책 미리보기
-                    {% else %}
-                    지역별 정책 안내
-                    {% endif %}
-                </h5>
-                <a href="{% url 'chatbot_web:policy_list' %}" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-list-ul"></i> 모든 정책 보기
-                </a>
-            </div>
-            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                {% if user.profile.region %}
-                    <div class="alert alert-info mb-3">
-                        <i class="bi bi-info-circle"></i>
-                        <strong>{{ user.profile.region }}</strong> 지역으로 설정되어 있습니다.
-                    </div>
-
-                    <h6 class="border-bottom pb-2 mb-3">주요 복지 정책</h6>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item px-0">
-                            <i class="bi bi-check-circle text-success"></i> 기초연금
-                            <br><small class="text-muted">만 65세 이상, 소득 하위 70%</small>
-                        </li>
-                        <li class="list-group-item px-0">
-                            <i class="bi bi-check-circle text-success"></i> 노인 장기요양보험
-                            <br><small class="text-muted">일상생활 어려운 노인 지원</small>
-                        </li>
-                        <li class="list-group-item px-0">
-                            <i class="bi bi-check-circle text-success"></i> 노인 일자리 사업
-                            <br><small class="text-muted">60세 이상 일자리 제공</small>
-                        </li>
-                    </ul>
-
-                    <div class="alert alert-warning mt-3">
-                        <i class="bi bi-lightbulb"></i>
-                        자세한 정책 정보는 <a href="{% url 'chatbot_web:chat' %}" class="alert-link">챗봇</a>에 질문하세요!
-                    </div>
-                {% else %}
-                    <div class="text-center text-muted py-4">
-                        <i class="bi bi-geo-alt" style="font-size: 3rem;"></i>
-                        <p class="mt-2">지역을 설정하면 해당 지역의<br>복지 정책을 우선 추천받을 수 있습니다.</p>
-                        <a href="{% url 'chatbot_web:profile' %}" class="btn btn-success">
-                            <i class="bi bi-geo-alt-fill"></i> 지역 설정하기
-                        </a>
-                    </div>
-
-                    <h6 class="border-bottom pb-2 mb-3 mt-4">전국 단위 주요 정책</h6>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item px-0">
-                            <i class="bi bi-check-circle text-primary"></i> 기초연금
-                        </li>
-                        <li class="list-group-item px-0">
-                            <i class="bi bi-check-circle text-primary"></i> 노인 장기요양보험
-                        </li>
-                        <li class="list-group-item px-0">
-                            <i class="bi bi-check-circle text-primary"></i> 노인 일자리 사업
-                        </li>
-                    </ul>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+    <h5 class="mb-2" style="color: #333; font-weight: 600; font-size: 1rem;">대한민국정부</h5>
+    <div style="width: 350px; max-width: 85%; margin: 10px auto; border-top: 2px solid #ccc;"></div>
+    <h2 class="mt-2 px-3" style="color: #222; font-weight: 700; font-size: 1.5rem; line-height: 1.4; max-width: 100%; word-wrap: break-word;">
+        더 나은 미래로 향하는 발걸음 <img src="{% static 'photos/footprint.png' %}" alt="발걸음" style="width: 28px; height: 28px; object-fit: contain; vertical-align: middle; margin-left: 2px;">
+    </h2>
+    <h3 class="mt-2 px-3" style="color: #444; font-weight: 600; font-size: 1.1rem; line-height: 1.4; max-width: 100%; word-wrap: break-word;">대한민국 정부가 함께 하겠습니다.</h3>
 </div>
 
-<!-- 빠른 시작 가이드 -->
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-question-circle"></i> 빠른 시작 가이드</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 text-center mb-3">
-                        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                            1
-                        </div>
-                        <h6 class="mt-2">내 정보 설정</h6>
-                        <p class="small text-muted">나이와 지역을 등록하면<br>맞춤형 정책 추천</p>
-                    </div>
-                    <div class="col-md-3 text-center mb-3">
-                        <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                            2
-                        </div>
-                        <h6 class="mt-2">챗봇에 질문</h6>
-                        <p class="small text-muted">궁금한 복지 정책을<br>자유롭게 질문하세요</p>
-                    </div>
-                    <div class="col-md-3 text-center mb-3">
-                        <div class="rounded-circle bg-warning text-dark d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                            3
-                        </div>
-                        <h6 class="mt-2">정책 확인</h6>
-                        <p class="small text-muted">AI가 관련 정책을<br>찾아서 안내해드립니다</p>
-                    </div>
-                    <div class="col-md-3 text-center mb-3">
-                        <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                            4
-                        </div>
-                        <h6 class="mt-2">신청 방법 안내</h6>
-                        <p class="small text-muted">정책 신청 방법과<br>필요 서류 확인</p>
+<!-- 4개 메인 카드 -->
+<div class="row g-4 mb-5 px-5">
+    <!-- 정책 찾아보기 -->
+    <div class="col-md-6 col-lg-3">
+        <a href="{% url 'chatbot_web:policy_list' %}" class="text-decoration-none">
+            <div class="card shadow-sm square-card" style="border-radius: 12px; overflow: hidden; border: none;">
+                <div class="square-content" style="position: relative; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('{% static 'photos/sasun-bughdaryan-e11Oa3kvx4c-unsplash.jpg' %}'); background-size: cover; background-position: center;">
+                    <div style="position: absolute; bottom: -15px; left: 80px; right: 15px;">
+                        <h3 class="text-white fw-bold" style="font-size: 2.0rem; line-height: 1.2;">정책 찾아보기</h3>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
+    </div>
+
+    <!-- 질문과 답변 -->
+    <div class="col-md-6 col-lg-3">
+        <a href="{% url 'chatbot_web:faq' %}" class="text-decoration-none">
+            <div class="card shadow-sm square-card" style="border-radius: 12px; overflow: hidden; border: none;">
+                <div class="square-content" style="position: relative; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('{% static 'photos/junior-ferreira-7esRPTt38nI-unsplash.jpg' %}'); background-size: cover; background-position: center;">
+                    <div style="position: absolute; bottom: -15px; left: 110px; right: 20px;">
+                        <h3 class="text-white fw-bold" style="font-size: 2.0rem; line-height: 1.2;">질문과 답변</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- 챗봇 -->
+    <div class="col-md-6 col-lg-3">
+        <a href="{% url 'chatbot_web:chat' %}" class="text-decoration-none">
+            <div class="card shadow-sm square-card" style="border-radius: 12px; overflow: hidden; border: none;">
+                <div class="square-content" style="position: relative; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('{% static 'photos/adem-ay-ik_AuIWeBBM-unsplash.jpg' %}'); background-size: cover; background-position: center;">
+                    <div style="position: absolute; bottom: -15px; left: 210px; right: 20px;">
+                        <h3 class="text-white fw-bold" style="font-size: 2.0rem; line-height: 1.2;">챗봇</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- 빠른 시작 도우미 -->
+    <div class="col-md-6 col-lg-3">
+        <a href="{% url 'chatbot_web:quick_start' %}" class="text-decoration-none">
+            <div class="card shadow-sm square-card" style="border-radius: 12px; overflow: hidden; border: none;">
+                <div class="square-content" style="position: relative; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('{% static 'photos/sincerely-media-nGrfKmtwv24-unsplash.jpg' %}'); background-size: cover; background-position: center;">
+                    <div style="position: absolute; bottom: -15px; left: 140px; right: 20px;">
+                        <h3 class="text-white fw-bold" style="font-size:2.0rem; line-height:1.2;">
+                        <span style="display:block;">빠른 시작</span>
+                        <span style="display:block; margin-left:38px;">도우미</span>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </a>
     </div>
 </div>
+
+<style>
+.square-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.square-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+}
+/* Make cards perfect squares */
+.square-content {
+    width: 100%;
+    padding-bottom: 150%; /* This creates a 1:1 aspect ratio */
+}
+.square-content > div {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+</style>
+{% endwith %}
 {% endblock %}

@@ -7,6 +7,9 @@ RAG 기능 모듈
 import logging
 from typing import List, Dict, Any, Optional
 import re
+import random
+import csv
+from pathlib import Path
 
 try:
     import openai
@@ -117,6 +120,10 @@ class WelfareRAGChain:
         self.policy_formatter = EnhancedPolicyFormatter()
         logger.info("✨ Enhanced Policy Formatter 활성화")
 
+        # Policy URL 매핑 로드
+        self.policy_url_mapping = self._load_policy_url_mapping()
+        logger.info(f"📋 Policy URL 매핑 로드 완료: {len(self.policy_url_mapping)}개")
+
         if self.api_key and openai:
             try:
                 # 안전한 OpenAI 클라이언트 초기화
@@ -128,6 +135,33 @@ class WelfareRAGChain:
             except Exception as e:
                 logger.warning(f"OpenAI 클라이언트 초기화 실패: {e}")
                 self.client = None
+
+    def _load_policy_url_mapping(self) -> Dict[str, str]:
+        """policy_mapping.csv 파일에서 정책명 -> URL 매핑 로드 (지역+정책명 조합만 사용)"""
+        mapping = {}
+        csv_path = Path(__file__).parent.parent.parent / 'policy_mapping.csv'
+
+        try:
+            with open(csv_path, 'r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    # xlsx 형식: 시도명, 관심주제, 정책명, 링크
+                    policy_name = row.get('정책명', '').strip()
+                    url = row.get('링크', '').strip()
+                    region = row.get('시도명', '').strip()
+
+                    # 지역+정책명 조합으로만 매핑 (정확한 매칭을 위해)
+                    if policy_name and url and region:
+                        mapping[f"{region}_{policy_name}"] = url
+
+            logger.info(f"✅ CSV 로드 성공: {csv_path} ({len(mapping)}개 매핑)")
+            logger.info(f"📋 매핑 예시: {list(mapping.keys())[:3]}")
+        except FileNotFoundError:
+            logger.warning(f"⚠️ policy_mapping.csv 파일을 찾을 수 없습니다: {csv_path}")
+        except Exception as e:
+            logger.error(f"❌ CSV 로드 실패: {e}")
+
+        return mapping
 
     def process_question(self, question: str, user_region: Optional[str] = None) -> Dict[str, Any]:
         """질문 처리 및 응답 생성"""
@@ -149,17 +183,27 @@ class WelfareRAGChain:
         logger.info("📋 복지 관련 질문으로 처리 - Advanced RAG 시작")
 
         # 2단계: 지역 우선순위 결정
-        target_region = None
-        if user_region:
-            # 1순위: 사용자 프로필의 지역
-            target_region = map_user_region_to_data_folder(user_region)
-            logger.info(f"사용자 프로필 지역: {user_region} → {target_region}")
+        # 우선순위 1: 사용자 프로필의 '사는 지역' (최우선!)
+        # 우선순위 2: 질문에 명시된 지역 (프로필 없을 때만)
+        # 우선순위 3: 전국 + 랜덤 지역 (둘 다 없을 때)
 
-        if not target_region:
-            # 2순위: 질문에서 지역 추출
-            target_region = extract_region_from_question(question)
-            if target_region:
-                logger.info(f"질문에서 지역 추출: {target_region}")
+        target_region = None
+        question_region = extract_region_from_question(question)
+
+        if user_region:
+            # 1순위: 사용자 프로필의 지역 (질문에 지역이 있어도 무시!)
+            target_region = map_user_region_to_data_folder(user_region)
+            if question_region and question_region != target_region:
+                logger.info(f"⚠️ 질문에 '{question_region}' 지역이 있지만, 사용자 프로필 '{target_region}' 우선 적용")
+            else:
+                logger.info(f"✅ 사용자 프로필 지역: {user_region} → {target_region}")
+        elif question_region:
+            # 2순위: 질문에서 지역 추출 (프로필 없을 때만)
+            target_region = question_region
+            logger.info(f"✅ 질문에서 지역 추출: {target_region}")
+        else:
+            # 3순위: 둘 다 없음 - None으로 유지 (나중에 랜덤 지역 처리)
+            logger.info(f"ℹ️ 지역 정보 없음 - 전국 + 랜덤 지역으로 답변")
 
         # 3-5단계: Advanced RAG Pipeline 실행
         rag_result = self.advanced_rag.process(
@@ -293,25 +337,25 @@ class WelfareRAGChain:
         지역 기반으로 문서 정렬
 
         우선순위:
-        1. target_region과 일치하는 문서
-        2. '전국' 문서
+        1. '전국' 문서 (최우선! - 모든 지역에 적용되는 정책)
+        2. target_region과 일치하는 문서
         3. 다른 지역 문서
         """
-        target_docs = []
         nationwide_docs = []
+        target_docs = []
         other_docs = []
 
         for doc in docs:
             region = doc['metadata'].get('region', '')
-            if region == target_region:
-                target_docs.append(doc)
-            elif region == '전국':
+            if region == '전국':
                 nationwide_docs.append(doc)
+            elif region == target_region:
+                target_docs.append(doc)
             else:
                 other_docs.append(doc)
 
-        # 우선순위에 따라 정렬
-        return target_docs + nationwide_docs + other_docs
+        # 우선순위에 따라 정렬: 전국 → 해당 지역 → 다른 지역
+        return nationwide_docs + target_docs + other_docs
 
     def _clean_pdf_text(self, text: str) -> str:
         """PDF 텍스트 정제 - 메타데이터 제거 및 정리"""
@@ -462,92 +506,125 @@ class WelfareRAGChain:
         return '\n'.join(unique_sentences[:max_sentences])
 
     def _generate_welfare_response(self, question: str, relevant_docs: List[Dict], target_region: Optional[str] = None) -> Dict[str, Any]:
-        """복지 관련 응답 생성 - Enhanced Policy Formatter 사용"""
-        logger.info("📝 정책 정보 추출 및 포맷팅 중...")
+        """복지 관련 응답 생성 - OpenAI LLM 기반 + 검증용 원본 버전 제공"""
+        logger.info("🤖 OpenAI LLM 기반 답변 생성 시작...")
 
-        # DB에서 가져온 문서들로 답변 구성
-        answer_parts = []
+        # 1단계: Enhanced Policy Formatter로 원본 버전 생성 (검증용)
+        formatted_response = self._generate_formatted_response_fallback(question, relevant_docs, target_region)
+        formatted_answer = formatted_response.get('answer', '')
 
-        # 질문에 직접 답변하는 헤더
-        answer_parts.append(f"'{question}'에 대한 복지 정책 정보를 안내해드리겠습니다.\n")
+        # OpenAI 클라이언트가 없으면 폴백 (원본 버전만 반환)
+        if not self.client:
+            logger.warning("⚠️ OpenAI 클라이언트 없음 - 원본 버전만 반환")
+            formatted_response['answer_before_llm'] = formatted_answer
+            formatted_response['answer_after_llm'] = formatted_answer
+            return formatted_response
 
-        # 문서별로 정보 정리
+        # 2단계: 문서 정보 추출 및 컨텍스트 구성 (URL 포함)
+        context_parts = []
         seen_regions = set()
-        doc_info_by_region = {}
+        policy_urls = {}  # 정책명 -> URL 매핑
 
-        for doc in relevant_docs:
+        for doc in relevant_docs[:10]:  # 최대 10개 문서 사용
             region = doc['metadata'].get('region', '지역미상')
             filename = doc['metadata'].get('filename', '정책문서.pdf')
 
-            # Enhanced Policy Formatter를 사용하여 정책 정보 추출
+            # Enhanced Policy Formatter로 정보 추출
             policy_result = self.policy_formatter.format_document(doc, question=question)
 
-            # 비어있으면 건너뛰기
-            if not policy_result or not policy_result.get('has_content'):
-                continue
+            if policy_result and policy_result.get('has_content'):
+                formatted_text = policy_result.get('formatted_text', '')
+                policy_name = policy_result.get('policy_name', '')
 
-            formatted_text = policy_result.get('formatted_text')
-            if not formatted_text or len(formatted_text) < 20:
-                continue
+                if len(formatted_text) > 20:
+                    # URL 찾기 - CSV에 지역+정책명이 정확히 일치하는 경우만 사용
+                    url = None
 
-            # 지역별로 문서 그룹화
-            if region not in doc_info_by_region:
-                doc_info_by_region[region] = []
+                    if policy_name:
+                        # CSV에서 region_정책명 조합 확인 (정확한 일치만 허용)
+                        region_policy_key = f"{region}_{policy_name}"
 
-            # 중복 방지: 같은 내용이 이미 있으면 건너뛰기
-            if formatted_text not in str(doc_info_by_region[region]):
-                doc_info_by_region[region].append({
-                    'filename': filename,
-                    'region': region,
-                    'content': formatted_text
-                })
+                        if region_policy_key in self.policy_url_mapping:
+                            # 정확히 일치: CSV에 해당 지역+정책 조합 존재
+                            url = self.policy_url_mapping[region_policy_key]
+                            logger.info(f"✅ URL 매칭 성공: {region} - {policy_name}")
+                        else:
+                            # CSV에 없음: URL 제외
+                            logger.debug(f"⚠️ CSV에 없는 정책 조합 (URL 제외): {region} - {policy_name}")
 
-        # 지역별로 정보 출력
-        # 1순위: target_region
-        if target_region and target_region in doc_info_by_region:
-            answer_parts.append(f"\n📍 **{target_region} 지역 정책**\n")
-            for i, doc_info in enumerate(doc_info_by_region[target_region][:3], 1):  # 최대 3개
-                answer_parts.append(f"\n{doc_info['content']}\n")
-            seen_regions.add(target_region)
+                    # 컨텍스트에 URL 정보 추가 (CSV에 정확히 일치하는 경우만)
+                    context_entry = f"[{region} - {filename}]\n{formatted_text}"
+                    if url:
+                        context_entry += f"\n[신청/상세정보 URL: {url}]"
+                        policy_urls[policy_name or filename] = url
 
-        # 2순위: 전국 정책
-        if '전국' in doc_info_by_region:
-            if seen_regions:
-                answer_parts.append(f"\n📍 **전국 공통 정책**\n")
-            else:
-                answer_parts.append(f"\n📍 **전국 정책**\n")
-            for i, doc_info in enumerate(doc_info_by_region['전국'][:3], 1):
-                answer_parts.append(f"\n{doc_info['content']}\n")
-            seen_regions.add('전국')
+                    context_parts.append(context_entry)
+                    seen_regions.add(region)
 
-        # 3순위: 기타 지역 (최대 2개 지역)
-        other_regions = [r for r in sorted(doc_info_by_region.keys()) if r not in seen_regions]
-        for region in other_regions[:2]:
-            answer_parts.append(f"\n📍 **{region} 지역 정책**\n")
-            for i, doc_info in enumerate(doc_info_by_region[region][:2], 1):  # 최대 2개
-                answer_parts.append(f"\n{doc_info['content']}\n")
+        if not context_parts:
+            logger.warning("⚠️ 추출된 정책 정보 없음")
+            return self._generate_no_docs_response(question)
 
-        # 추가 안내 메시지
-        answer_parts.append(f"\n💡 **추가 문의**\n")
-        answer_parts.append(f"• 더 자세한 내용은 관할 주민센터나 구청에 문의하세요.\n")
-        answer_parts.append(f"• 복지로 홈페이지(www.bokjiro.go.kr)에서도 확인할 수 있습니다.\n")
-        answer_parts.append(f"• 보건복지상담센터: 129\n")
+        context = "\n\n---\n\n".join(context_parts[:8])  # 최대 8개 컨텍스트
+        logger.info(f"📄 컨텍스트 구성 완료: {len(context_parts)}개 정책, {len(context)}자")
 
-        answer = "".join(answer_parts)
+        # 2단계: LLM 프롬프트 구성
+        prompt = self._build_llm_prompt(question, context, target_region, seen_regions)
 
-        # 소스 정보 추가
-        sources = self._extract_sources(relevant_docs)
+        # 3단계: OpenAI API 호출
+        try:
+            logger.info("🔄 OpenAI API 호출 중...")
+            response = self.client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """당신은 노인복지 정책 전문 상담사입니다.
+제공된 정책 자료만을 바탕으로 정확하고 친절하게 답변하세요.
+자료에 없는 내용은 절대 지어내지 마세요.
+복지 정책과 무관한 질문에는 답변하지 마세요."""
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=TEMPERATURE,
+                max_tokens=MAX_TOKENS
+            )
 
-        logger.info(f"✅ 답변 생성 완료 (길이: {len(answer)}자)")
+            llm_answer = response.choices[0].message.content.strip()
+            logger.info(f"✅ LLM 답변 생성 완료 (길이: {len(llm_answer)}자)")
 
-        return {
-            "answer": answer,
-            "intent": "welfare_inquiry",
-            "sources": sources,
-            "confidence": "high",
-            "context_used": len(relevant_docs),
-            "method": "enhanced_policy_extraction"  # 디버깅용: Enhanced Policy Extractor 사용
-        }
+            # 4단계: 추가 안내 메시지 추가
+            answer_parts = [llm_answer]
+            answer_parts.append(f"\n\n💡 **추가 문의**")
+            answer_parts.append(f"\n• 더 자세한 내용은 관할 주민센터나 구청에 문의하세요.")
+            answer_parts.append(f"\n• 복지로 홈페이지(www.bokjiro.go.kr)에서도 확인할 수 있습니다.")
+            answer_parts.append(f"\n• 보건복지상담센터: 129")
+
+            llm_final_answer = "\n".join(answer_parts)
+            sources = self._extract_sources(relevant_docs)
+
+            return {
+                "answer": llm_final_answer,  # 기본 답변 (일반 챗봇용)
+                "answer_before_llm": formatted_answer,  # LLM 전 (검증용)
+                "answer_after_llm": llm_final_answer,   # LLM 후 (검증용)
+                "intent": "welfare_inquiry",
+                "sources": sources,
+                "confidence": "high",
+                "context_used": len(relevant_docs),
+                "method": "openai_llm"
+            }
+
+        except Exception as e:
+            logger.error(f"❌ OpenAI API 호출 실패: {e}")
+            # 실패 시에도 두 버전 제공 (같은 내용)
+            fallback_response = self._generate_formatted_response_fallback(question, relevant_docs, target_region)
+            fallback_answer = fallback_response.get('answer', '')
+            fallback_response['answer_before_llm'] = fallback_answer
+            fallback_response['answer_after_llm'] = fallback_answer
+            return fallback_response
 
     def _generate_no_docs_response(self, question: str) -> Dict[str, Any]:
         """관련 문서 없음 응답"""
@@ -642,6 +719,190 @@ class WelfareRAGChain:
 - 불확실한 정보는 관련 기관 문의를 권해주세요
 
 답변:"""
+
+    def _build_llm_prompt(self, question: str, context: str, target_region: Optional[str], seen_regions: set) -> str:
+        """LLM 프롬프트 구성 - 환각 방지 강화 + 지역 표시 강제 + 2개 정책 제한"""
+        region_info = ""
+        if target_region:
+            region_info = f"\n**중요**: 사용자의 거주 지역은 '{target_region}'입니다. 이 지역의 정책을 설명해주세요."
+        elif seen_regions:
+            regions_str = ', '.join(sorted(seen_regions))
+            region_info = f"\n**참고**: 현재 자료에는 다음 지역의 정보가 있습니다: {regions_str}"
+
+        return f"""아래 복지 정책 자료를 바탕으로 질문에 답변해주세요.
+
+【정책 자료】
+{context}
+
+【질문】
+{question}
+
+【답변 작성 지침】{region_info}
+1. **제공된 자료에만 기반**하여 답변하세요. 자료에 없는 내용은 절대 만들어내지 마세요.
+
+2. **정확히 2개의 정책만 설명하세요** (필수! 절대 3개 이상 쓰지 마세요):
+   - 우선순위 1: 전국 정책 1개 (자료에 '전국'이 있으면 반드시 먼저)
+   - 우선순위 2: 시도 지역 정책 1개 (사용자 지역 우선, 없으면 자료 중 하나)
+   - 총 2개 초과하면 안 됩니다!
+
+3. **정책 설명 시 반드시 지역을 명시하세요**:
+   - 각 정책 앞에 반드시 지역 정보를 포함하세요
+   - 예시: "**부산 지역 - 노인일자리사업**" 또는 "**전국 - 기초연금**"
+   - 지역 정보가 없는 정책 설명은 절대 작성하지 마세요
+
+4. **깔끔한 포맷팅 사용**:
+   - 정책별로 명확히 구분하세요
+   - 불릿 포인트(•)나 하이픈(-) 대신 **볼드체**와 줄바꿈으로 구조화하세요
+   - 각 섹션(지원 대상, 지원 내용, 신청 방법)은 볼드체로 제목을 표시하세요
+
+5. 정책명, 지원 대상, 지원 내용, 신청 방법을 명확히 구분하여 설명하세요.
+
+6. 구체적인 금액, 조건, 기준이 있다면 정확히 명시하세요.
+
+7. **신청 방법 작성 시**: 자료에 "[신청/상세정보 URL: ...]" 형식의 링크가 있으면 반드시 신청 방법 섹션에 포함하세요.
+   예시: "**신청 방법**: 거주지 주민센터 방문 또는 온라인 신청 ([상세정보 보기](URL))"
+
+8. **중요**: 사용자가 명시적으로 요청한 정보에 대해서만 답변하세요. 사용자가 묻지 않은 지역이나 정책에 대해 "없다"고 언급하지 마세요.
+
+9. 제공된 자료에 있는 정책만 설명하고, 자료에 없는 지역/정책은 아예 언급하지 마세요.
+
+10. 친절하고 이해하기 쉬운 말투로 작성하세요.
+
+【답변 형식 예시 - 정확히 2개만!】
+## 전국 - 국민기초생활보장
+
+**지원 대상**
+소득인정액이 기준 중위소득 30% 이하인 가구
+
+**지원 내용**
+생계급여, 의료급여, 주거급여, 교육급여 제공
+
+**신청 방법**
+거주지 주민센터 방문 신청
+
+---
+
+## 부산 지역 - 노인일자리 및 사회활동 지원사업
+
+**지원 대상**
+지역사회 내 노인
+
+**지원 내용**
+공익 서비스 활동 지원
+
+**신청 방법**
+거주지 노인복지관 또는 주민센터 신청
+
+답변:"""
+
+    def _generate_formatted_response_fallback(self, question: str, relevant_docs: List[Dict], target_region: Optional[str] = None) -> Dict[str, Any]:
+        """OpenAI 실패 시 폴백 - Enhanced Policy Formatter 사용"""
+        logger.warning("⚠️ 폴백 모드: Enhanced Policy Formatter 사용")
+
+        # DB에서 가져온 문서들로 답변 구성
+        answer_parts = []
+        answer_parts.append(f"'{question}'에 대한 복지 정책 정보를 안내해드리겠습니다.\n")
+
+        # 문서별로 정보 정리
+        seen_regions = set()
+        doc_info_by_region = {}
+
+        for doc in relevant_docs:
+            region = doc['metadata'].get('region', '지역미상')
+            filename = doc['metadata'].get('filename', '정책문서.pdf')
+
+            # Enhanced Policy Formatter를 사용하여 정책 정보 추출
+            policy_result = self.policy_formatter.format_document(doc, question=question)
+
+            # 비어있으면 건너뛰기
+            if not policy_result or not policy_result.get('has_content'):
+                continue
+
+            formatted_text = policy_result.get('formatted_text')
+            policy_name = policy_result.get('policy_name', '')
+
+            if not formatted_text or len(formatted_text) < 20:
+                continue
+
+            # URL 찾기 - CSV에 지역+정책명이 정확히 일치하는 경우만 사용
+            url = None
+            if policy_name:
+                region_policy_key = f"{region}_{policy_name}"
+                if region_policy_key in self.policy_url_mapping:
+                    url = self.policy_url_mapping[region_policy_key]
+                    logger.info(f"✅ [폴백] URL 매칭 성공: {region} - {policy_name}")
+                else:
+                    logger.debug(f"⚠️ [폴백] CSV에 없는 정책 조합 (URL 제외): {region} - {policy_name}")
+
+            # URL이 있으면 formatted_text에 추가
+            if url:
+                formatted_text += f"\n**신청/상세정보**: [바로가기]({url})"
+
+            # 지역별로 문서 그룹화
+            if region not in doc_info_by_region:
+                doc_info_by_region[region] = []
+
+            # 중복 방지: 같은 내용이 이미 있으면 건너뛰기
+            if formatted_text not in str(doc_info_by_region[region]):
+                doc_info_by_region[region].append({
+                    'filename': filename,
+                    'region': region,
+                    'content': formatted_text
+                })
+
+        # ===== 핵심 로직: 정확히 2개의 정책만 표시 =====
+        # 0순위: 전국 정책 1개 (있으면 무조건 먼저!)
+        # 1순위: 시도 정책 1개 (target_region > 랜덤)
+
+        policies_shown = 0  # 표시된 정책 수 추적
+
+        # 0순위: 전국 정책 1개
+        if '전국' in doc_info_by_region and policies_shown < 2:
+            answer_parts.append(f"\n{doc_info_by_region['전국'][0]['content']}\n")
+            seen_regions.add('전국')
+            policies_shown += 1
+            logger.info(f"✅ [0순위] 전국 정책 1개 추가")
+
+        # 1순위: 시도 정책 1개
+        if policies_shown < 2:
+            if target_region and target_region in doc_info_by_region:
+                # 1-1순위: target_region (사용자 프로필 또는 질문에서 추출)
+                answer_parts.append(f"\n{doc_info_by_region[target_region][0]['content']}\n")
+                seen_regions.add(target_region)
+                policies_shown += 1
+                logger.info(f"✅ [1순위] {target_region} 지역 정책 1개 추가")
+            else:
+                # 1-2순위: 랜덤 지역 (target_region이 없거나 데이터 없을 때)
+                other_regions = [r for r in doc_info_by_region.keys() if r not in seen_regions]
+                if other_regions:
+                    random_region = random.choice(other_regions)
+                    answer_parts.append(f"\n{doc_info_by_region[random_region][0]['content']}\n")
+                    policies_shown += 1
+                    logger.info(f"✅ [1순위-랜덤] {random_region} 지역 정책 1개 추가")
+
+        logger.info(f"📊 총 {policies_shown}개 정책 표시됨 (목표: 2개)")
+
+        # 추가 안내 메시지
+        answer_parts.append(f"\n💡 **추가 문의**\n")
+        answer_parts.append(f"• 더 자세한 내용은 관할 주민센터나 구청에 문의하세요.\n")
+        answer_parts.append(f"• 복지로 홈페이지(www.bokjiro.go.kr)에서도 확인할 수 있습니다.\n")
+        answer_parts.append(f"• 보건복지상담센터: 129\n")
+
+        answer = "".join(answer_parts)
+
+        # 소스 정보 추가
+        sources = self._extract_sources(relevant_docs)
+
+        logger.info(f"✅ 폴백 답변 생성 완료 (길이: {len(answer)}자)")
+
+        return {
+            "answer": answer,
+            "intent": "welfare_inquiry",
+            "sources": sources,
+            "confidence": "medium",
+            "context_used": len(relevant_docs),
+            "method": "enhanced_policy_extraction_fallback"
+        }
 
     def _extract_sources(self, relevant_docs: List[Dict]) -> List[Dict[str, str]]:
         """소스 정보 추출"""

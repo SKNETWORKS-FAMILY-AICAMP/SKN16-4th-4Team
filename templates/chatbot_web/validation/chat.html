@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}검증용 챗봇 - 노인 복지 정책 RAG 챗봇{% endblock %}
 
 {% block content %}
-<h2 class="mb-4"><i class="bi bi-chat-dots-fill"></i> 노인 복지 정책 챗봇</h2>
+<h2 class="mb-4"><i class="bi bi-chat-dots-fill text-warning"></i> 노인 복지 정책 챗봇 <span class="badge bg-warning text-dark">검증용</span></h2>
 
 {% if session.rag_config %}
 <div class="alert alert-info mb-4">
@@ -18,22 +21,40 @@
         <div class="card">
             <div class="card-body" style="height: 500px; overflow-y: auto;" id="chatContainer">
                 <div id="chatMessages">
-                    <div class="alert alert-info">
-                        <i class="bi bi-robot"></i> 안녕하세요! 노인 복지 정책에 대해 궁금한 것을 물어보세요.
+                    <div class="alert alert-secondary">
+                        <img src="{% static 'photos/artificial-intelligence_9325602.png' %}" alt="AI" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px;"> 안녕하세요! 노인 복지 정책에 대해 궁금한 것을 자유롭게 물어보세요. <span class="badge bg-warning text-dark">검증용 챗봇</span>
+                        <hr class="my-2">
+                        <div class="mt-2">
+                            <p class="mb-1"><i class="bi bi-lightbulb"></i> <strong>예시 질문:</strong></p>
+                            <ul class="mb-0 small">
+                                <li>노인 복지 정책에는 어떤 것들이 있나요?</li>
+                                <li>기초연금은 누가 받을 수 있나요?</li>
+                                <li>노인 장기요양보험 신청 방법</li>
+                            </ul>
+                        </div>
                     </div>
 
-                    {% for message in messages %}
-                    <div class="alert alert-{% if message.role == 'user' %}primary text-end{% else %}secondary{% endif %} mb-2">
+                    {% for message in chat_messages %}
+                    <div class="alert alert-{% if message.role == 'user' %}primary text-end{% else %}secondary{% endif %} mb-2" {% if message.role != 'user' %}data-answer="{{ message.content|escapejs }}" data-question=""{% endif %}>
                         {% if message.role == 'user' %}
                             <i class="bi bi-person-circle"></i> {{ message.content }}
                         {% else %}
-                            <i class="bi bi-robot"></i> {{ message.content|linebreaks }}
+                            <img src="{% static 'photos/artificial-intelligence_9325602.png' %}" alt="AI" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 3px;"> <span class="answer-text">{{ message.content|linebreaks }}</span>
                             {% if message.retrieved_docs %}
                             <hr>
                             <small class="text-muted">
                                 <i class="bi bi-file-text"></i> 검색된 문서: {{ message.retrieved_docs|length }}개
                             </small>
                             {% endif %}
+                            <hr class="my-2">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-primary" onclick="copyAnswer(this)">
+                                    <i class="bi bi-clipboard"></i> 복사
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" onclick="bookmarkAnswer(this, 'validation')">
+                                    <i class="bi bi-bookmark-star"></i> 북마크
+                                </button>
+                            </div>
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -53,26 +74,6 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-clock-history"></i> 대화 정보
-            </div>
-            <div class="card-body">
-                <p><strong>세션 ID:</strong><br><code class="small">{{ session.session_id }}</code></p>
-                <p><strong>시작 시간:</strong><br>{{ session.created_at|date:"Y-m-d H:i:s" }}</p>
-                <p><strong>메시지 수:</strong> {{ session.messages.count }}개</p>
-
-                <hr>
-
-                <a href="{% url 'chatbot_web:chat_new_session' %}" class="btn btn-success btn-sm w-100 mb-2">
-                    <i class="bi bi-plus-circle"></i> 새 대화 시작
-                </a>
-                <a href="{% url 'chatbot_web:home' %}" class="btn btn-secondary btn-sm w-100">
-                    <i class="bi bi-house"></i> 홈으로
-                </a>
-            </div>
-        </div>
-
-        <div class="card mt-3">
-            <div class="card-header">
                 <i class="bi bi-lightbulb"></i> 예시 질문
             </div>
             <div class="card-body">
@@ -89,6 +90,22 @@
                 </div>
             </div>
         </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <i class="bi bi-clock-history"></i> 대화 정보
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button onclick="clearValidationChatHistory()" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash"></i> 대화 내역 초기화
+                    </button>
+                    <a href="{% url 'chatbot_web:home' %}" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-house"></i> 홈으로
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -96,6 +113,19 @@
 {% block extra_js %}
 <script>
 const SESSION_ID = '{{ session.session_id }}';
+let lastQuestion = '';  // 마지막 질문 저장
+
+// 페이지 로드 시 세션 ID를 localStorage에 저장
+localStorage.setItem('validation_session_id', SESSION_ID);
+
+function clearValidationChatHistory() {
+    if (confirm('대화 내역을 모두 삭제하고 새로 시작하시겠습니까?')) {
+        // localStorage에서 세션 ID 제거
+        localStorage.removeItem('validation_session_id');
+        // 새 세션 생성 페이지로 이동
+        window.location.href = '{% url "chatbot_web:validation_chat_new_session" %}';
+    }
+}
 
 function askQuestion() {
     const input = document.getElementById('questionInput');
@@ -105,6 +135,9 @@ function askQuestion() {
         alert('질문을 입력해주세요.');
         return;
     }
+
+    // 마지막 질문 저장
+    lastQuestion = question;
 
     // 사용자 메시지 표시
     addMessage('user', question);
@@ -133,7 +166,7 @@ function askQuestion() {
         if (data.error) {
             addMessage('bot', '<i class="bi bi-exclamation-triangle"></i> 오류: ' + data.error, true);
         } else {
-            addMessage('bot', data.response, false);
+            addMessage('bot', data.response, false, question);
         }
     })
     .catch(error => {
@@ -142,7 +175,7 @@ function askQuestion() {
     });
 }
 
-function addMessage(type, text, allowHtml = false) {
+function addMessage(type, text, allowHtml = false, question = '') {
     const container = document.getElementById('chatMessages');
     const div = document.createElement('div');
     div.className = type === 'user' ? 'alert alert-primary text-end mb-2' : 'alert alert-secondary mb-2';
@@ -150,11 +183,33 @@ function addMessage(type, text, allowHtml = false) {
     if (type === 'user') {
         div.innerHTML = '<i class="bi bi-person-circle"></i> ' + escapeHtml(text);
     } else {
-        if (allowHtml) {
-            div.innerHTML = '<i class="bi bi-robot"></i> ' + text;
-        } else {
-            div.innerHTML = '<i class="bi bi-robot"></i> ' + escapeHtml(text).replace(/\n/g, '<br>');
+        // 봇 답변인 경우 data 속성 추가
+        if (question) {
+            div.setAttribute('data-question', question);
+            div.setAttribute('data-answer', text);
         }
+
+        let contentHtml = '';
+        if (allowHtml) {
+            contentHtml = '<img src="{% static 'photos/artificial-intelligence_9325602.png' %}" alt="AI" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 3px;"> <span class="answer-text">' + text + '</span>';
+        } else {
+            contentHtml = '<img src="{% static 'photos/artificial-intelligence_9325602.png' %}" alt="AI" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 3px;"> <span class="answer-text">' + escapeHtml(text).replace(/\n/g, '<br>') + '</span>';
+        }
+
+        // 복사 및 북마크 버튼 추가
+        contentHtml += `
+            <hr class="my-2">
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="copyAnswer(this)">
+                    <i class="bi bi-clipboard"></i> 복사
+                </button>
+                <button class="btn btn-sm btn-outline-success" onclick="bookmarkAnswer(this, 'validation')">
+                    <i class="bi bi-bookmark-star"></i> 북마크
+                </button>
+            </div>
+        `;
+
+        div.innerHTML = contentHtml;
     }
 
     container.appendChild(div);
@@ -164,6 +219,75 @@ function addMessage(type, text, allowHtml = false) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
     return div;
+}
+
+function copyAnswer(button) {
+    const answerDiv = button.closest('.alert');
+    const answerText = answerDiv.querySelector('.answer-text').innerText;
+
+    navigator.clipboard.writeText(answerText).then(function() {
+        // 버튼 텍스트 임시 변경
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check"></i> 복사됨!';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-primary');
+
+        setTimeout(() => {
+            button.innerHTML = originalHtml;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
+        }, 2000);
+    }, function(err) {
+        console.error('복사 실패:', err);
+        alert('복사에 실패했습니다. 다시 시도해주세요.');
+    });
+}
+
+function bookmarkAnswer(button, chatbotType) {
+    const answerDiv = button.closest('.alert');
+    const question = answerDiv.getAttribute('data-question') || lastQuestion;
+    const answer = answerDiv.getAttribute('data-answer') || answerDiv.querySelector('.answer-text').innerText;
+
+    if (!question) {
+        alert('질문 정보를 찾을 수 없습니다.');
+        return;
+    }
+
+    // 북마크 저장 API 호출
+    fetch('{% url "chatbot_web:bookmark_save" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            question: question,
+            answer: answer,
+            chatbot_type: chatbotType
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 버튼 텍스트 임시 변경
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-check"></i> 저장됨!';
+            button.classList.add('btn-success');
+            button.classList.remove('btn-outline-success');
+
+            setTimeout(() => {
+                button.innerHTML = originalHtml;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-success');
+            }, 2000);
+        } else {
+            alert('북마크 저장 실패: ' + (data.error || '알 수 없는 오류'));
+        }
+    })
+    .catch(error => {
+        console.error('북마크 저장 오류:', error);
+        alert('북마크 저장 중 오류가 발생했습니다.');
+    });
 }
 
 function setQuestion(text) {

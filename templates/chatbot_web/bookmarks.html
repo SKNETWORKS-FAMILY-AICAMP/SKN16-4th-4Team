@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}북마크 - 노인 복지 정책 RAG 챗봇{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-bookmark-star-fill"></i> 북마크</h2>
+
+<p class="text-muted mb-4">저장된 복지 정책 Q&A를 확인하세요.</p>
+
+{% if bookmarks %}
+    <div class="accordion" id="bookmarksAccordion">
+        {% for bookmark in bookmarks %}
+        <div class="accordion-item mb-2">
+            <h2 class="accordion-header" id="heading{{ bookmark.id }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ bookmark.id }}" aria-expanded="false" aria-controls="collapse{{ bookmark.id }}">
+                    <div class="w-100 d-flex justify-content-between align-items-center pe-3">
+                        <div>
+                            <i class="bi bi-question-circle me-2"></i>
+                            <strong>{{ bookmark.question|truncatewords:20 }}</strong>
+                        </div>
+                        <div>
+                            {% if bookmark.chatbot_type == 'regular' %}
+                                <span class="badge bg-primary"><i class="bi bi-chat-dots"></i> 일반</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark"><i class="bi bi-shield-check"></i> 검증용</span>
+                            {% endif %}
+                            <span class="text-muted small ms-2">{{ bookmark.created_at|date:"m/d H:i" }}</span>
+                        </div>
+                    </div>
+                </button>
+            </h2>
+            <div id="collapse{{ bookmark.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ bookmark.id }}" data-bs-parent="#bookmarksAccordion">
+                <div class="accordion-body">
+                    <h6 class="text-muted mb-2"><i class="bi bi-question-circle-fill"></i> 질문:</h6>
+                    <p class="mb-3">{{ bookmark.question }}</p>
+
+                    <hr>
+
+                    <h6 class="text-muted mb-2"><i class="bi bi-chat-left-text-fill"></i> 답변:</h6>
+                    <div class="answer-content mb-3" style="white-space: pre-wrap;">{{ bookmark.answer }}</div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-sm btn-outline-primary" onclick="copyBookmarkAnswer({{ bookmark.id }})">
+                            <i class="bi bi-clipboard"></i> 답변 복사
+                        </button>
+                        <form method="post" action="{% url 'chatbot_web:bookmark_delete' bookmark.id %}" style="display: inline;" onsubmit="return confirm('이 북마크를 삭제하시겠습니까?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i> 삭제
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> 저장된 북마크가 없습니다. 챗봇에서 마음에 드는 답변을 북마크해보세요!
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyBookmarkAnswer(bookmarkId) {
+    // 해당 북마크의 답변 내용 찾기
+    const accordion = document.querySelector(`#collapse${bookmarkId}`);
+    const answerContent = accordion.querySelector('.answer-content').textContent;
+
+    // 클립보드에 복사
+    navigator.clipboard.writeText(answerContent).then(function() {
+        alert('답변이 복사되었습니다!');
+    }, function(err) {
+        console.error('복사 실패:', err);
+        alert('복사에 실패했습니다. 다시 시도해주세요.');
+    });
+}
+</script>
+{% endblock %}

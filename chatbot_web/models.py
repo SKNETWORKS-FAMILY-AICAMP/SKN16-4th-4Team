@@ -303,3 +303,38 @@ class ElderlyPolicy(models.Model):
 
     def __str__(self):
         return f"[{self.region}] {self.title}"
+
+
+class Bookmark(models.Model):
+    """북마크 - 사용자가 저장한 Q&A"""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookmarks')
+    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, null=True, blank=True, related_name='bookmarks')
+
+    question = models.TextField(verbose_name="질문")
+    answer = models.TextField(verbose_name="답변")
+
+    # 북마크가 생성된 탭 구분 (일반 챗봇 vs 검증용 챗봇)
+    chatbot_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('regular', '일반 챗봇'),
+            ('validation', '검증용 챗봇'),
+        ],
+        default='regular',
+        verbose_name="챗봇 종류"
+    )
+
+    # 메모/태그 (선택사항)
+    memo = models.TextField(blank=True, verbose_name="메모")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="저장일")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="수정일")
+
+    class Meta:
+        verbose_name = "북마크"
+        verbose_name_plural = "북마크들"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.question[:30]}..."

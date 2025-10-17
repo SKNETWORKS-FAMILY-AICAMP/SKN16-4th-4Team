@@ -14,7 +14,7 @@ urlpatterns = [
     # Authentication
     path('register/', views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='chatbot_web/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', views.logout_view, name='logout'),
 
     # Chat
     path('chat/', views.chat_view, name='chat'),
@@ -33,12 +33,22 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('profile/edit/', views.profile_edit, name='profile_edit'),
 
+    # Bookmarks
+    path('bookmarks/', views.bookmark_list, name='bookmark_list'),
+    path('bookmarks/save/', views.bookmark_save, name='bookmark_save'),
+    path('bookmarks/<int:bookmark_id>/delete/', views.bookmark_delete, name='bookmark_delete'),
+
     # Policy List
+    # FAQ and Quick Start
+    path('faq/', views.faq_view, name='faq'),
+    path('quick-start/', views.quick_start_view, name='quick_start'),
+
     path('policies/', views.policy_list, name='policy_list'),
 
     # Admin Dashboard
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('chat-logs/', views.chat_logs, name='chat_logs'),
+    path('api/chat/session/<str:session_id>/', views.chat_session_detail_api, name='chat_session_detail_api'),
     path('user-management/', views.user_management, name='user_management'),
     path('user/<int:user_id>/toggle-admin/', views.user_toggle_admin, name='user_toggle_admin'),
     path('validation/chat-logs/', views.validation_chat_logs, name='validation_chat_logs'),
