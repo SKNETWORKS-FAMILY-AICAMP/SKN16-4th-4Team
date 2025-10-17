@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-hammer"></i> RAG 구축 확인</h2>
+
+<div class="card">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> RAG {% if config.build_status == 'completed' %}재구축{% else %}구축{% endif %} 확인</h5>
+    </div>
+    <div class="card-body">
+        <p><strong>다음 RAG 구성으로 DB를 {% if config.build_status == 'completed' %}초기화하고 재구축{% else %}구축{% endif %}하시겠습니까?</strong></p>
+
+        <div class="alert alert-info">
+            <h6><strong>{{ config.name }}</strong></h6>
+            <ul class="mb-0">
+                <li><strong>PDF 추출:</strong> {{ config.get_pdf_extractor_display }}</li>
+                <li><strong>HWP 추출:</strong> {{ config.get_hwp_extractor_display }}</li>
+                <li><strong>OCR 사용:</strong> {% if config.use_ocr %}예 (PDF 실패 시){% else %}아니오{% endif %}</li>
+                <li><strong>청킹:</strong> {{ config.get_chunking_strategy_display }} (크기: {{ config.chunk_size }} / 오버랩: {{ config.chunk_overlap }})</li>
+                <li><strong>임베딩:</strong> {{ config.embedding_model }}</li>
+                <li><strong>검색:</strong> {{ config.get_retrieval_strategy_display }} (Top-{{ config.top_k }})</li>
+                <li><strong>컬렉션:</strong> <code>{{ config.collection_name }}</code></li>
+            </ul>
+        </div>
+
+        <div class="alert alert-danger">
+            <h6><i class="bi bi-exclamation-octagon"></i> 주의사항</h6>
+            <ul class="mb-0">
+                <li><strong>{% if config.build_status == 'completed' %}기존 {% endif %}ChromaDB 컬렉션 <code>{{ config.collection_name }}</code>이 완전히 삭제되고 처음부터 다시 생성됩니다</strong></li>
+                <li><strong>data/</strong> 폴더의 모든 HWP/PDF 문서를 읽어서 처리합니다</li>
+                <li>처리 과정: 문서 로드 → 텍스트 추출 (PDF/HWP 별도) → 청킹 → 임베딩 → ChromaDB 저장</li>
+                <li>처리 시간은 문서 수, 추출기, 임베딩 모델에 따라 달라집니다 (보통 수분~수십분)</li>
+                <li>구축 중에는 취소할 수 없습니다</li>
+            </ul>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-arrow-repeat"></i> {% if config.build_status == 'completed' %}재구축{% else %}구축{% endif %} 시작
+                </button>
+                <a href="{% url 'chatbot_web:config_detail' config.pk %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> 취소
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

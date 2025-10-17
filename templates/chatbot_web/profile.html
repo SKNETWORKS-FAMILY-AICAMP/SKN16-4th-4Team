@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4"><i class="bi bi-person-circle"></i> 내 정보</h2>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> 계정 정보</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>아이디:</strong></div>
+                    <div class="col-md-8"><code>{{ user.username }}</code></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>이메일:</strong></div>
+                    <div class="col-md-8">{{ user.email|default:"미등록" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>가입일:</strong></div>
+                    <div class="col-md-8">{{ user.date_joined|date:"Y년 m월 d일 H:i" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>권한:</strong></div>
+                    <div class="col-md-8">
+                        {% if user.is_superuser %}
+                        <span class="badge bg-danger"><i class="bi bi-shield-fill-check"></i> 슈퍼유저</span>
+                        {% elif user.is_staff %}
+                        <span class="badge bg-warning text-dark"><i class="bi bi-shield-check"></i> 관리자</span>
+                        {% else %}
+                        <span class="badge bg-secondary"><i class="bi bi-person"></i> 일반 사용자</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-pencil-square"></i> 개인정보 수정</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'chatbot_web:profile_edit' %}">
+                    {% csrf_token %}
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>주의:</strong> 개인정보를 수정하려면 현재 비밀번호를 반드시 입력해야 합니다.
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="old_password" class="form-label">현재 비밀번호 <span class="text-danger">*필수</span></label>
+                        <input type="password" class="form-control" id="old_password" name="old_password" required>
+                        <small class="text-muted">본인 확인을 위해 필수로 입력해야 합니다.</small>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">새 비밀번호 (선택)</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password">
+                        <small class="text-muted">비밀번호를 변경하지 않으려면 비워두세요. 변경 시 다시 로그인해야 합니다.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="age" class="form-label">나이 (선택)</label>
+                        <input type="number" class="form-control" id="age" name="age" value="{{ user.profile.age|default:'' }}" min="1" max="150" placeholder="예: 65">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="region" class="form-label">사는 지역 (선택)</label>
+                        <select class="form-select" id="region" name="region">
+                            <option value="">선택 안함</option>
+                            {% for value, display in region_choices %}
+                            <option value="{{ value }}" {% if user.profile.region == value %}selected{% endif %}>{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">지역을 설정하면 해당 지역의 정책을 우선적으로 추천받을 수 있습니다.</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> 정보 수정하기
+                        </button>
+                        <a href="{% url 'chatbot_web:home' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> 취소
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4 border-warning">
+            <div class="card-header bg-warning">
+                <h6 class="mb-0"><i class="bi bi-shield-lock"></i> 개인정보 보호</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-0 small">
+                    <i class="bi bi-check-circle text-success"></i> 비밀번호는 암호화되어 저장됩니다 (pbkdf2_sha256)<br>
+                    <i class="bi bi-check-circle text-success"></i> 개인정보는 서비스 개선 목적으로만 사용됩니다<br>
+                    <i class="bi bi-check-circle text-success"></i> 나이와 지역 정보는 언제든지 삭제할 수 있습니다
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

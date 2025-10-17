@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-gear-fill"></i> RAG 구성 관리</h2>
+    {% if user.is_staff %}
+    <a href="{% url 'chatbot_web:config_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> 새 구성 만들기
+    </a>
+    {% endif %}
+</div>
+
+<div class="row">
+    {% for config in configs %}
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 {% if config.is_active %}border-success{% endif %}">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ config.name }}</h5>
+                    {% if config.is_active %}
+                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> 활성</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ config.description|default:"설명 없음" }}</p>
+
+                <div class="row small mb-3">
+                    <div class="col-12 mb-2">
+                        <strong><i class="bi bi-file-earmark-text"></i> 텍스트 추출:</strong><br>
+                        <span class="badge bg-primary">PDF: {{ config.get_pdf_extractor_display }}</span>
+                        <span class="badge bg-success">HWP: {{ config.get_hwp_extractor_display }}</span>
+                        {% if config.use_ocr %}
+                        <span class="badge bg-info">OCR 사용</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-12">
+                        <strong><i class="bi bi-scissors"></i> 청킹 전략:</strong><br>
+                        <span class="badge bg-secondary">{{ config.get_chunking_strategy_display }}</span>
+                    </div>
+                </div>
+
+                <div class="row small mb-3">
+                    <div class="col-6">
+                        <strong><i class="bi bi-cpu"></i> 임베딩 모델:</strong><br>
+                        <span class="badge bg-info text-dark">{{ config.embedding_model|truncatechars:20 }}</span>
+                    </div>
+                    <div class="col-6">
+                        <strong><i class="bi bi-search"></i> 검색 전략:</strong><br>
+                        <span class="badge bg-warning text-dark">{{ config.get_retrieval_strategy_display }}</span>
+                    </div>
+                </div>
+
+                <div class="small mb-3">
+                    <strong><i class="bi bi-sliders"></i> 파라미터:</strong>
+                    <code class="d-block">Chunk: {{ config.chunk_size }} / Overlap: {{ config.chunk_overlap }} / Top-K: {{ config.top_k }}</code>
+                </div>
+
+                <div class="mb-3">
+                    <strong><i class="bi bi-database"></i> 컬렉션:</strong> <code>{{ config.collection_name }}</code>
+                </div>
+
+                <div class="mb-3">
+                    <strong><i class="bi bi-activity"></i> 구축 상태:</strong>
+                    <div class="mt-1">
+                        {% if config.build_status == 'pending' %}
+                        <span class="badge bg-secondary" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                            <i class="bi bi-clock"></i> 대기 중
+                        </span>
+                        {% elif config.build_status == 'building' %}
+                        <span class="badge bg-warning text-dark building-status" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                            <span class="spinner-border spinner-border-sm me-1"></span> 진행 중
+                        </span>
+                        {% elif config.build_status == 'completed' %}
+                        <span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                            <i class="bi bi-check-circle-fill"></i> 완료
+                        </span>
+                        {% if config.total_documents %}
+                        <small class="text-muted d-block mt-1">문서: {{ config.total_documents }}개 / 청크: {{ config.total_chunks }}개</small>
+                        {% endif %}
+                        {% elif config.build_status == 'failed' %}
+                        <span class="badge bg-danger" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                            <i class="bi bi-x-circle-fill"></i> 실패
+                        </span>
+                        {% if config.error_message %}
+                        <small class="text-danger d-block mt-1" title="{{ config.error_message }}">{{ config.error_message|truncatechars:60 }}</small>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <small class="text-muted">
+                    <i class="bi bi-calendar"></i> 생성: {{ config.created_at|date:"Y-m-d H:i" }}
+                    {% if config.build_completed_at %}
+                    | 구축: {{ config.build_completed_at|date:"Y-m-d H:i" }}
+                    {% endif %}
+                </small>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'chatbot_web:config_detail' config.pk %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i> 상세
+                    </a>
+                    {% if user.is_staff %}
+                        {% if config.build_status == 'completed' and not config.is_active %}
+                        <form method="post" action="{% url 'chatbot_web:config_activate' config.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success" title="이 구성을 활성화하여 챗봇에 적용">
+                                <i class="bi bi-check-circle"></i> 활성화
+                            </button>
+                        </form>
+                        {% endif %}
+                    {% endif %}
+                    {% if config.created_by == user or user.is_staff %}
+                    <a href="{% url 'chatbot_web:config_edit' config.pk %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-pencil"></i> 수정
+                    </a>
+                    {% if config.build_status != 'building' %}
+                    <a href="{% url 'chatbot_web:config_build' config.pk %}" class="btn btn-sm btn-outline-success" title="이 구성으로 DB 초기화 후 문서 재처리">
+                        <i class="bi bi-arrow-repeat"></i>
+                        {% if config.build_status == 'completed' %}재구축{% else %}구축{% endif %}
+                    </a>
+                    {% endif %}
+                    {% if user.is_staff %}
+                    <a href="{% url 'chatbot_web:config_delete' config.pk %}" class="btn btn-sm btn-outline-danger" title="이 구성 삭제">
+                        <i class="bi bi-trash"></i> 삭제
+                    </a>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i> 아직 생성된 RAG 구성이 없습니다.
+            {% if user.is_staff %}
+            <br><a href="{% url 'chatbot_web:config_create' %}" class="btn btn-primary mt-3">첫 구성 만들기</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh page if any configuration is building
+document.addEventListener('DOMContentLoaded', function() {
+    const buildingElements = document.querySelectorAll('.building-status');
+
+    if (buildingElements.length > 0) {
+        // Refresh every 5 seconds if there are building configs
+        console.log('구축 진행 중인 구성이 있습니다. 5초마다 자동 새로고침합니다.');
+        setTimeout(function() {
+            location.reload();
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}

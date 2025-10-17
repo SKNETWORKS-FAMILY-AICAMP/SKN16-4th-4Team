@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-box-arrow-in-right"></i> 로그인</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">사용자명</label>
+                        <input type="text" name="username" class="form-control" id="id_username" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">비밀번호</label>
+                        <input type="password" name="password" class="form-control" id="id_password" required>
+                    </div>
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i> 사용자명 또는 비밀번호가 올바르지 않습니다.
+                    </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right"></i> 로그인
+                    </button>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-2">
+                    계정이 없으신가요? <a href="{% url 'chatbot_web:register' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-person-plus"></i> 회원가입
+                    </a>
+                </p>
+                <p class="mb-0 small text-muted">
+                    <i class="bi bi-info-circle"></i> 일반 사용자로 가입 후, 관리자에게 권한 요청
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

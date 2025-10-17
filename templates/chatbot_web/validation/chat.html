@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-chat-dots-fill"></i> 노인 복지 정책 챗봇</h2>
+
+{% if session.rag_config %}
+<div class="alert alert-info mb-4">
+    <i class="bi bi-info-circle"></i> <strong>현재 RAG 구성:</strong> {{ session.rag_config.name }}
+    <span class="badge bg-primary">PDF: {{ session.rag_config.get_pdf_extractor_display }}</span>
+    <span class="badge bg-success">HWP: {{ session.rag_config.get_hwp_extractor_display }}</span>
+    <span class="badge bg-info">{{ session.rag_config.embedding_model|truncatechars:15 }}</span>
+    <span class="badge bg-warning text-dark">{{ session.rag_config.get_retrieval_strategy_display }}</span>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body" style="height: 500px; overflow-y: auto;" id="chatContainer">
+                <div id="chatMessages">
+                    <div class="alert alert-info">
+                        <i class="bi bi-robot"></i> 안녕하세요! 노인 복지 정책에 대해 궁금한 것을 물어보세요.
+                    </div>
+
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.role == 'user' %}primary text-end{% else %}secondary{% endif %} mb-2">
+                        {% if message.role == 'user' %}
+                            <i class="bi bi-person-circle"></i> {{ message.content }}
+                        {% else %}
+                            <i class="bi bi-robot"></i> {{ message.content|linebreaks }}
+                            {% if message.retrieved_docs %}
+                            <hr>
+                            <small class="text-muted">
+                                <i class="bi bi-file-text"></i> 검색된 문서: {{ message.retrieved_docs|length }}개
+                            </small>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="questionInput" placeholder="질문을 입력하세요..." onkeypress="if(event.key==='Enter') askQuestion()">
+                    <button class="btn btn-primary" onclick="askQuestion()">
+                        <i class="bi bi-send"></i> 전송
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history"></i> 대화 정보
+            </div>
+            <div class="card-body">
+                <p><strong>세션 ID:</strong><br><code class="small">{{ session.session_id }}</code></p>
+                <p><strong>시작 시간:</strong><br>{{ session.created_at|date:"Y-m-d H:i:s" }}</p>
+                <p><strong>메시지 수:</strong> {{ session.messages.count }}개</p>
+
+                <hr>
+
+                <a href="{% url 'chatbot_web:chat_new_session' %}" class="btn btn-success btn-sm w-100 mb-2">
+                    <i class="bi bi-plus-circle"></i> 새 대화 시작
+                </a>
+                <a href="{% url 'chatbot_web:home' %}" class="btn btn-secondary btn-sm w-100">
+                    <i class="bi bi-house"></i> 홈으로
+                </a>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <i class="bi bi-lightbulb"></i> 예시 질문
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="setQuestion('노인 복지 정책에는 어떤 것들이 있나요?')">
+                        노인 복지 정책에는 어떤 것들이 있나요?
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="setQuestion('기초연금은 누가 받을 수 있나요?')">
+                        기초연금은 누가 받을 수 있나요?
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="setQuestion('노인 장기요양보험 신청 방법을 알려주세요')">
+                        노인 장기요양보험 신청 방법
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const SESSION_ID = '{{ session.session_id }}';
+
+function askQuestion() {
+    const input = document.getElementById('questionInput');
+    const question = input.value.trim();
+
+    if (!question) {
+        alert('질문을 입력해주세요.');
+        return;
+    }
+
+    // 사용자 메시지 표시
+    addMessage('user', question);
+    input.value = '';
+
+    // 로딩 표시
+    const loadingDiv = addMessage('bot', '<div class="spinner-border spinner-border-sm" role="status"></div> 답변을 생성하는 중...', true);
+
+    // API 호출 (검증용 API 사용)
+    fetch('{% url "chatbot_web:validation_chat_api_message" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            session_id: SESSION_ID,
+            message: question
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // 로딩 메시지 제거
+        loadingDiv.remove();
+
+        if (data.error) {
+            addMessage('bot', '<i class="bi bi-exclamation-triangle"></i> 오류: ' + data.error, true);
+        } else {
+            addMessage('bot', data.response, false);
+        }
+    })
+    .catch(error => {
+        loadingDiv.remove();
+        addMessage('bot', '<i class="bi bi-exclamation-triangle"></i> 오류가 발생했습니다: ' + error, true);
+    });
+}
+
+function addMessage(type, text, allowHtml = false) {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = type === 'user' ? 'alert alert-primary text-end mb-2' : 'alert alert-secondary mb-2';
+
+    if (type === 'user') {
+        div.innerHTML = '<i class="bi bi-person-circle"></i> ' + escapeHtml(text);
+    } else {
+        if (allowHtml) {
+            div.innerHTML = '<i class="bi bi-robot"></i> ' + text;
+        } else {
+            div.innerHTML = '<i class="bi bi-robot"></i> ' + escapeHtml(text).replace(/\n/g, '<br>');
+        }
+    }
+
+    container.appendChild(div);
+
+    // 스크롤 하단으로
+    const chatContainer = document.getElementById('chatContainer');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    return div;
+}
+
+function setQuestion(text) {
+    document.getElementById('questionInput').value = text;
+    document.getElementById('questionInput').focus();
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// 스크롤을 하단으로 초기화
+document.addEventListener('DOMContentLoaded', function() {
+    const chatContainer = document.getElementById('chatContainer');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+});
+</script>
+{% endblock %}

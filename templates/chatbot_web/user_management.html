@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-people"></i> 사용자 관리</h2>
+    <a href="{% url 'chatbot_web:admin_dashboard' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> 대시보드로
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-person-badge"></i> 사용자 목록</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> <strong>안내:</strong>
+            관리자 권한을 가진 사용자는 RAG 구성을 생성/수정/삭제할 수 있으며, 모든 관리 기능에 접근할 수 있습니다.
+        </div>
+
+        {% if users %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>사용자명</th>
+                        <th>이메일</th>
+                        <th>권한</th>
+                        <th>가입일</th>
+                        <th>마지막 로그인</th>
+                        <th>작업</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_item in users %}
+                    <tr id="user-row-{{ user_item.pk }}">
+                        <td>{{ user_item.pk }}</td>
+                        <td>
+                            <i class="bi bi-person"></i> <strong>{{ user_item.username }}</strong>
+                            {% if user_item.is_superuser %}
+                            <span class="badge bg-danger">슈퍼유저</span>
+                            {% endif %}
+                            {% if user_item == user %}
+                            <span class="badge bg-info">나</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user_item.email|default:"이메일 없음" }}</td>
+                        <td>
+                            <span class="badge bg-{% if user_item.is_staff %}warning text-dark{% else %}secondary{% endif %}"
+                                  id="badge-{{ user_item.pk }}">
+                                {% if user_item.is_staff %}
+                                <i class="bi bi-shield-check"></i> 관리자
+                                {% else %}
+                                <i class="bi bi-person"></i> 일반 사용자
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>{{ user_item.date_joined|date:"Y-m-d" }}</td>
+                        <td>
+                            {% if user_item.last_login %}
+                            {{ user_item.last_login|date:"Y-m-d H:i" }}
+                            {% else %}
+                            <span class="text-muted">없음</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user_item == user %}
+                            <span class="text-muted">자신의 권한은 변경 불가</span>
+                            {% elif user_item.is_superuser %}
+                            <span class="text-muted"><i class="bi bi-shield-fill-check"></i> 슈퍼유저 (보호됨)</span>
+                            {% else %}
+                            <button class="btn btn-sm btn-outline-primary"
+                                    onclick="toggleAdmin({{ user_item.pk }}, '{{ user_item.username }}')"
+                                    id="btn-{{ user_item.pk }}">
+                                <i class="bi bi-arrow-repeat"></i>
+                                {% if user_item.is_staff %}일반으로 변경{% else %}관리자로 변경{% endif %}
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> 사용자가 없습니다.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <i class="bi bi-bar-chart"></i> 통계
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3 class="text-primary">{{ total_users }}</h3>
+                    <p class="text-muted">전체 사용자</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3 class="text-warning">{{ admin_users }}</h3>
+                    <p class="text-muted">관리자</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3 class="text-secondary">{{ regular_users }}</h3>
+                    <p class="text-muted">일반 사용자</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleAdmin(userId, username) {
+    if (!confirm(`${username}님의 관리자 권한을 변경하시겠습니까?`)) {
+        return;
+    }
+
+    const btn = document.getElementById(`btn-${userId}`);
+    const badge = document.getElementById(`badge-${userId}`);
+
+    // Disable button during request
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 처리중...';
+
+    fetch(`{% url 'chatbot_web:user_toggle_admin' 0 %}`.replace('0', userId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update badge
+            if (data.is_admin) {
+                badge.className = 'badge bg-warning text-dark';
+                badge.innerHTML = '<i class="bi bi-shield-check"></i> 관리자';
+                btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> 일반으로 변경';
+            } else {
+                badge.className = 'badge bg-secondary';
+                badge.innerHTML = '<i class="bi bi-person"></i> 일반 사용자';
+                btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> 관리자로 변경';
+            }
+
+            // Show success message
+            showAlert('success', `${data.username}님의 권한이 변경되었습니다.`);
+        } else {
+            showAlert('danger', data.error || '오류가 발생했습니다.');
+        }
+
+        btn.disabled = false;
+    })
+    .catch(error => {
+        showAlert('danger', `오류: ${error}`);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> 권한 변경';
+    });
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.querySelector('.container.main-content').insertBefore(
+        alertDiv,
+        document.querySelector('h2').parentElement
+    );
+
+    // Auto dismiss after 3 seconds
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

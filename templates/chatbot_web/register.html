@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0"><i class="bi bi-person-plus"></i> 회원가입</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> <strong>안내:</strong>
+                    회원가입 시 일반 사용자로 등록됩니다. 관리자 권한이 필요한 경우 관리자에게 문의하세요.
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="bi bi-person"></i> 사용자명 <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="username" name="username" required
+                               placeholder="사용자명을 입력하세요" autofocus>
+                        <small class="text-muted">영문, 숫자, @/./+/-/_ 만 사용 가능</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i class="bi bi-envelope"></i> 이메일 (선택)
+                        </label>
+                        <input type="email" class="form-control" id="email" name="email"
+                               placeholder="email@example.com">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password1" class="form-label">
+                            <i class="bi bi-lock"></i> 비밀번호 <span class="text-danger">*</span>
+                        </label>
+                        <input type="password" class="form-control" id="password1" name="password1" required
+                               placeholder="비밀번호를 입력하세요">
+                        <small class="text-muted">최소 8자 이상 권장</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password2" class="form-label">
+                            <i class="bi bi-lock-fill"></i> 비밀번호 확인 <span class="text-danger">*</span>
+                        </label>
+                        <input type="password" class="form-control" id="password2" name="password2" required
+                               placeholder="비밀번호를 다시 입력하세요">
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> 가입하기
+                        </button>
+                        <a href="{% url 'chatbot_web:login' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> 로그인 페이지로
+                        </a>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center text-muted">
+                <small>이미 계정이 있으신가요? <a href="{% url 'chatbot_web:login' %}">로그인</a></small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

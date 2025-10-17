@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-plus-circle"></i> 새 RAG 구성 만들기</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <h5><i class="bi bi-info-circle"></i> 기본 정보</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label">구성 이름 *</label>
+                        <input type="text" class="form-control" id="name" name="name" required
+                               placeholder="예: 고급HWP + Recursive + KoSRoBERTa">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="collection_name" class="form-label">컬렉션명 (ChromaDB) *</label>
+                        <input type="text" class="form-control" id="collection_name" name="collection_name" required
+                               placeholder="예: elderly_welfare_v1">
+                        <small class="text-muted">영문, 숫자, 언더스코어만 사용 가능</small>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">설명</label>
+                    <textarea class="form-control" id="description" name="description" rows="2"
+                              placeholder="이 구성에 대한 간단한 설명을 입력하세요"></textarea>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="mb-4">
+                <h5><i class="bi bi-file-earmark-text"></i> 텍스트 추출기</h5>
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label for="pdf_extractor" class="form-label">PDF 추출기 *</label>
+                        <select class="form-select" id="pdf_extractor" name="pdf_extractor" required>
+                            <option value="">선택하세요...</option>
+                            {% for value, display in pdf_extractors %}
+                            <option value="{{ value }}">{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">권장: pdfplumber</small>
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <label for="hwp_extractor" class="form-label">HWP 추출기 *</label>
+                        <select class="form-select" id="hwp_extractor" name="hwp_extractor" required>
+                            <option value="">선택하세요...</option>
+                            {% for value, display in hwp_extractors %}
+                            <option value="{{ value }}">{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">권장: advanced_hwp (63배 성능↑)</small>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">OCR 사용</label>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="use_ocr" name="use_ocr" checked>
+                            <label class="form-check-label" for="use_ocr">
+                                PDF 실패 시
+                            </label>
+                        </div>
+                        <small class="text-muted">이미지 PDF 처리</small>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="mb-4">
+                <h5><i class="bi bi-scissors"></i> 청킹 전략</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="chunking_strategy" class="form-label">전략 *</label>
+                        <select class="form-select" id="chunking_strategy" name="chunking_strategy" required>
+                            <option value="">선택하세요...</option>
+                            {% for value, display in chunking_strategies %}
+                            <option value="{{ value }}">{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="chunk_size" class="form-label">청크 크기 *</label>
+                        <input type="number" class="form-control" id="chunk_size" name="chunk_size"
+                               value="1000" min="100" max="5000" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="chunk_overlap" class="form-label">오버랩 *</label>
+                        <input type="number" class="form-control" id="chunk_overlap" name="chunk_overlap"
+                               value="200" min="0" max="1000" required>
+                    </div>
+                </div>
+                <small class="text-muted">권장: recursive 전략, 청크 크기 1000, 오버랩 200</small>
+            </div>
+
+            <hr>
+
+            <div class="mb-4">
+                <h5><i class="bi bi-cpu"></i> 임베딩 모델</h5>
+                <select class="form-select" name="embedding_model" required>
+                    <option value="">선택하세요...</option>
+                    {% for value, display in embedding_models %}
+                    <option value="{{ value }}">{{ display }}</option>
+                    {% endfor %}
+                </select>
+                <small class="text-muted">권장: jhgan/ko-sroberta-multitask (한국어 최적화)</small>
+            </div>
+
+            <hr>
+
+            <div class="mb-4">
+                <h5><i class="bi bi-search"></i> 검색 전략</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="retrieval_strategy" class="form-label">전략 *</label>
+                        <select class="form-select" id="retrieval_strategy" name="retrieval_strategy" required>
+                            <option value="">선택하세요...</option>
+                            {% for value, display in retrieval_strategies %}
+                            <option value="{{ value }}">{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="top_k" class="form-label">검색 결과 수 (Top-K) *</label>
+                        <input type="number" class="form-control" id="top_k" name="top_k"
+                               value="5" min="1" max="20" required>
+                    </div>
+                </div>
+                <small class="text-muted">권장: similarity (기본) 또는 ensemble (최고 품질, 느림)</small>
+            </div>
+
+            <hr>
+
+            <div class="mb-3">
+                <h5><i class="bi bi-hammer"></i> RAG 구축 옵션</h5>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="auto_build" name="auto_build" checked>
+                    <label class="form-check-label" for="auto_build">
+                        <strong>저장 후 자동으로 RAG 구축 시작</strong>
+                        <br><small class="text-muted">체크하면 구성 저장 직후 자동으로 문서를 처리하여 ChromaDB에 저장합니다.</small>
+                    </label>
+                </div>
+            </div>
+
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> <strong>주의:</strong>
+                새 구성을 저장하고 구축하면 기존 ChromaDB 데이터(같은 컬렉션명)가 삭제됩니다.
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> 저장하기
+                </button>
+                <a href="{% url 'chatbot_web:validation_config_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> 취소
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <i class="bi bi-lightbulb"></i> 추천 조합
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <h6>고성능 (정확도 우선)</h6>
+                <ul class="small">
+                    <li>PDF: pdfplumber / HWP: advanced_hwp</li>
+                    <li>OCR: 사용</li>
+                    <li>청킹: recursive (1000/200)</li>
+                    <li>임베딩: ko-sroberta-multitask</li>
+                    <li>검색: ensemble</li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>균형 (속도/정확도)</h6>
+                <ul class="small">
+                    <li>PDF: pdfplumber / HWP: advanced_hwp</li>
+                    <li>OCR: 사용</li>
+                    <li>청킹: recursive (1000/200)</li>
+                    <li>임베딩: ko-sroberta-multitask</li>
+                    <li>검색: similarity</li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>고속 (속도 우선)</h6>
+                <ul class="small">
+                    <li>PDF: PyPDF2 / HWP: hwpx</li>
+                    <li>OCR: 미사용</li>
+                    <li>청킹: fixed_size (500/100)</li>
+                    <li>임베딩: multilingual-MiniLM</li>
+                    <li>검색: similarity</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

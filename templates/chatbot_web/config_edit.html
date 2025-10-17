@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-pencil"></i> RAG 구성 수정</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="name" class="form-label">구성 이름 *</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ config.name }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">설명</label>
+                <textarea class="form-control" id="description" name="description" rows="2">{{ config.description }}</textarea>
+            </div>
+
+            <div class="mb-4">
+                <h6><i class="bi bi-file-earmark-text"></i> 텍스트 추출기</h6>
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label for="pdf_extractor" class="form-label">PDF 추출기 *</label>
+                        <select class="form-select" id="pdf_extractor" name="pdf_extractor" required>
+                            {% for value, display in pdf_extractors %}
+                            <option value="{{ value }}" {% if config.pdf_extractor == value %}selected{% endif %}>{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <label for="hwp_extractor" class="form-label">HWP 추출기 *</label>
+                        <select class="form-select" id="hwp_extractor" name="hwp_extractor" required>
+                            {% for value, display in hwp_extractors %}
+                            <option value="{{ value }}" {% if config.hwp_extractor == value %}selected{% endif %}>{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">OCR 사용</label>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="use_ocr" name="use_ocr" {% if config.use_ocr %}checked{% endif %}>
+                            <label class="form-check-label" for="use_ocr">
+                                PDF 실패 시
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="chunking_strategy" class="form-label">청킹 전략 *</label>
+                <select class="form-select" name="chunking_strategy" required>
+                    {% for value, display in chunking_strategies %}
+                    <option value="{{ value }}" {% if config.chunking_strategy == value %}selected{% endif %}>{{ display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="chunk_size" class="form-label">청크 크기 *</label>
+                    <input type="number" class="form-control" name="chunk_size" value="{{ config.chunk_size }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="chunk_overlap" class="form-label">오버랩 *</label>
+                    <input type="number" class="form-control" name="chunk_overlap" value="{{ config.chunk_overlap }}" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="embedding_model" class="form-label">임베딩 모델 *</label>
+                <select class="form-select" name="embedding_model" required>
+                    {% for value, display in embedding_models %}
+                    <option value="{{ value }}" {% if config.embedding_model == value %}selected{% endif %}>{{ display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="retrieval_strategy" class="form-label">검색 전략 *</label>
+                    <select class="form-select" name="retrieval_strategy" required>
+                        {% for value, display in retrieval_strategies %}
+                        <option value="{{ value }}" {% if config.retrieval_strategy == value %}selected{% endif %}>{{ display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="top_k" class="form-label">Top-K *</label>
+                    <input type="number" class="form-control" name="top_k" value="{{ config.top_k }}" required>
+                </div>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if config.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="is_active">활성화</label>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> 저장</button>
+                <a href="{% url 'chatbot_web:config_detail' config.pk %}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> 취소</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

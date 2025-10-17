@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-chat-left-text"></i> 질의응답 로그</h2>
+    <a href="{% url 'chatbot_web:admin_dashboard' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> 대시보드로
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-funnel"></i> 필터
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <label for="config" class="form-label">RAG 구성으로 필터링</label>
+                <select class="form-select" id="config" name="config" onchange="this.form.submit()">
+                    <option value="">전체 보기</option>
+                    {% for config in configs %}
+                    <option value="{{ config.pk }}" {% if selected_config == config.pk|stringformat:"s" %}selected{% endif %}>
+                        {{ config.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                {% if selected_config %}
+                <a href="{% url 'chatbot_web:chat_logs' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> 필터 해제
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-list-ul"></i> 채팅 세션 목록</h5>
+    </div>
+    <div class="card-body">
+        {% if sessions %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>세션 제목</th>
+                        <th>사용자</th>
+                        <th>RAG 구성</th>
+                        <th>메시지 수</th>
+                        <th>생성일</th>
+                        <th>작업</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                    <tr>
+                        <td>
+                            <strong>{{ session.title }}</strong>
+                            <br><small class="text-muted">ID: {{ session.session_id|slice:":8" }}...</small>
+                        </td>
+                        <td>
+                            <i class="bi bi-person"></i> {{ session.user.username }}
+                            {% if session.user.is_staff %}
+                            <span class="badge bg-warning text-dark">관리자</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.rag_config %}
+                            <span class="badge bg-success">{{ session.rag_config.name }}</span>
+                            <br><small class="text-muted">{{ session.rag_config.collection_name }}</small>
+                            {% else %}
+                            <span class="badge bg-secondary">구성 없음</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge bg-info">{{ session.message_count }}</span></td>
+                        <td>{{ session.created_at|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewSession('{{ session.session_id }}')">
+                                <i class="bi bi-eye"></i> 보기
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            {% if selected_config %}
+            선택한 RAG 구성에 대한 채팅 세션이 없습니다.
+            {% else %}
+            아직 채팅 세션이 없습니다.
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Session Detail Modal -->
+<div class="modal fade" id="sessionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-chat-dots"></i> 세션 상세</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="sessionDetail">
+                <div class="text-center">
+                    <div class="spinner-border" role="status"></div>
+                    <p>로딩 중...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function viewSession(sessionId) {
+    const modal = new bootstrap.Modal(document.getElementById('sessionModal'));
+    const detailDiv = document.getElementById('sessionDetail');
+
+    // Show loading
+    detailDiv.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status"></div>
+            <p>로딩 중...</p>
+        </div>
+    `;
+
+    modal.show();
+
+    // Fetch session messages
+    fetch(`/api/chat/session/${sessionId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                detailDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                return;
+            }
+
+            let html = `
+                <div class="mb-3">
+                    <h6><i class="bi bi-info-circle"></i> 세션 정보</h6>
+                    <p>
+                        <strong>제목:</strong> ${data.session.title}<br>
+                        <strong>사용자:</strong> ${data.session.user}<br>
+                        <strong>RAG 구성:</strong> ${data.session.rag_config || '없음'}<br>
+                        <strong>생성일:</strong> ${data.session.created_at}
+                    </p>
+                </div>
+                <hr>
+                <h6><i class="bi bi-chat-left-text"></i> 대화 내용</h6>
+                <div class="chat-messages">
+            `;
+
+            data.messages.forEach(msg => {
+                const isUser = msg.role === 'user';
+                const alertClass = isUser ? 'alert-primary text-end' : 'alert-secondary';
+                const icon = isUser ? 'person' : 'robot';
+
+                html += `
+                    <div class="alert ${alertClass} mb-2">
+                        <small><i class="bi bi-${icon}"></i> ${msg.role}</small><br>
+                        ${msg.content}
+                        <br><small class="text-muted">${msg.created_at}</small>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            detailDiv.innerHTML = html;
+        })
+        .catch(error => {
+            detailDiv.innerHTML = `<div class="alert alert-danger">오류: ${error}</div>`;
+        });
+}
+</script>
+{% endblock %}
