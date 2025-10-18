@@ -104,9 +104,9 @@ echo "== Django 마이그레이션 및 collectstatic =="
 export DJANGO_SETTINGS_MODULE=config.django_settings
 # ensure environment variables from .env are exported
 set -a; true; set +a
-python "$PROJECT_DIR/manage.py" makemigrations --noinput || true
-python "$PROJECT_DIR/manage.py" migrate --noinput
-python "$PROJECT_DIR/manage.py" collectstatic --noinput
+python manage.py makemigrations --noinput || true
+python manage.py migrate --noinput
+python manage.py collectstatic --noinput
 
 echo "== systemd 서비스 파일 생성 (gunicorn) =="
 SERVICE_FILE="/etc/systemd/system/$GUNICORN_SERVICE_NAME.service"
