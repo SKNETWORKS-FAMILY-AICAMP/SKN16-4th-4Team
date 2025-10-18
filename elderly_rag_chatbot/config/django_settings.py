@@ -224,7 +224,20 @@ SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', str(not DEBUG)).lower() i
 # CSRF trusted origins can be provided as comma-separated list
 CSRF_TRUSTED_ENV = os.getenv('CSRF_TRUSTED_ORIGINS')
 if CSRF_TRUSTED_ENV:
-    extra_csrf = [u.strip() for u in CSRF_TRUSTED_ENV.split(',') if u.strip()]
+    extra_csrf = []
+    for origin in CSRF_TRUSTED_ENV.split(','):
+        origin = origin.strip()
+        if origin:
+            # Django 4.0+ requires scheme (http:// or https://)
+            if not origin.startswith(('http://', 'https://')):
+                # Default to http:// for IP addresses, https:// for domains
+                if origin.replace('.', '').replace(':', '').isdigit():
+                    # IP address - use http://
+                    origin = f'http://{origin}'
+                else:
+                    # Domain - use https://
+                    origin = f'https://{origin}'
+            extra_csrf.append(origin)
     CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS + extra_csrf
 
 # Create necessary directories (ensure strings passed to os.makedirs)
