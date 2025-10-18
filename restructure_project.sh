@@ -56,14 +56,14 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
-cd /home/ubuntu/4th_project
+cd /home/ubuntu
 
 echo ""
 echo "📦 1단계: 백업 생성"
 echo "=================="
 BACKUP_DIR="/home/ubuntu/project_backup_$(date +%Y%m%d_%H%M%S)"
 echo "백업 디렉토리: $BACKUP_DIR"
-cp -r SKN16-4th-4Team "$BACKUP_DIR"
+cp -r 4th_project "$BACKUP_DIR"
 echo "✅ 전체 백업 완료"
 
 echo ""
@@ -87,31 +87,30 @@ echo "📁 3단계: 파일 이동 및 통합"
 echo "=========================="
 
 # 핵심 Django 파일들 이동 (elderly_rag_chatbot에서 가져오기)
-cp /home/ubuntu/4th_project/SKN16-4th-4Team/elderly_rag_chatbot/manage.py ./
-cp /home/ubuntu/4th_project/SKN16-4th-4Team/elderly_rag_chatbot/requirements.txt ./
-cp -r /home/ubuntu/4th_project/SKN16-4th-4Team/elderly_rag_chatbot/config/* config/
+cp /home/ubuntu/4th_project/elderly_rag_chatbot/manage.py ./
+cp /home/ubuntu/4th_project/elderly_rag_chatbot/requirements.txt ./
+cp -r /home/ubuntu/4th_project/elderly_rag_chatbot/config/* config/
 
 # Django 앱들 이동
-cp -r /home/ubuntu/4th_project/SKN16-4th-4Team/elderly_rag_chatbot/chatbot_web apps/
-cp -r /home/ubuntu/4th_project/SKN16-4th-4Team/documents apps/
+cp -r /home/ubuntu/4th_project/elderly_rag_chatbot/chatbot_web apps/
+cp -r /home/ubuntu/4th_project/documents apps/ 2>/dev/null || true
+cp -r /home/ubuntu/4th_project/chatbot apps/ 2>/dev/null || true
 
 # 템플릿과 정적 파일 이동
-cp -r /home/ubuntu/4th_project/SKN16-4th-4Team/elderly_rag_chatbot/templates/* templates/ 2>/dev/null || true
-cp -r /home/ubuntu/4th_project/SKN16-4th-4Team/templates/* templates/ 2>/dev/null || true
-cp -r /home/ubuntu/4th_project/SKN16-4th-4Team/elderly_rag_chatbot/static/* static/ 2>/dev/null || true
+cp -r /home/ubuntu/4th_project/elderly_rag_chatbot/templates/* templates/ 2>/dev/null || true
+cp -r /home/ubuntu/4th_project/templates/* templates/ 2>/dev/null || true
+cp -r /home/ubuntu/4th_project/elderly_rag_chatbot/static/* static/ 2>/dev/null || true
 
 # RAG 시스템 파일들 이동
-cp -r /home/ubuntu/4th_project/SKN16-4th-4Team/elderly_rag_chatbot/src/* src/ 2>/dev/null || true
-cp -r /home/ubuntu/4th_project/SKN16-4th-4Team/data/* data/ 2>/dev/null || true
+cp -r /home/ubuntu/4th_project/elderly_rag_chatbot/src/* src/ 2>/dev/null || true
+cp -r /home/ubuntu/4th_project/data/* data/ 2>/dev/null || true
 
 # 중요한 설정 파일들
-cp /home/ubuntu/4th_project/SKN16-4th-4Team/elderly_rag_chatbot/.env.example ./
-cp /home/ubuntu/4th_project/SKN16-4th-4Team/elderly_rag_chatbot/.env ./ 2>/dev/null || true
+cp /home/ubuntu/4th_project/elderly_rag_chatbot/.env.example ./
+cp /home/ubuntu/4th_project/elderly_rag_chatbot/.env ./ 2>/dev/null || true
 
-# 관리 스크립트들을 scripts 디렉토리로 정리
-cp /home/ubuntu/4th_project/SKN16-4th-4Team/restart_server.sh scripts/
-cp /home/ubuntu/4th_project/SKN16-4th-4Team/monitor_logs.sh scripts/
-cp /home/ubuntu/4th_project/SKN16-4th-4Team/master.sh scripts/
+# 관리 스크립트들을 scripts 디렉토리로 정리 (4th_project 루트에서)
+cp /home/ubuntu/4th_project/*.sh scripts/ 2>/dev/null || true
 
 echo "✅ 파일 이동 완료"
 
@@ -138,8 +137,8 @@ echo ""
 echo "📂 6단계: 프로젝트 교체"
 echo "======================="
 
-cd /home/ubuntu/4th_project
-mv SKN16-4th-4Team SKN16-4th-4Team.old
+cd /home/ubuntu
+mv 4th_project 4th_project.old
 mv "$TEMP_DIR" elderly_rag_project
 
 echo "✅ 새로운 프로젝트 구조로 교체 완료"
@@ -157,9 +156,9 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/home/ubuntu/4th_project/elderly_rag_project
-Environment="PATH=/home/ubuntu/4th_project/elderly_rag_project/venv/bin"
-ExecStart=/home/ubuntu/4th_project/elderly_rag_project/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 --timeout 120 config.wsgi:application
+WorkingDirectory=/home/ubuntu/elderly_rag_project
+Environment="PATH=/home/ubuntu/elderly_rag_project/venv/bin"
+ExecStart=/home/ubuntu/elderly_rag_project/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 --timeout 120 config.wsgi:application
 ExecReload=/bin/kill -s HUP \$MAINPID
 KillMode=mixed
 Restart=on-failure
@@ -184,13 +183,13 @@ server {
     client_max_body_size 100M;
     
     location /static/ {
-        alias /home/ubuntu/4th_project/elderly_rag_project/static/;
+        alias /home/ubuntu/elderly_rag_project/static/;
         expires 30d;
         add_header Cache-Control "public, no-transform";
     }
     
     location /media/ {
-        alias /home/ubuntu/4th_project/elderly_rag_project/media/;
+        alias /home/ubuntu/elderly_rag_project/media/;
         expires 7d;
     }
     
@@ -214,12 +213,12 @@ echo ""
 echo "🐍 9단계: 가상환경 재생성"
 echo "======================="
 
-cd /home/ubuntu/4th_project/elderly_rag_project
+cd /home/ubuntu/elderly_rag_project
 
 # 기존 가상환경이 있다면 복사, 없다면 새로 생성
-if [ -d "/home/ubuntu/4th_project/SKN16-4th-4Team.old/elderly_rag_chatbot/venv" ]; then
+if [ -d "/home/ubuntu/4th_project.old/elderly_rag_chatbot/venv" ]; then
     echo "기존 가상환경 복사 중..."
-    cp -r /home/ubuntu/4th_project/SKN16-4th-4Team.old/elderly_rag_chatbot/venv ./
+    cp -r /home/ubuntu/4th_project.old/elderly_rag_chatbot/venv ./
 else
     echo "새로운 가상환경 생성 중..."
     python3 -m venv venv
@@ -261,7 +260,7 @@ echo "🎉 프로젝트 구조 재구성 완료!"
 echo "============================"
 echo ""
 echo "📁 새로운 프로젝트 위치:"
-echo "   /home/ubuntu/4th_project/elderly_rag_project/"
+echo "   /home/ubuntu/elderly_rag_project/"
 echo ""
 echo "💾 백업 위치:"
 echo "   $BACKUP_DIR"
@@ -270,6 +269,6 @@ echo "🌐 웹사이트 접속:"
 echo "   http://43.202.39.220/"
 echo ""
 echo "🔧 관리 명령어 (새 위치에서):"
-echo "   cd /home/ubuntu/4th_project/elderly_rag_project"
+echo "   cd /home/ubuntu/elderly_rag_project"
 echo "   ./scripts/master.sh"
 EOF
