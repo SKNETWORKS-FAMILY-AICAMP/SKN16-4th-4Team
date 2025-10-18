@@ -6,7 +6,7 @@ admin / admin 계정을 생성합니다.
 import os
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'elderly_policy.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.django_settings')
 django.setup()
 
 from django.contrib.auth.models import User

@@ -103,20 +103,17 @@ source "$VENV_DIR/bin/activate"
 python -m pip install --upgrade pip setuptools wheel build
 
 echo "== Pre-installing numpy (prefer binary) to avoid build issues =="
-# try to detect pinned numpy in requirements.txt
-PINNED_NUMPY=$(grep -E "^numpy==" requirements.txt || true)
-if [ -n "$PINNED_NUMPY" ]; then
-    echo "Found pinned numpy: $PINNED_NUMPY"
-    pip install --prefer-binary ${PINNED_NUMPY#==}
-else
-    pip install --prefer-binary numpy
-fi
+# Install system build dependencies first
+apt install -y build-essential libopenblas-dev liblapack-dev gfortran python3-dev
+
+# Install numpy binary wheel (avoid source compilation)
+pip install --prefer-binary numpy
 
 echo "== Installing Python requirements =="
 pip install -r requirements.txt || {
-    echo "pip install failed — attempting to install build deps and retry"
-    apt install -y build-essential libopenblas-dev liblapack-dev gfortran
-    pip install -r requirements.txt
+    echo "pip install failed — attempting with additional build dependencies"
+    apt install -y libffi-dev libssl-dev
+    pip install --prefer-binary --no-cache-dir -r requirements.txt
 }
 
 echo "== Django migrations & collectstatic =="
