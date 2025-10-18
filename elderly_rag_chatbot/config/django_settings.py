@@ -90,7 +90,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
-import dj_database_url
+# dj-database-url은 production 배포에서 권장되며 requirements.txt에 포함되어야 합니다.
+try:
+    import dj_database_url
+except Exception:
+    dj_database_url = None
 
 # DATABASE 설정: 기본 sqlite 사용, 환경변수로 POSTGRES 또는 DATABASE_URL 설정 가능
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -147,14 +151,15 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Allow overriding STATIC_ROOT via env (useful in deployment)
+STATIC_ROOT = Path(os.getenv('STATIC_ROOT', str(BASE_DIR / 'staticfiles')))
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
 # Media files
 MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = Path(os.getenv('MEDIA_ROOT', str(BASE_DIR / 'media')))
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -178,13 +183,53 @@ SESSION_SAVE_EVERY_REQUEST = True
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
 
 # RAG System Settings
-RAG_DATA_DIR = BASE_DIR.parent / 'data'
-RAG_CHROMA_DB_DIR = BASE_DIR / 'chroma_db'
-RAG_CACHE_DIR = BASE_DIR / 'cache'
+# Base data directory (project root / data)
+RAG_DATA_DIR = Path(os.getenv('DATA_DIRECTORY', str(BASE_DIR.parent / 'data')))
+# ChromaDB persist directory (overrideable via CHROMA_PERSIST_DIR)
+RAG_CHROMA_DB_DIR = Path(os.getenv('CHROMA_PERSIST_DIR', str(BASE_DIR / 'chroma_db')))
+RAG_CACHE_DIR = Path(os.getenv('RAG_CACHE_DIR', str(BASE_DIR / 'cache')))
 
-# Create necessary directories
-os.makedirs(RAG_DATA_DIR, exist_ok=True)
-os.makedirs(RAG_CHROMA_DB_DIR, exist_ok=True)
-os.makedirs(RAG_CACHE_DIR, exist_ok=True)
-os.makedirs(BASE_DIR / 'static', exist_ok=True)
-os.makedirs(BASE_DIR / 'templates', exist_ok=True)
+# Additional environment-driven RAG parameters
+CHUNKING_STRATEGY = os.getenv('CHUNKING_STRATEGY', 'recursive_character')
+try:
+    CHUNK_SIZE = int(os.getenv('CHUNK_SIZE', '1000'))
+except ValueError:
+    CHUNK_SIZE = 1000
+try:
+    CHUNK_OVERLAP = int(os.getenv('CHUNK_OVERLAP', '200'))
+except ValueError:
+    CHUNK_OVERLAP = 200
+try:
+    HYBRID_RERANK_WEIGHT = float(os.getenv('HYBRID_RERANK_WEIGHT', '0.6'))
+except ValueError:
+    HYBRID_RERANK_WEIGHT = 0.6
+
+# OpenAI embedding model override
+OPENAI_EMB_MODEL = os.getenv('OPENAI_EMB_MODEL', 'text-embedding-3-small')
+
+# Logging / monitoring
+LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
+SENTRY_DSN = os.getenv('SENTRY_DSN', '')
+
+# Cache / background worker
+REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0')
+
+# Gunicorn / service settings (for automated service files)
+GUNICORN_WORKERS = int(os.getenv('GUNICORN_WORKERS', '3'))
+GUNICORN_BIND = os.getenv('GUNICORN_BIND', '127.0.0.1:8000')
+
+# Security flags
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', str(not DEBUG)).lower() in ('true', '1', 'yes', 'on')
+
+# CSRF trusted origins can be provided as comma-separated list
+CSRF_TRUSTED_ENV = os.getenv('CSRF_TRUSTED_ORIGINS')
+if CSRF_TRUSTED_ENV:
+    extra_csrf = [u.strip() for u in CSRF_TRUSTED_ENV.split(',') if u.strip()]
+    CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS + extra_csrf
+
+# Create necessary directories (ensure strings passed to os.makedirs)
+os.makedirs(str(RAG_DATA_DIR), exist_ok=True)
+os.makedirs(str(RAG_CHROMA_DB_DIR), exist_ok=True)
+os.makedirs(str(RAG_CACHE_DIR), exist_ok=True)
+os.makedirs(str(BASE_DIR / 'static'), exist_ok=True)
+os.makedirs(str(BASE_DIR / 'templates'), exist_ok=True)

@@ -57,17 +57,32 @@ source "$VENV_DIR/bin/activate"
 pip install --upgrade pip setuptools wheel
 pip install -r "$PROJECT_DIR/requirements.txt"
 
-# .env 자동 생성: .env가 없으면 .env.example 복사하고 DATABASE_URL이 있으면 반영
-if [ ! -f "$PROJECT_DIR/.env" ]; then
+## .env 로드/초기화 함수
+load_or_init_env() {
+    # 우선 .env 파일이 있으면 source
+    if [ -f "$PROJECT_DIR/.env" ]; then
+        echo "Loading .env from $PROJECT_DIR/.env"
+        # export all variables defined in .env (ignore comments)
+        set -a; source "$PROJECT_DIR/.env"; set +a
+        return
+    fi
+
+    # .env 가 없으면 .env.example을 복사하고 최소값 채움
     if [ -f "$PROJECT_DIR/.env.example" ]; then
+        echo ".env not found — creating from .env.example"
         cp "$PROJECT_DIR/.env.example" "$PROJECT_DIR/.env"
-        echo ".env 파일이 생성되었습니다: $PROJECT_DIR/.env"
+
+        # if DATABASE_URL provided via env, ensure it's set in .env
         if [ ! -z "${DATABASE_URL:-}" ]; then
-            # append DATABASE_URL line
-            echo "DATABASE_URL=${DATABASE_URL}" >> "$PROJECT_DIR/.env"
+            if grep -q "^DATABASE_URL=" "$PROJECT_DIR/.env"; then
+                sed -i "s|^DATABASE_URL=.*|DATABASE_URL=${DATABASE_URL}|" "$PROJECT_DIR/.env"
+            else
+                echo "DATABASE_URL=${DATABASE_URL}" >> "$PROJECT_DIR/.env"
+            fi
         fi
-        # 자동 SECRET_KEY 생성 if not set
-        if ! grep -q "SECRET_KEY" "$PROJECT_DIR/.env"; then
+
+        # generate SECRET_KEY if missing
+        if ! grep -q "^SECRET_KEY=" "$PROJECT_DIR/.env"; then
             SECRET_KEY_VAL=$(python3 - <<'PY'
 import secrets
 print(secrets.token_urlsafe(50))
@@ -75,11 +90,20 @@ PY
 )
             echo "SECRET_KEY=${SECRET_KEY_VAL}" >> "$PROJECT_DIR/.env"
         fi
+
+        set -a; source "$PROJECT_DIR/.env"; set +a
+    else
+        echo "Warning: .env and .env.example both missing. Proceeding with environment variables only."
     fi
-fi
+}
+
+# load or init .env so subsequent commands can use variables
+load_or_init_env
 
 echo "== Django 마이그레이션 및 collectstatic =="
 export DJANGO_SETTINGS_MODULE=config.django_settings
+# ensure environment variables from .env are exported
+set -a; true; set +a
 python "$PROJECT_DIR/manage.py" makemigrations --noinput || true
 python "$PROJECT_DIR/manage.py" migrate --noinput
 python "$PROJECT_DIR/manage.py" collectstatic --noinput
