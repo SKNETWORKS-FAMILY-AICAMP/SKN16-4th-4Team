@@ -17,8 +17,21 @@ if [ ! -d "$VENV_DIR" ]; then
 fi
 source "$VENV_DIR/bin/activate"
 
-pip install --upgrade pip
-pip install -r "$PROJECT_DIR/requirements.txt"
+# pip/setuptools/wheel 업그레이드 (Python 3.12 호환성)
+pip install --upgrade pip setuptools wheel
+
+# numpy 바이너리 우선 설치 (빌드 에러 방지)
+echo "Installing numpy binary wheel first..."
+pip install --prefer-binary numpy
+
+# 나머지 dependencies 설치
+echo "Installing other requirements..."
+pip install -r "$PROJECT_DIR/requirements.txt" || {
+    echo "Requirements installation failed, installing build dependencies..."
+    sudo apt-get update
+    sudo apt-get install -y build-essential python3-dev libopenblas-dev liblapack-dev gfortran
+    pip install -r "$PROJECT_DIR/requirements.txt"
+}
 
 # 환경변수 확인
 if [ ! -f "$PROJECT_DIR/.env" ]; then
