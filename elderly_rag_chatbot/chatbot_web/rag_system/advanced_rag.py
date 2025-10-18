@@ -15,6 +15,7 @@ from collections import Counter
 import re
 
 logger = logging.getLogger(__name__)
+from .re_ranker import hybrid_rerank
 
 
 class QueryExpander:
@@ -369,6 +370,29 @@ class AdvancedRAGPipeline:
         # Step 3: Reranking
         logger.info("\n[Step 3] Reranking")
         reranked_docs = self.reranker.rerank(query, all_docs, top_k=top_k)
+
+        # 추가: 하이브리드 재순위 (의미 기반 + 도메인 가중치)
+        try:
+            # hybrid_rerank 입력 준비
+            hybrid_input = []
+            for d in reranked_docs:
+                score = d.get('rerank_score') or d.get('similarity') or 0.0
+                hybrid_input.append({
+                    'id': d.get('metadata', {}).get('filename', '') or d.get('id', ''),
+                    'score': float(score),
+                    'metadata': d.get('metadata', {}) or {}
+                })
+
+            # 기본 alpha는 0.5; 운영에서 조정 가능
+            hybrid_alpha = 0.5
+            hybrid_output = hybrid_rerank(hybrid_input, alpha=hybrid_alpha, domain_boosts={'region': {}}, normalize=True)
+
+            # hybrid_output 순서로 reranked_docs 정렬
+            id_order = {item['id']: idx for idx, item in enumerate(hybrid_output)}
+            reranked_docs.sort(key=lambda x: id_order.get(x.get('metadata', {}).get('filename', ''), 999))
+        except Exception:
+            # 재순위 실패 시 원본 reranked_docs 유지
+            logger.exception('하이브리드 재순위 중 오류 발생 - 기존 순서 유지')
 
         # Step 4: Answer Synthesis
         logger.info("\n[Step 4] Answer Synthesis")

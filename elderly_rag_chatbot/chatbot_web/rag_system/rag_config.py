@@ -15,11 +15,13 @@ if PROJECT_ROOT:
 
 # ============== OpenAI 설정 ==============
 OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-4o-mini')
-OPENAI_EMB_MODEL = os.environ.get('OPENAI_EMB_MODEL', 'text-embedding-ada-002')
+OPENAI_EMB_MODEL = os.environ.get('OPENAI_EMB_MODEL', 'text-embedding-3-small')
 TEMPERATURE = float(os.environ.get('TEMPERATURE', '0.1'))
 MAX_TOKENS = int(os.environ.get('MAX_TOKENS', '1000'))
 
 # ============== RAG 설정 ==============
+# 기본 청킹: recursive character 방식 권장
+CHUNKING_STRATEGY = os.environ.get('CHUNKING_STRATEGY', 'recursive')
 CHUNK_SIZE = int(os.environ.get('CHUNK_SIZE', '1000'))
 CHUNK_OVERLAP = int(os.environ.get('CHUNK_OVERLAP', '200'))
 TOP_K_RESULTS = int(os.environ.get('TOP_K_RESULTS', '5'))

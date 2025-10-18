@@ -13,6 +13,13 @@ from . import rag_config
 from .data_processing import DataProcessor
 from .rag_functions import WelfareRAGChain
 
+# Django models (optional persistence)
+try:
+    from chatbot_web.models import ChatSession, ChatMessage, RetrieverLog, APIUsage, RAGConfiguration
+    HAS_DJANGO_MODELS = True
+except Exception:
+    HAS_DJANGO_MODELS = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -134,6 +141,57 @@ python manage.py build_rag_database {db_type}
 
         try:
             result = self.rag_chain.process_question(question, user_region=user_region)
+
+            # DB 저장 (가능한 경우)
+            if HAS_DJANGO_MODELS:
+                try:
+                    # 세션/메시지 생성: 세션 id는 history에서 추출하거나 새로 생성
+                    session_obj = None
+                    if history and isinstance(history, list) and len(history) > 0:
+                        # try to get session id from history metadata
+                        sid = None
+                        for h in history:
+                            if isinstance(h, dict) and 'session_id' in h:
+                                sid = h.get('session_id')
+                                break
+                        if sid:
+                            session_obj = ChatSession.objects.filter(session_id=sid).first()
+
+                    if session_obj is None:
+                        # 익명 세션 생성: user=None 허용하도록 모델을 변경했음
+                        try:
+                            # 가능한 경우 활성화된 RAGConfiguration 사용
+                            default_rag = RAGConfiguration.objects.filter(is_active=True).first()
+                        except Exception:
+                            default_rag = None
+
+                        session_obj = ChatSession.objects.create(
+                            user=None,
+                            rag_config=default_rag,
+                            session_id=f"anon-{os.urandom(6).hex()}",
+                            title="익명 대화"
+                        )
+
+                    # 사용자 질문 저장 (session이 있을 때만 저장)
+                    if session_obj:
+                        ChatMessage.objects.create(session=session_obj, role='user', content=question)
+
+                    # assistant 응답 저장
+                    assistant_text = result.get('answer', '')
+                    if session_obj:
+                        ChatMessage.objects.create(session=session_obj, role='assistant', content=assistant_text, retrieved_docs=result.get('sources', []))
+
+                    # Retriever 로그 저장
+                    RetrieverLog.objects.create(
+                        query_text=question,
+                        session=session_obj,
+                        retrieved=result.get('sources', []),
+                        user_region=user_region,
+                        elapsed_ms=None
+                    )
+                except Exception as e:
+                    logger.exception(f"DB에 대화/로그 저장 실패: {e}")
+
             return result
         except Exception as e:
             logger.error(f"질문 처리 중 오류: {e}", exc_info=True)

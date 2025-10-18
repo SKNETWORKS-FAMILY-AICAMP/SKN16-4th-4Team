@@ -183,9 +183,13 @@ class RAGConfiguration(models.Model):
 
 
 class ChatSession(models.Model):
-    """사용자 채팅 세션"""
+    """사용자 채팅 세션
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_sessions')
+    user는 nullable로 변경하여 비로그인(익명) 세션을 지원합니다.
+    """
+
+    # user를 nullable로 변경하여 익명 세션을 허용
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_sessions', null=True, blank=True)
     rag_config = models.ForeignKey(RAGConfiguration, on_delete=models.SET_NULL, null=True)
 
     session_id = models.CharField(max_length=100, unique=True, verbose_name="세션 ID")
@@ -303,3 +307,62 @@ class ElderlyPolicy(models.Model):
 
     def __str__(self):
         return f"[{self.region}] {self.title}"
+
+
+class DocumentChunk(models.Model):
+    """문서 청크(임베딩 전/후 메타 저장)"""
+
+    policy = models.ForeignKey(ElderlyPolicy, on_delete=models.SET_NULL, null=True, blank=True, related_name='chunks')
+    source_path = models.CharField(max_length=1000, blank=True, verbose_name="원본 파일 경로")
+    chunk_index = models.IntegerField(verbose_name="청크 인덱스")
+    text = models.TextField(verbose_name="청크 텍스트")
+    embedding = models.BinaryField(null=True, blank=True, verbose_name="임베딩(바이너리) -- 선택적 저장")
+    metadata = models.JSONField(default=dict, blank=True, verbose_name="메타데이터")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "문서 청크"
+        verbose_name_plural = "문서 청크들"
+        indexes = [models.Index(fields=['chunk_index']), ]
+
+    def __str__(self):
+        return f"Chunk {self.chunk_index} - {self.source_path[:60]}"
+
+
+class RetrieverLog(models.Model):
+    """리트리버(검색) 로그: 검색 쿼리, 결과, 점수 등 기록"""
+
+    query_text = models.TextField(verbose_name="검색 질의")
+    session = models.ForeignKey(ChatSession, on_delete=models.SET_NULL, null=True, blank=True, related_name='retriever_logs')
+    retrieved = models.JSONField(default=list, blank=True, verbose_name="검색 결과 정보(문서 id, score 등)")
+    user_region = models.CharField(max_length=100, blank=True, verbose_name="사용자 지역")
+    elapsed_ms = models.IntegerField(null=True, blank=True, verbose_name="소요 시간(ms)")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "리트리버 로그"
+        verbose_name_plural = "리트리버 로그들"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"RetrieverLog {self.id} - {self.query_text[:60]}"
+
+
+class APIUsage(models.Model):
+    """외부 API 사용 로그 (OpenAI 등)"""
+
+    provider = models.CharField(max_length=50, verbose_name="프로바이더", default='openai')
+    api_endpoint = models.CharField(max_length=200, blank=True, verbose_name="엔드포인트")
+    request_payload = models.JSONField(null=True, blank=True)
+    response_summary = models.TextField(blank=True)
+    tokens_used = models.IntegerField(null=True, blank=True)
+    cost_estimate = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "API 사용 로그"
+        verbose_name_plural = "API 사용 로그들"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.provider} @ {self.created_at.isoformat()}"

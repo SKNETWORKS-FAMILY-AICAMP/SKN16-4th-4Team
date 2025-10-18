@@ -7,6 +7,7 @@ from .models import (
     UserFeedback,
     ElderlyPolicy
 )
+from .models import DocumentChunk, RetrieverLog, APIUsage
 
 
 @admin.register(UserProfile)
@@ -25,9 +26,13 @@ class RAGConfigurationAdmin(admin.ModelAdmin):
 
 @admin.register(ChatSession)
 class ChatSessionAdmin(admin.ModelAdmin):
-    list_display = ['user', 'title', 'rag_config', 'created_at']
+    list_display = ['user_display', 'title', 'rag_config', 'created_at']
     list_filter = ['created_at']
     search_fields = ['user__username', 'title']
+
+    def user_display(self, obj):
+        return obj.user.username if obj.user else '(익명)'
+    user_display.short_description = '사용자'
 
 
 @admin.register(ChatMessage)
@@ -54,3 +59,24 @@ class ElderlyPolicyAdmin(admin.ModelAdmin):
     list_filter = ['region', 'provider']
     search_fields = ['title', 'description', 'provider']
     ordering = ['region', 'title']
+
+
+@admin.register(DocumentChunk)
+class DocumentChunkAdmin(admin.ModelAdmin):
+    list_display = ['id', 'policy', 'chunk_index', 'source_path', 'created_at']
+    search_fields = ['source_path', 'text']
+    list_filter = ['created_at']
+
+
+@admin.register(RetrieverLog)
+class RetrieverLogAdmin(admin.ModelAdmin):
+    list_display = ['id', 'query_text', 'session', 'elapsed_ms', 'created_at']
+    search_fields = ['query_text']
+    list_filter = ['created_at']
+
+
+@admin.register(APIUsage)
+class APIUsageAdmin(admin.ModelAdmin):
+    list_display = ['provider', 'api_endpoint', 'tokens_used', 'cost_estimate', 'created_at']
+    search_fields = ['provider', 'api_endpoint']
+    list_filter = ['provider', 'created_at']
