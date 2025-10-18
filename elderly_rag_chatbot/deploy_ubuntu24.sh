@@ -55,7 +55,23 @@ if [ ! -d "$VENV_DIR" ]; then
 fi
 source "$VENV_DIR/bin/activate"
 pip install --upgrade pip setuptools wheel
-pip install -r "$PROJECT_DIR/requirements.txt"
+
+echo "== Pre-installing numpy (prefer binary) to avoid build issues =="
+# try to detect pinned numpy in requirements.txt
+PINNED_NUMPY=$(grep -E "^numpy==" requirements.txt || true)
+if [ -n "$PINNED_NUMPY" ]; then
+    echo "Found pinned numpy: $PINNED_NUMPY"
+    pip install --prefer-binary ${PINNED_NUMPY#*==}
+else
+    pip install --prefer-binary numpy
+fi
+
+echo "== Installing Python requirements =="
+pip install -r "$PROJECT_DIR/requirements.txt" || {
+    echo "pip install failed — attempting to install build deps and retry"
+    sudo apt install -y build-essential libopenblas-dev liblapack-dev gfortran
+    pip install -r "$PROJECT_DIR/requirements.txt"
+}
 
 ## .env 로드/초기화 함수
 load_or_init_env() {
