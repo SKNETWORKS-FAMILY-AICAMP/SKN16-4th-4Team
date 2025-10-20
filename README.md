@@ -145,7 +145,7 @@ A: HWP는 제한적 지원. PDF 변환 권장 또는 `pip install olefile` 설�
 A: `config/` 폴더에서 청킹 크기를 1024→512로 줄이거나 CPU 모드 사용
 
 ### 상세 문제해결
-👉 **[완전한 문제해결 가이드](elderly_rag_chatbot/README_완전가이드.md#문제해결-가이드)** 참조
+👉
 
 ## 📚 상세 문서
 
