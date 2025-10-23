@@ -1,4 +1,4 @@
-# 🤖 노인 복지 정책 RAG 챗봇 시스템
+# 노인 복지 정책 RAG 챗봇 시스템
 
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Django](https://img.shields.io/badge/Django-092E20?style=flat&logo=django&logoColor=white)](https://www.djangoproject.com/)
@@ -14,7 +14,7 @@
 
 ---
 
-## 📋 목차
+## 목차
 
 - [프로젝트 소개](#-프로젝트-소개)
 - [주요 기능](#-주요-기능)
@@ -29,21 +29,21 @@
 
 ---
 
-## 🎯 프로젝트 소개
+## 프로젝트 소개
 
 노인 복지 챗봇은 **RAG(Retrieval-Augmented Generation)** 기술을 활용하여 노인과 그 가족들이 복지 정책 정보를 쉽게 찾고 이해할 수 있도록 돕는 지능형 챗봇 시스템입니다.
 
 ### 주요 특징
 
-- 🔍 **정확한 정보 제공**: 최신 복지 정책 문서를 기반으로 정확한 정보 제공
-- 🤖 **자연어 대화**: GPT-4를 활용한 자연스러운 한국어 대화
-- 📚 **지역별 맞춤 정보**: 17개 시도별 복지 정책 정보 제공
-- 🎯 **AI 기반 피드백 분석**: OpenAI를 활용한 사용자 피드백 자동 분류 및 감정 분석
-- ⭐ **사용자 피드백**: 메시지 및 세션 평가 시스템
-- 🔖 **북마크 기능**: 유용한 답변 저장 및 관리
-- 👤 **맞춤형 추천**: 사용자 프로필 기반 복지 정책 추천
-- 🐳 **간편한 배포**: Docker 기반 원클릭 배포 시스템
-- 🔒 **안정적인 운영**: PostgreSQL + ChromaDB 통합
+-  **정확한 정보 제공**: 최신 복지 정책 문서를 기반으로 정확한 정보 제공
+-  **자연어 대화**: GPT-4를 활용한 자연스러운 한국어 대화
+-  **지역별 맞춤 정보**: 17개 시도별 복지 정책 정보 제공
+-  **AI 기반 피드백 분석**: OpenAI를 활용한 사용자 피드백 자동 분류 및 감정 분석
+-  **사용자 피드백**: 메시지 및 세션 평가 시스템
+-  **북마크 기능**: 유용한 답변 저장 및 관리
+-  **맞춤형 추천**: 사용자 프로필 기반 복지 정책 추천
+-  **간편한 배포**: Docker 기반 원클릭 배포 시스템
+-  **안정적인 운영**: PostgreSQL + ChromaDB 통합
 
 ### 두 가지 챗봇 시스템
 
@@ -52,7 +52,7 @@
 
 ---
 
-## ✨ 주요 기능
+##  주요 기능
 
 ### 1. 지능형 챗봇
 - GPT-4 기반 자연어 이해 및 응답
@@ -108,7 +108,7 @@
 
 ---
 
-## 🛠️ 기술 스택
+## 기술 스택
 
 ### Backend
 - **Django 4.2+**: 웹 프레임워크
@@ -136,7 +136,7 @@
 
 ---
 
-## 🏗️ 시스템 아키텍처
+## 시스템 아키텍처
 
 ```
 ┌─────────────┐
@@ -150,14 +150,14 @@
 └─────────────┬───────────────────────┘
               │
               ▼
-┌─────────────────────────────────────┐
-│         Django Application          │
+┌────────────────────────────────────┐
+│         Django Application         │
 │  ┌──────────────────────────────┐  │
 │  │    Chat Interface            │  │
-│  │  ┌────────┐    ┌──────────┐ │  │
-│  │  │ User   │    │  Admin   │ │  │
-│  │  │Chatbot │    │ Chatbot  │ │  │
-│  │  └────────┘    └──────────┘ │  │
+│  │  ┌────────┐    ┌──────────┐  │  │
+│  │  │ User   │    │  Admin   │  │  │
+│  │  │Chatbot │    │ Chatbot  │  │  │
+│  │  └────────┘    └──────────┘  │  │
 │  └──────────────────────────────┘  │
 │  ┌──────────────────────────────┐  │
 │  │    RAG System                │  │
@@ -165,11 +165,11 @@
 │  │  │   LangChain Pipeline   │  │  │
 │  │  │  ┌──────┐  ┌────────┐  │  │  │
 │  │  │  │GPT-4 │  │Chroma  │  │  │  │
-│  │  │  │      │  │  DB    │  │  │  │
+│  │  │  │o-mini│  │  DB    │  │  │  │
 │  │  │  └──────┘  └────────┘  │  │  │
 │  │  └────────────────────────┘  │  │
 │  └──────────────────────────────┘  │
-└─────────────┬───────────────────────┘
+└─────────────┬──────────────────────┘
               │
        ┌──────┴──────┐
        │             │
@@ -188,7 +188,7 @@
 
 ---
 
-## 🚀 빠른 시작
+## 빠른 시작
 
 ### 사전 요구사항
 
@@ -241,31 +241,31 @@ docker compose -f docker-compose.prod.yml exec django python manage.py collectst
 
 ---
 
-## 📁 프로젝트 구조
+## 프로젝트 구조
 
 ```
 c:\develop1\d\
-├── 📄 db.sqlite3                  # 개발용 DB (gitignore됨)
-├── 🐳 docker-compose.yml          # 개발용 Docker 설정
-├── 🐳 docker-compose.prod.yml     # 프로덕션 Docker 설정
-├── 🐳 docker-entrypoint.sh        # Docker 실행 스크립트
-├── 🐳 Dockerfile                  # Docker 이미지 빌드
-├── ⚙️ gunicorn_config.py          # Gunicorn 설정
-├── 🐍 manage.py                   # Django 관리 명령
-├── 📖 README.md                   # 프로젝트 문서
-├── 📦 requirements.txt            # Python 의존성
-├── 📦 requirements-prod.txt       # 프로덕션 의존성
-├── 📁 apps/                       # Django 앱
-├── 📁 config/                     # Django 설정
-├── 📁 docker/                     # Docker 설정 파일
-├── 📁 src/                        # RAG 시스템 소스
-├── 📁 static/                     # 정적 파일
-└── 📁 templates/     
+├── db.sqlite3                  # 개발용 DB (gitignore됨)
+├── docker-compose.yml          # 개발용 Docker 설정
+├── docker-compose.prod.yml     # 프로덕션 Docker 설정
+├── docker-entrypoint.sh        # Docker 실행 스크립트
+├── Dockerfile                  # Docker 이미지 빌드
+├── gunicorn_config.py          # Gunicorn 설정
+├── manage.py                   # Django 관리 명령
+├── README.md                   # 프로젝트 문서
+├── requirements.txt            # Python 의존성
+├── requirements-prod.txt       # 프로덕션 의존성
+├── apps/                       # Django 앱
+├── config/                     # Django 설정
+├── docker/                     # Docker 설정 파일
+├── src/                        # RAG 시스템 소스
+├── static/                     # 정적 파일
+└── templates/     
 ```
 
 ---
 
-## 🔧 환경 변수 설정
+## 환경 변수 설정
 
 `.env` 파일에 다음 변수들을 설정하세요:
 
@@ -298,7 +298,7 @@ EMAIL_HOST_PASSWORD=your-app-password
 
 ---
 
-## 📡 API 문서
+## API 문서
 
 ### 주요 엔드포인트
 
@@ -412,34 +412,34 @@ docker compose -f docker-compose.prod.yml exec db pg_dump -U chatbot_user chatbo
 
 ---
 
-## 🎨 주요 업데이트 (v2.0.0)
+## 주요 업데이트 (v2.0.0)
 
 ### Phase 1: 긴급 버그 수정
-- ✅ CSRF 보안 강화 (@csrf_exempt 제거)
-- ✅ 출처 표시 개선 (파일 확장자 제거)
-- ✅ 검증용 챗봇 UI 통일
-- ✅ 피드백 message_id 누락 문제 해결
+- CSRF 보안 강화 (@csrf_exempt 제거)
+- 출처 표시 개선 (파일 확장자 제거)
+- 검증용 챗봇 UI 통일
+- 피드백 message_id 누락 문제 해결
 
 ### Phase 2: 기능 개선
-- ✅ 프로필 설정 리팩토링 (비밀번호 변경 분리)
-- ✅ 빠른 챗봇 실행 분기 개선
-- ✅ 민감 정보 체크박스 재배치
-- ✅ 국가유공자 옵션 추가
+- 프로필 설정 리팩토링 (비밀번호 변경 분리)
+- 빠른 챗봇 실행 분기 개선
+- 민감 정보 체크박스 재배치
+- 국가유공자 옵션 추가
 
 ### Phase 3: 고급 기능
-- ✅ AI 기반 피드백 자동 분류 및 감정 분석
-- ✅ 피드백 분석 대시보드 개선
-- ✅ Chart.js 기반 시각화 강화
+- AI 기반 피드백 자동 분류 및 감정 분석
+- 피드백 분석 대시보드 개선
+- Chart.js 기반 시각화 강화
 
 ---
 
-## 📄 라이센스
+## 라이센스
 
 This project is licensed under the MIT License.
 
 ---
 
-## 👥 팀
+## 팀
 
 **SKN16-4th-4Team**
 
@@ -449,7 +449,7 @@ This project is licensed under the MIT License.
 
 ---
 
-## 📞 문의
+## 문의
 
 프로젝트 관련 문의사항이 있으시면 이슈를 생성해주세요.
 
