@@ -55,10 +55,6 @@
 ##  주요 기능
 
 ### 1. 지능형 챗봇
-![Initial](https://github.com/user-attachments/assets/a6e79514-6dfb-4861-888f-84d749edb391)
-<img width="2166" height="1446" alt="Image" src="https://github.com/user-attachments/assets/6738bd2c-daf9-4ce3-b026-498bd5c709bd" />
-<img width="1390" height="1398" alt="Image" src="https://github.com/user-attachments/assets/c6a6ed69-2105-459d-a800-b9d71ccccec1" />
-<img width="2120" height="1246" alt="Image" src="https://github.com/user-attachments/assets/d6d5d722-5bc2-4ef4-bdeb-779e363654d7" />
 <img width="2798" height="1476" alt="Image" src="https://github.com/user-attachments/assets/d4a2a51f-3aee-4c16-8491-86a03e81992e" />
 - GPT-4 기반 자연어 이해 및 응답
 - 복지 정책 문서 기반 RAG 시스템
@@ -67,6 +63,7 @@
 - 실시간 피드백 수집 (thumbs up/down)
 
 ### 2. 복지 정책 검색
+<img width="2166" height="1446" alt="Image" src="https://github.com/user-attachments/assets/6738bd2c-daf9-4ce3-b026-498bd5c709bd" />
 - 지역별 복지 정책 검색 (17개 시도)
 - 카테고리별 정책 분류
 - 신청 자격 및 방법 안내
@@ -74,6 +71,7 @@
 - 출처 표시 (파일 확장자 제거로 깔끔한 UI)
 
 ### 3. 맞춤형 추천 시스템
+![Initial](https://github.com/user-attachments/assets/a6e79514-6dfb-4861-888f-84d749edb391)
 - **프로필 기반 자동 분기**: 프로필 설정 여부에 따라 자동으로 간소화된 폼 제공
 - 나이, 지역, 성별 기반 필터링
 - 관심 분야별 정책 추천 (기초연금, 장기요양보험, 의료지원, 주거지원, 일자리, 문화/여가)
@@ -82,6 +80,7 @@
 - 상세 추천 (신규 사용자)
 
 ### 4. 사용자 관리
+<img width="2120" height="1246" alt="Image" src="https://github.com/user-attachments/assets/d6d5d722-5bc2-4ef4-bdeb-779e363654d7" />
 - **일반 로그인** 및 **카카오 간편 로그인** 지원
 - 회원가입 및 로그인
 - 카카오 OAuth 2.0 연동 (자동 회원가입)
@@ -93,6 +92,7 @@
 - 북마크 관리
 
 ### 5. 관리자 기능
+<img width="1390" height="1398" alt="Image" src="https://github.com/user-attachments/assets/c6a6ed69-2105-459d-a800-b9d71ccccec1" />
 - 복지 정책 데이터 관리
 - 사용자 관리
 - 챗봇 대화 로그 분석
