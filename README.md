@@ -55,7 +55,7 @@
 ##  주요 기능
 
 ### 1. 지능형 챗봇
-<img width="2798" height="1476" alt="Image" src="https://github.com/user-attachments/assets/d4a2a51f-3aee-4c16-8491-86a03e81992e" />
+![Initial]("https://github.com/user-attachments/assets/d4a2a51f-3aee-4c16-8491-86a03e81992e")
 - GPT-4 기반 자연어 이해 및 응답
 - 복지 정책 문서 기반 RAG 시스템
 - 대화 히스토리 관리 및 컨텍스트 유지
@@ -63,7 +63,7 @@
 - 실시간 피드백 수집 (thumbs up/down)
 
 ### 2. 복지 정책 검색
-<img width="2166" height="1446" alt="Image" src="https://github.com/user-attachments/assets/6738bd2c-daf9-4ce3-b026-498bd5c709bd" />
+![Initial]("https://github.com/user-attachments/assets/6738bd2c-daf9-4ce3-b026-498bd5c709bd")
 - 지역별 복지 정책 검색 (17개 시도)
 - 카테고리별 정책 분류
 - 신청 자격 및 방법 안내
@@ -80,7 +80,7 @@
 - 상세 추천 (신규 사용자)
 
 ### 4. 사용자 관리
-<img width="2120" height="1246" alt="Image" src="https://github.com/user-attachments/assets/d6d5d722-5bc2-4ef4-bdeb-779e363654d7" />
+![Initial]("https://github.com/user-attachments/assets/d6d5d722-5bc2-4ef4-bdeb-779e363654d7")
 - **일반 로그인** 및 **카카오 간편 로그인** 지원
 - 회원가입 및 로그인
 - 카카오 OAuth 2.0 연동 (자동 회원가입)
@@ -92,7 +92,7 @@
 - 북마크 관리
 
 ### 5. 관리자 기능
-<img width="1390" height="1398" alt="Image" src="https://github.com/user-attachments/assets/c6a6ed69-2105-459d-a800-b9d71ccccec1" />
+![Initial]("https://github.com/user-attachments/assets/c6a6ed69-2105-459d-a800-b9d71ccccec1")
 - 복지 정책 데이터 관리
 - 사용자 관리
 - 챗봇 대화 로그 분석
