@@ -55,6 +55,11 @@
 ##  주요 기능
 
 ### 1. 지능형 챗봇
+![Initial](https://github.com/user-attachments/assets/a6e79514-6dfb-4861-888f-84d749edb391)
+<img width="2166" height="1446" alt="Image" src="https://github.com/user-attachments/assets/6738bd2c-daf9-4ce3-b026-498bd5c709bd" />
+<img width="1390" height="1398" alt="Image" src="https://github.com/user-attachments/assets/c6a6ed69-2105-459d-a800-b9d71ccccec1" />
+<img width="2120" height="1246" alt="Image" src="https://github.com/user-attachments/assets/d6d5d722-5bc2-4ef4-bdeb-779e363654d7" />
+<img width="2798" height="1476" alt="Image" src="https://github.com/user-attachments/assets/d4a2a51f-3aee-4c16-8491-86a03e81992e" />
 - GPT-4 기반 자연어 이해 및 응답
 - 복지 정책 문서 기반 RAG 시스템
 - 대화 히스토리 관리 및 컨텍스트 유지
