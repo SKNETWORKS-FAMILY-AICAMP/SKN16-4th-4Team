@@ -1,0 +1,66 @@
+# 노인복지 정책 RAG 챗봇 시스템 - Production Requirements (최적화)
+# 프로덕션 환경에서 필요한 최소 패키지만 포함
+
+# Core Python packages
+python-dotenv>=1.0.0
+pandas>=2.0.0,<2.2.0
+numpy>=1.24.0,<1.27.0
+
+# Django framework
+Django>=4.2.0,<5.0.0
+django-cors-headers>=4.0.0
+
+# LangChain ecosystem (stable versions)
+langchain-core>=0.1.20,<0.3.0
+langchain>=0.1.0,<0.3.0
+langchain-openai>=0.0.2,<0.2.0
+langchain-community>=0.0.10,<0.3.0
+
+# LangGraph workflow system
+langgraph>=0.0.20,<0.2.0
+
+# Vector database
+chromadb>=0.4.0,<0.5.0
+
+# Text embeddings and transformers
+sentence-transformers>=2.2.0,<3.0.0
+transformers>=4.30.0,<5.0.0
+torch>=2.0.0,<2.3.0
+
+# PDF text extraction (minimal set)
+PyPDF2>=3.0.0
+pdfplumber>=0.9.0
+
+# HWP text extraction
+olefile>=0.46
+
+# Machine learning (core only)
+scikit-learn>=1.3.0,<1.5.0
+
+# API clients
+openai>=1.0.0,<2.0.0
+
+# Utilities
+tqdm>=4.60.0
+requests>=2.25.0,<3.0.0
+pyyaml>=6.0
+
+# Database connectivity
+dj-database-url>=1.0.0
+psycopg2-binary>=2.9.6
+
+# Web server
+gunicorn>=21.2.0
+whitenoise>=6.5.0
+
+# Additional packages for production
+python-decouple>=3.8
+django-environ>=0.11.0
+Pillow>=10.0.0
+djangorestframework>=3.14.0
+
+# Token counting
+tiktoken>=0.4.0,<0.6.0
+
+# Chroma integration
+langchain-chroma>=0.0.1,<0.3.0

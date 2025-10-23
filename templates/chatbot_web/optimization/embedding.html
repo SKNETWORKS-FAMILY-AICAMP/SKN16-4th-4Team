@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}임베딩 모델 최적화{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-vector-square text-warning"></i>
+                    3단계: 임베딩 모델 최적화
+                </h1>
+                <a href="{% url 'chatbot_web:chatbot_optimization' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 최적화 대시보드
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-info-circle"></i> 임베딩 모델이란?</h5>
+                <p class="mb-0">
+                    텍스트를 숫자 벡터로 변환하는 모델입니다. 의미적으로 유사한 텍스트는 유사한 벡터로 변환되어 검색이 가능합니다.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5><i class="fas fa-play-circle"></i> 최적화 실행</h5>
+                    <button id="run-embedding" class="btn btn-warning btn-lg">
+                        <i class="fas fa-rocket"></i> 임베딩 모델 최적화 시작
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="progress-section" class="row mb-4" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5><i class="fas fa-spinner fa-spin"></i> 최적화 진행 중...</h5>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning"
+                             role="progressbar" style="width: 50%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="results-section" class="row" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow border-left-warning">
+                <div class="card-header">
+                    <h5 class="m-0"><i class="fas fa-check-circle text-warning"></i> 최적화 완료</h5>
+                </div>
+                <div class="card-body">
+                    <div id="results-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.border-left-warning { border-left: 0.25rem solid #ffc107 !important; }
+</style>
+
+<script>
+document.getElementById('run-embedding').addEventListener('click', function() {
+    this.disabled = true;
+    document.getElementById('progress-section').style.display = 'block';
+    document.getElementById('results-section').style.display = 'none';
+
+    fetch("{% url 'chatbot_web:api_run_embedding' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('progress-section').style.display = 'none';
+        document.getElementById('run-embedding').disabled = false;
+
+        if (data.success) {
+            const result = data.result;
+            document.getElementById('results-section').style.display = 'block';
+
+            document.getElementById('results-content').innerHTML = `
+                <div class="alert alert-warning">
+                    <h5><strong>선택된 모델:</strong> ${result.selected_option}</h5>
+                    <p><strong>점수:</strong> ${(result.score * 100).toFixed(1)}점</p>
+                    <p class="mb-0"><strong>이유:</strong> ${result.reason}</p>
+                </div>
+                <h6>상세 메트릭:</h6>
+                <pre class="bg-light p-3 rounded">${JSON.stringify(result.metrics, null, 2)}</pre>
+            `;
+        } else {
+            alert('오류: ' + data.error);
+        }
+    })
+    .catch(error => {
+        document.getElementById('progress-section').style.display = 'none';
+        document.getElementById('run-embedding').disabled = false;
+        alert('요청 실패: ' + error);
+    });
+});
+</script>
+{% endblock %}

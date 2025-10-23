@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}사용자 관리{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-users text-primary"></i>
+                사용자 관리
+            </h1>
+            <p class="lead text-muted">등록된 사용자들의 정보와 권한을 관리할 수 있습니다.</p>
+        </div>
+    </div>
+
+    <!-- 사용자 목록 -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-list"></i>
+                등록된 사용자 목록
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if users %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>사용자명</th>
+                            <th>이메일</th>
+                            <th>가입일</th>
+                            <th>최종 로그인</th>
+                            <th>권한</th>
+                            <th>상태</th>
+                            <th>프로필</th>
+                            <th>작업</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>
+                                <strong>{{ user.username }}</strong>
+                                {% if user.first_name or user.last_name %}
+                                <br><small class="text-muted">{{ user.first_name }} {{ user.last_name }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.email %}
+                                    <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="text-nowrap">{{ user.date_joined|date:"Y-m-d" }}</span>
+                                <br><small class="text-muted">{{ user.date_joined|date:"H:i" }}</small>
+                            </td>
+                            <td>
+                                {% if user.last_login %}
+                                    <span class="text-nowrap">{{ user.last_login|date:"Y-m-d" }}</span>
+                                    <br><small class="text-muted">{{ user.last_login|date:"H:i" }}</small>
+                                {% else %}
+                                    <span class="text-muted">로그인 기록 없음</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_superuser %}
+                                    <span class="badge badge-danger">슈퍼유저</span>
+                                {% elif user.is_staff %}
+                                    <span class="badge badge-warning">관리자</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">일반사용자</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="badge badge-success">활성</span>
+                                {% else %}
+                                    <span class="badge badge-danger">비활성</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% with user.userprofile as profile %}
+                                {% if profile %}
+                                    {% if profile.age %}
+                                        <span class="text-muted">{{ profile.age }}세</span><br>
+                                    {% endif %}
+                                    {% if profile.region %}
+                                        <small class="text-info">{{ profile.region }}</small>
+                                    {% endif %}
+                                    {% if profile.gender %}
+                                        <br><small class="text-muted">{{ profile.get_gender_display }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">미설정</span>
+                                {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td>
+                                {% if user != request.user %}
+                                <form method="post" action="{% url 'chatbot_web:user_toggle_admin' user.pk %}" 
+                                      style="display: inline-block;" 
+                                      onsubmit="return confirm('{{ user.username }}님의 권한을 변경하시겠습니까?')">
+                                    {% csrf_token %}
+                                    {% if user.is_staff %}
+                                        <button type="submit" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-user-minus"></i> 관리자 해제
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-user-plus"></i> 관리자 설정
+                                        </button>
+                                    {% endif %}
+                                </form>
+                                {% else %}
+                                <span class="text-muted">본인</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center">
+                <h4><i class="fas fa-users"></i></h4>
+                <p>등록된 사용자가 없습니다.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 통계 정보 -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="fas fa-users fa-3x mb-2"></i>
+                        <h4>{{ users|length }}</h4>
+                        <p class="mb-0">총 사용자</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="fas fa-user-shield fa-3x mb-2"></i>
+                        <h4>{{ users|length|add:"-1" }}</h4>
+                        <p class="mb-0">관리자</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="fas fa-user-check fa-3x mb-2"></i>
+                        <h4>{{ users|length }}</h4>
+                        <p class="mb-0">활성 사용자</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="fas fa-clock fa-3x mb-2"></i>
+                        <h4>오늘</h4>
+                        <p class="mb-0">신규 가입</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 하단 안내 -->
+    <div class="mt-4 p-3 bg-light rounded">
+        <h6><i class="fas fa-info-circle text-info"></i> 사용자 관리 안내</h6>
+        <ul class="mb-0">
+            <li><strong>관리자 권한:</strong> 관리자는 대시보드, 채팅 로그, 검증용 채팅에 접근할 수 있습니다.</li>
+            <li><strong>권한 변경:</strong> "관리자 설정/해제" 버튼으로 사용자 권한을 변경할 수 있습니다.</li>
+            <li><strong>본인 권한:</strong> 자기 자신의 권한은 변경할 수 없습니다.</li>
+            <li><strong>프로필 정보:</strong> 사용자가 설정한 나이, 지역 등의 정보를 확인할 수 있습니다.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- 사용자 관리 스타일 -->
+<style>
+.table-hover tbody tr:hover {
+    background-color: #e3f2fd !important;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

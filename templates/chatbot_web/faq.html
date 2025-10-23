@@ -1,0 +1,773 @@
+{% extends 'base.html' %}
+
+{% block title %}질문과 답변 - 노인 복지 정책 RAG 챗봇{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-question-circle-fill"></i> 질문과 답변</h2>
+    </div>
+
+    <div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-list-ul"></i> 검색 결과 <span id="resultCount">32</span>건</h6>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs mb-3" id="categoryTabs" style="flex-wrap: wrap;">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-category="all" onclick="filterByCategory('all'); return false;">전체</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="physical_health" onclick="filterByCategory('physical_health'); return false;">신체건강</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="mental_health" onclick="filterByCategory('mental_health'); return false;">정신건강</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="living_support" onclick="filterByCategory('living_support'); return false;">생활지원</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="housing" onclick="filterByCategory('housing'); return false;">주거</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="job" onclick="filterByCategory('job'); return false;">일자리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="culture" onclick="filterByCategory('culture'); return false;">문화/여가</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="safety" onclick="filterByCategory('safety'); return false;">안전/위기</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="pregnancy" onclick="filterByCategory('pregnancy'); return false;">임신/출산</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="childcare" onclick="filterByCategory('childcare'); return false;">보육</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="education" onclick="filterByCategory('education'); return false;">교육</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="adoption" onclick="filterByCategory('adoption'); return false;">입양/위탁</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="care" onclick="filterByCategory('care'); return false;">보호/돌봄</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="finance" onclick="filterByCategory('finance'); return false;">서민금융</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="law" onclick="filterByCategory('law'); return false;">법률</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="energy" onclick="filterByCategory('energy'); return false;">에너지</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-category="other" onclick="filterByCategory('other'); return false;">기타</a>
+                    </li>
+                </ul>
+
+                <div class="accordion" id="faqAccordion">
+                    <!-- 신체건강 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="physical_health" data-region="전국" data-keywords="무료건강검진 대상">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                <i class="bi bi-patch-question me-2"></i> 노인 무료건강검진 대상과 검진항목은 무엇인가요?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                만 65세 이상 어르신은 국가건강검진을 무료로 받으실 수 있습니다. 일반건강검진, 암검진(위암, 대장암, 폐암 등), 치매조기검진 등이 포함됩니다. 국민건강보험공단에서 안내문을 보내드립니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="physical_health" data-region="전국" data-keywords="만성질환 관리">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                <i class="bi bi-patch-question me-2"></i> 만성질환 관리 지원 프로그램이 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                보건소에서 고혈압, 당뇨병 등 만성질환 관리 프로그램을 무료로 제공합니다. 정기적인 건강상담, 투약관리, 합병증 예방교육 등을 받으실 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 정신건강 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="mental_health" data-region="전국" data-keywords="치매 조기검진">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                <i class="bi bi-patch-question me-2"></i> 치매 조기검진은 어디서 받을 수 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                전국 치매안심센터에서 무료 치매검진을 제공합니다. 선별검사, 진단검사, 감별검사 단계로 진행되며, 치매 예방교육과 인지훈련 프로그램도 함께 운영됩니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="mental_health" data-region="전국" data-keywords="우울증 상담">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                <i class="bi bi-patch-question me-2"></i> 노인 우울증 상담 서비스가 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                정신건강복지센터에서 노인 우울증 상담과 치료를 무료로 지원합니다. 전화상담(1577-0199), 방문상담, 집단프로그램 등을 이용하실 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 생활지원 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="living_support" data-region="전국" data-keywords="무료급식 식사지원">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                <i class="bi bi-patch-question me-2"></i> 무료급식 서비스는 어디서 이용할 수 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq5" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                노인복지관, 경로당, 종교시설 등에서 무료급식을 제공합니다. 저소득 어르신 대상으로 도시락 배달 서비스도 있습니다. 주민센터에 문의하시면 가까운 급식소를 안내받으실 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="living_support" data-region="전국" data-keywords="기초생활수급자 생계급여">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
+                                <i class="bi bi-patch-question me-2"></i> 기초생활수급자 생계급여는 얼마나 받을 수 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq6" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                2024년 기준 1인 가구는 월 62만원, 2인 가구는 월 103만원 정도 지원됩니다. 소득인정액이 기준 중위소득 30% 이하인 경우 신청 가능합니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 주거 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="housing" data-region="전국" data-keywords="공공임대주택 신청">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq7">
+                                <i class="bi bi-patch-question me-2"></i> 노인 대상 공공임대주택은 어떻게 신청하나요?
+                            </button>
+                        </h2>
+                        <div id="faq7" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                LH청약센터나 주거복지센터에서 신청 가능합니다. 영구임대, 국민임대, 행복주택, 시니어주택 등 다양한 유형이 있으며, 소득기준에 따라 자격이 결정됩니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="housing" data-region="전국" data-keywords="주거환경 개선 집수리">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq8">
+                                <i class="bi bi-patch-question me-2"></i> 낡은 집 수리 지원을 받을 수 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq8" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                저소득 노인 가구는 주거환경개선 사업을 통해 도배, 장판, 난방, 화장실 개선 등 집수리 지원을 받을 수 있습니다. 주민센터나 지역자활센터에 문의하세요.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 일자리 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="job" data-region="전국" data-keywords="노인일자리 신청">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq9">
+                                <i class="bi bi-patch-question me-2"></i> 노인일자리 사업은 어떻게 신청하나요?
+                            </button>
+                        </h2>
+                        <div id="faq9" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                만 65세 이상 어르신은 주민센터나 노인복지관에서 신청할 수 있습니다. 공익활동, 사회서비스형, 시장형 사업단, 취업알선형 등 다양한 유형이 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="job" data-region="전국" data-keywords="노인일자리 활동비">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq10">
+                                <i class="bi bi-patch-question me-2"></i> 노인일자리 활동비는 얼마나 받나요?
+                            </button>
+                        </h2>
+                        <div id="faq10" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                공익활동형은 월 27만원(30시간), 사회서비스형은 월 최대 71만원을 받을 수 있습니다. 시장형과 취업알선형은 사업장 여건에 따라 다릅니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 문화/여가 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="culture" data-region="전국" data-keywords="경로당 프로그램">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq11">
+                                <i class="bi bi-patch-question me-2"></i> 경로당에서 어떤 프로그램을 이용할 수 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq11" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                건강체조, 노래교실, 미술활동, 바둑, 장기 등 다양한 여가활동 프로그램이 제공됩니다. 무료급식과 건강관리 서비스도 함께 이용하실 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="culture" data-region="전국" data-keywords="문화 할인 경로우대">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq12">
+                                <i class="bi bi-patch-question me-2"></i> 문화시설 경로우대 할인은 어떻게 되나요?
+                            </button>
+                        </h2>
+                        <div id="faq12" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                만 65세 이상은 국·공립 박물관, 미술관, 고궁 등 무료입장이 가능합니다. 영화관, 공연장 등 민간 문화시설도 할인 혜택을 제공하는 곳이 많습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 안전/위기 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="safety" data-region="전국" data-keywords="독거노인 안전확인">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq13">
+                                <i class="bi bi-patch-question me-2"></i> 혼자 사시는 어르신 안전 확인 서비스가 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq13" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                독거노인 생활관리사가 주기적으로 방문하여 안전확인, 생활교육, 서비스연계 등을 지원합니다. 응급안전안심서비스(화재, 낙상 감지 등)도 제공됩니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="safety" data-region="전국" data-keywords="노인학대 신고">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq14">
+                                <i class="bi bi-patch-question me-2"></i> 노인학대 신고는 어디에 하나요?
+                            </button>
+                        </h2>
+                        <div id="faq14" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                노인보호전문기관(1577-1389) 또는 경찰(112)에 신고하실 수 있습니다. 24시간 상담 및 현장조사, 법률지원, 쉼터연계 등 종합적인 지원을 받으실 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 임신/출산 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="pregnancy" data-region="전국" data-keywords="출산지원금">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq15">
+                                <i class="bi bi-patch-question me-2"></i> 출산지원금은 얼마나 받을 수 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq15" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                첫째 아이 200만원, 둘째 300만원, 셋째 이상 500만원의 국가 출산지원금이 지급됩니다. 지자체별로 추가 지원금이 있을 수 있으니 주민센터에 문의하세요.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="pregnancy" data-region="전국" data-keywords="임신 출산 의료비">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq16">
+                                <i class="bi bi-patch-question me-2"></i> 임신·출산 의료비 지원은 어떻게 받나요?
+                            </button>
+                        </h2>
+                        <div id="faq16" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                임신 확인 시 건강보험공단에서 국민행복카드를 발급받아 임신·출산 진료비로 사용할 수 있습니다. 단태아 100만원, 다태아 140만원이 지원됩니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 보육 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="childcare" data-region="전국" data-keywords="어린이집 보육료">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq17">
+                                <i class="bi bi-patch-question me-2"></i> 어린이집 보육료 지원은 어떻게 되나요?
+                            </button>
+                        </h2>
+                        <div id="faq17" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                만 0~5세 영유아는 소득수준과 관계없이 보육료를 전액 지원받습니다. 복지로 홈페이지나 주민센터에서 신청하시면 됩니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="childcare" data-region="전국" data-keywords="양육수당">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq18">
+                                <i class="bi bi-patch-question me-2"></i> 가정양육수당은 얼마나 지원되나요?
+                            </button>
+                        </h2>
+                        <div id="faq18" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                어린이집이나 유치원을 이용하지 않는 가정양육 아동에게 월 10~20만원의 양육수당이 지급됩니다. 만 0~5세 아동이 대상입니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 교육 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="education" data-region="전국" data-keywords="학비 지원 장학금">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq19">
+                                <i class="bi bi-patch-question me-2"></i> 저소득층 학비 지원은 어떻게 받나요?
+                            </button>
+                        </h2>
+                        <div id="faq19" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                기초생활수급자, 차상위계층 자녀는 교육급여(교육활동지원비)를 지원받습니다. 대학생은 국가장학금을 한국장학재단 홈페이지에서 신청할 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="education" data-region="전국" data-keywords="평생교육 노인대학">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq20">
+                                <i class="bi bi-patch-question me-2"></i> 노인대학이나 평생교육 프로그램이 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq20" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                노인복지관, 평생학습센터에서 한글교육, 스마트폰 활용, 외국어, 건강관리 등 다양한 무료 교육프로그램을 운영합니다. 지역 복지관에 문의하세요.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 입양/위탁 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="adoption" data-region="전국" data-keywords="입양 절차">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq21">
+                                <i class="bi bi-patch-question me-2"></i> 입양 절차는 어떻게 되나요?
+                            </button>
+                        </h2>
+                        <div id="faq21" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                중앙입양원이나 입양기관에 상담 신청 후 교육이수, 가정조사, 아동결연, 법원허가 순으로 진행됩니다. 입양 후 양육수당과 의료비 등을 지원받을 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="adoption" data-region="전국" data-keywords="위탁가정 지원">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq22">
+                                <i class="bi bi-patch-question me-2"></i> 위탁가정 양육비는 얼마나 지원되나요?
+                            </button>
+                        </h2>
+                        <div id="faq22" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                가정위탁 아동 1인당 월 30만원의 양육비가 지원됩니다. 추가로 심리치료비, 대학입학금, 자립정착금 등의 지원도 받을 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 보호/돌봄 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="care" data-region="전국" data-keywords="장기요양보험 등급">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq23">
+                                <i class="bi bi-patch-question me-2"></i> 장기요양보험 등급은 어떻게 받나요?
+                            </button>
+                        </h2>
+                        <div id="faq23" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                만 65세 이상 또는 노인성 질병이 있는 경우 국민건강보험공단에 신청합니다. 방문조사 후 1~5등급, 인지지원등급으로 판정되며, 재가급여나 시설급여를 받을 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="care" data-region="전국" data-keywords="노인돌봄서비스">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq24">
+                                <i class="bi bi-patch-question me-2"></i> 노인돌봄종합서비스는 무엇인가요?
+                            </button>
+                        </h2>
+                        <div id="faq24" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                만 65세 이상 독거노인, 고령부부 가구를 대상으로 가사지원, 활동지원, 주간보호 등의 서비스를 제공합니다. 주민센터에서 신청하실 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 서민금융 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="finance" data-region="전국" data-keywords="서민금융 햇살론">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq25">
+                                <i class="bi bi-patch-question me-2"></i> 서민금융 햇살론은 어떻게 신청하나요?
+                            </button>
+                        </h2>
+                        <div id="faq25" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                저신용자를 위한 정부지원 대출상품으로 연 10~20%의 금리로 최대 3,500만원까지 대출받을 수 있습니다. 서민금융진흥원이나 은행에서 신청 가능합니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="finance" data-region="전국" data-keywords="긴급생계비 대출">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq26">
+                                <i class="bi bi-patch-question me-2"></i> 긴급생계비 대출 지원이 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq26" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                실직, 폐업 등으로 생계곤란을 겪는 경우 긴급생계비를 무이자로 대출받을 수 있습니다. 1인 최대 100만원까지 지원되며, 주민센터에서 신청합니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 법률 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="law" data-region="전국" data-keywords="무료법률상담">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq27">
+                                <i class="bi bi-patch-question me-2"></i> 무료 법률상담은 어디서 받을 수 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq27" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                대한법률구조공단(132), 한국가정법률상담소 등에서 저소득층, 노인, 장애인을 대상으로 무료 법률상담과 소송지원을 제공합니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="law" data-region="전국" data-keywords="성년후견제도">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq28">
+                                <i class="bi bi-patch-question me-2"></i> 성년후견제도는 무엇인가요?
+                            </button>
+                        </h2>
+                        <div id="faq28" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                치매 등으로 의사결정이 어려운 어르신을 법적으로 보호하는 제도입니다. 가정법원에 후견인 선임을 청구하여 재산관리, 의료결정 등을 지원받을 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 에너지 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="energy" data-region="전국" data-keywords="에너지 바우처">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq29">
+                                <i class="bi bi-patch-question me-2"></i> 에너지바우처는 무엇인가요?
+                            </button>
+                        </h2>
+                        <div id="faq29" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                저소득층 에너지 취약계층에게 전기·도시가스·지역난방·등유·LPG 구입비용을 지원하는 제도입니다. 연간 최대 37만원까지 지원되며, 주민센터에서 신청합니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="energy" data-region="전국" data-keywords="전기요금 할인">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq30">
+                                <i class="bi bi-patch-question me-2"></i> 저소득층 전기요금 할인은 어떻게 받나요?
+                            </button>
+                        </h2>
+                        <div id="faq30" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                기초생활수급자, 차상위계층은 월 8,000~16,000원의 전기요금 할인을 받을 수 있습니다. 한국전력 고객센터(123)나 주민센터에서 신청하시면 됩니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 기타 카테고리 -->
+                    <div class="accordion-item faq-item" data-category="other" data-region="전국" data-keywords="기초연금 신청">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq31">
+                                <i class="bi bi-patch-question me-2"></i> 기초연금은 누가 받을 수 있나요?
+                            </button>
+                        </h2>
+                        <div id="faq31" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                만 65세 이상이며 소득인정액이 선정기준액 이하인 어르신이 받을 수 있습니다. 2024년 기준 단독가구 202만원, 부부가구 323.2만원 이하면 신청 가능합니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item faq-item" data-category="other" data-region="전국" data-keywords="복지로 신청">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq32">
+                                <i class="bi bi-patch-question me-2"></i> 복지로에서 온라인 신청이 가능한가요?
+                            </button>
+                        </h2>
+                        <div id="faq32" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                복지로 홈페이지(www.bokjiro.go.kr)에서 대부분의 복지서비스를 온라인으로 신청할 수 있습니다. 공인인증서나 간편인증으로 로그인 후 이용하세요.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-geo-alt"></i> 지역</h6>
+            </div>
+            <div class="card-body">
+                <select class="form-select" id="regionFilter" onchange="applyFilters()">
+                    <option value="">전체</option>
+                    <option value="전국">전국</option>
+                    <option value="부산">부산</option>
+                    <option value="대구">대구</option>
+                    <option value="경남">경남</option>
+                    <option value="경북">경북</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-funnel"></i> 관심주제</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3" style="max-height: 400px; overflow-y: auto;">
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="physical_health" id="cat-physical-health" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-physical-health">신체건강</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="mental_health" id="cat-mental-health" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-mental-health">정신건강</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="living_support" id="cat-living-support" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-living-support">생활지원</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="housing" id="cat-housing" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-housing">주거</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="job" id="cat-job" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-job">일자리</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="culture" id="cat-culture" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-culture">문화/여가</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="safety" id="cat-safety" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-safety">안전/위기</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="pregnancy" id="cat-pregnancy" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-pregnancy">임신/출산</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="childcare" id="cat-childcare" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-childcare">보육</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="education" id="cat-education" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-education">교육</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="adoption" id="cat-adoption" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-adoption">입양/위탁</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="care" id="cat-care" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-care">보호/돌봄</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="finance" id="cat-finance" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-finance">서민금융</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="law" id="cat-law" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-law">법률</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="energy" id="cat-energy" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-energy">에너지</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input category-filter" type="checkbox" value="other" id="cat-other" onchange="updateSelectedFilters()">
+                        <label class="form-check-label" for="cat-other">기타</label>
+                    </div>
+                </div>
+                <div id="selectedFilters" class="mb-2" style="min-height: 30px;">
+                    <small class="text-muted">선택한 항목이 없습니다</small>
+                </div>
+                <button class="btn btn-sm btn-outline-danger w-100" onclick="clearFilters()">
+                    <i class="bi bi-x-circle"></i> 초기화
+                </button>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-lightbulb"></i> 자주 묻는 질문</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="quickSearch('노인 복지 정책')">노인 복지 정책에는 어떤 것들이 있나요?</button>
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="quickSearch('기초연금')">기초연금은 누가 받을 수 있나요?</button>
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="quickSearch('장기요양보험')">노인 장기요양보험 선정 방법</button>
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="quickSearch('복지관 건강')">노인 복지관에서 건강 관련 프로그램이 있나요?</button>
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="quickSearch('무료급식')">무료급식소 식사 지원 서비스는 어디서 이용할 수 있나요?</button>
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="quickSearch('노인일자리')">노인일자리는 어떻게 신청하나요?</button>
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="quickSearch('복지 혜택 중복')">복지 혜택이 중복되는 경우 어떻게 처리되나요?</button>
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="quickSearch('기초연금 신청')">기초연금 신청은 어디서 하나요?</button>
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="quickSearch('장기요양 신청자격')">장기요양보험 신청자격과 절차는 어떻게 되나요?</button>
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="quickSearch('치매')">치매 인식테스트는 어떤 서비스를 제공하나요?</button>
+                    <button class="btn btn-outline-secondary btn-sm text-start" onclick="quickSearch('돌봄 부담')">가족이 돌봄 부담을 덜 수 있는 지원제도가 있나요?</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentCategory = 'all';
+let currentSearchKeyword = '';
+
+const categoryNames = {
+    'physical_health': '신체건강',
+    'mental_health': '정신건강',
+    'living_support': '생활지원',
+    'housing': '주거',
+    'job': '일자리',
+    'culture': '문화/여가',
+    'safety': '안전/위기',
+    'pregnancy': '임신/출산',
+    'childcare': '보육',
+    'education': '교육',
+    'adoption': '입양/위탁',
+    'care': '보호/돌봄',
+    'finance': '서민금융',
+    'law': '법률',
+    'energy': '에너지',
+    'other': '기타'
+};
+
+function filterByCategory(category) {
+    currentCategory = category;
+
+    // Update active tab
+    document.querySelectorAll('#categoryTabs .nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.dataset.category === category) {
+            link.classList.add('active');
+        }
+    });
+
+    // Apply filter
+    applyFilters();
+}
+
+function quickSearch(keyword) {
+    currentSearchKeyword = keyword.toLowerCase();
+    applyFilters();
+}
+
+function updateSelectedFilters() {
+    const selectedCheckboxes = Array.from(document.querySelectorAll('.category-filter:checked'));
+    const selectedFiltersDiv = document.getElementById('selectedFilters');
+
+    if (selectedCheckboxes.length === 0) {
+        selectedFiltersDiv.innerHTML = '<small class="text-muted">선택한 항목이 없습니다</small>';
+    } else {
+        const badges = selectedCheckboxes.map(cb => {
+            const categoryName = categoryNames[cb.value] || cb.value;
+            return `<span class="badge bg-primary me-1 mb-1">${categoryName}</span>`;
+        }).join('');
+        selectedFiltersDiv.innerHTML = badges;
+    }
+
+    applyFilters();
+}
+
+function clearFilters() {
+    // Clear region filter
+    document.getElementById('regionFilter').value = '';
+
+    // Uncheck all category filters
+    document.querySelectorAll('.category-filter').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+
+    // Clear search keyword
+    currentSearchKeyword = '';
+    currentCategory = 'all';
+
+    // Reset tab to all
+    document.querySelectorAll('#categoryTabs .nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.dataset.category === 'all') {
+            link.classList.add('active');
+        }
+    });
+
+    // Update selected filters display
+    document.getElementById('selectedFilters').innerHTML = '<small class="text-muted">선택한 항목이 없습니다</small>';
+
+    applyFilters();
+}
+
+function applyFilters() {
+    const regionFilter = document.getElementById('regionFilter').value;
+    const faqItems = document.querySelectorAll('.faq-item');
+    let visibleCount = 0;
+
+    // Get selected categories from checkboxes
+    const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked')).map(cb => cb.value);
+
+    faqItems.forEach(item => {
+        const itemCategory = item.dataset.category;
+        const itemRegion = item.dataset.region;
+        const itemKeywords = item.dataset.keywords.toLowerCase();
+        const itemText = item.textContent.toLowerCase();
+
+        let shouldShow = true;
+
+        // Category filter (checkbox-based)
+        if (selectedCategories.length > 0 && !selectedCategories.includes(itemCategory)) {
+            shouldShow = false;
+        }
+
+        // Tab-based category filter
+        if (currentCategory !== 'all' && itemCategory !== currentCategory) {
+            shouldShow = false;
+        }
+
+        // Region filter
+        if (regionFilter && itemRegion !== regionFilter) {
+            shouldShow = false;
+        }
+
+        // Keyword search
+        if (currentSearchKeyword && !itemKeywords.includes(currentSearchKeyword) && !itemText.includes(currentSearchKeyword)) {
+            shouldShow = false;
+        }
+
+        if (shouldShow) {
+            item.style.display = '';
+            visibleCount++;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+
+    // Update result count
+    document.getElementById('resultCount').textContent = visibleCount;
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    applyFilters();
+});
+</script>
+{% endblock %}

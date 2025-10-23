@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">노인 정책 목록</h2>
+
+{% for category, policy_list in categories.items %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">{{ category }}</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for policy in policy_list %}
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ policy.title }}</h6>
+                        <p class="card-text small">{{ policy.description }}</p>
+                        <a href="{{ policy.url }}" target="_blank" class="btn btn-sm btn-outline-primary">자세히 보기</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}채팅 로그{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-history text-primary"></i>
+                채팅 로그 관리
+            </h1>
+            <p class="lead text-muted">사용자들의 채팅 기록을 확인할 수 있습니다.</p>
+        </div>
+    </div>
+
+    <!-- 채팅 세션 목록 -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-comments"></i>
+                최근 채팅 세션 (최대 50개)
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if sessions %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>사용자</th>
+                            <th>세션 제목</th>
+                            <th>생성일시</th>
+                            <th>메시지 수</th>
+                            <th>작업</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in sessions %}
+                        <tr>
+                            <td>
+                                <i class="fas fa-user text-muted"></i>
+                                {{ session.user.username }}
+                                {% if session.user.is_staff %}
+                                    <span class="badge badge-warning">관리자</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ session.title|truncatechars:50 }}</strong>
+                                <br>
+                                <small class="text-muted">ID: {{ session.session_id|truncatechars:15 }}</small>
+                            </td>
+                            <td>
+                                <span class="text-nowrap">{{ session.created_at|date:"Y-m-d H:i" }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-info">{{ session.chatmessage_set.count }}개</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'chatbot_web:chat_session' session.session_id %}" 
+                                   class="btn btn-sm btn-outline-primary" target="_blank">
+                                    <i class="fas fa-eye"></i> 보기
+                                </a>
+                                <button class="btn btn-sm btn-outline-secondary" 
+                                        onclick="toggleMessages('{{ session.session_id }}')">
+                                    <i class="fas fa-list"></i> 메시지
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- 메시지 상세 (토글) -->
+                        <tr id="messages-{{ session.session_id }}" style="display: none;">
+                            <td colspan="5">
+                                <div class="bg-light p-3 rounded">
+                                    <h6><i class="fas fa-comments"></i> 메시지 목록</h6>
+                                    {% for message in session.chatmessage_set.all %}
+                                    <div class="mb-2 p-2 border-left-{{ message.role|yesno:'primary,success' }}">
+                                        <div class="d-flex justify-content-between">
+                                            <strong class="text-{{ message.role|yesno:'primary,success' }}">
+                                                {% if message.role == 'user' %}
+                                                    <i class="fas fa-user"></i> 사용자
+                                                {% else %}
+                                                    <i class="fas fa-robot"></i> AI 어시스턴트
+                                                {% endif %}
+                                            </strong>
+                                            <small class="text-muted">{{ message.created_at|date:"m-d H:i" }}</small>
+                                        </div>
+                                        <div class="mt-1">{{ message.content|truncatechars:200 }}</div>
+                                        {% if message.retrieved_docs %}
+                                        <div class="mt-1">
+                                            <small class="text-info">
+                                                <i class="fas fa-file-alt"></i> 
+                                                {{ message.retrieved_docs|length }}개 문서 참조
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% empty %}
+                                    <p class="text-muted mb-0">메시지가 없습니다.</p>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center">
+                <h4><i class="fas fa-info-circle"></i></h4>
+                <p>표시할 채팅 로그가 없습니다.</p>
+                <p class="mb-0">사용자들이 채팅을 시작하면 여기에 기록됩니다.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 하단 안내 -->
+    <div class="mt-4 p-3 bg-light rounded">
+        <h6><i class="fas fa-info-circle text-info"></i> 관리 안내</h6>
+        <ul class="mb-0">
+            <li>최근 50개의 채팅 세션만 표시됩니다.</li>
+            <li>"메시지" 버튼을 클릭하면 해당 세션의 상세 대화 내용을 볼 수 있습니다.</li>
+            <li>"보기" 버튼을 클릭하면 실제 채팅 화면으로 이동합니다.</li>
+            <li>개인정보 보호를 위해 로그 조회 권한은 관리자에게만 부여됩니다.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- 메시지 토글 스크립트 -->
+<script>
+function toggleMessages(sessionId) {
+    const messagesRow = document.getElementById('messages-' + sessionId);
+    if (messagesRow.style.display === 'none') {
+        messagesRow.style.display = 'table-row';
+    } else {
+        messagesRow.style.display = 'none';
+    }
+}
+
+// 테이블 스타일
+document.addEventListener('DOMContentLoaded', function() {
+    // 홀수 행 배경색
+    const rows = document.querySelectorAll('tbody tr:not([id^="messages-"])');
+    rows.forEach((row, index) => {
+        if (index % 2 === 0) {
+            row.style.backgroundColor = '#f8f9fa';
+        }
+    });
+});
+</script>
+
+<!-- 채팅 로그 스타일 -->
+<style>
+.border-left-primary {
+    border-left: 3px solid #007bff !important;
+}
+
+.border-left-success {
+    border-left: 3px solid #28a745 !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #e3f2fd !important;
+}
+
+.btn-group-sm > .btn, .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

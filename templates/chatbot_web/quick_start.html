@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}맞춤형 복지 정책 추천 - 노인 복지 정책 RAG 챗봇{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-stars"></i> 맞춤형 복지 정책 추천</h2>
+    </div>
+
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-info-circle"></i>
+        간단한 정보를 입력하시면, AI가 회원님께 딱 맞는 복지 정책을 추천해드립니다!
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-person-badge"></i> 정보 입력</h5>
+        </div>
+        <div class="card-body">
+            <form id="recommendationForm">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="age" class="form-label">나이 *</label>
+                        <input type="number" class="form-control" id="age" name="age" min="0" max="150" required placeholder="예: 70">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="region" class="form-label">거주 지역 *</label>
+                        <select class="form-select" id="region" name="region" required>
+                            <option value="">선택하세요</option>
+                            <option value="서울">서울</option>
+                            <option value="부산">부산</option>
+                            <option value="대구">대구</option>
+                            <option value="인천">인천</option>
+                            <option value="광주">광주</option>
+                            <option value="대전">대전</option>
+                            <option value="울산">울산</option>
+                            <option value="세종">세종</option>
+                            <option value="경기">경기</option>
+                            <option value="강원">강원</option>
+                            <option value="충북">충북</option>
+                            <option value="충남">충남</option>
+                            <option value="전북">전북</option>
+                            <option value="전남">전남</option>
+                            <option value="경북">경북</option>
+                            <option value="경남">경남</option>
+                            <option value="제주">제주</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">관심 정책 분야 (복수 선택 가능)</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="interests" value="기초연금" id="interest1">
+                            <label class="form-check-label" for="interest1">기초연금</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="interests" value="장기요양보험" id="interest2">
+                            <label class="form-check-label" for="interest2">장기요양보험</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="interests" value="의료지원" id="interest3">
+                            <label class="form-check-label" for="interest3">의료 지원</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="interests" value="주거지원" id="interest4">
+                            <label class="form-check-label" for="interest4">주거 지원</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="interests" value="일자리" id="interest5">
+                            <label class="form-check-label" for="interest5">일자리</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="interests" value="문화여가" id="interest6">
+                            <label class="form-check-label" for="interest6">문화/여가</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="disability" id="disability">
+                            <label class="form-check-label" for="disability">
+                                <i class="bi bi-universal-access"></i> 장애인 대상 정책 포함
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="veteran" id="veteran">
+                            <label class="form-check-label" for="veteran">
+                                <i class="bi bi-medal"></i> 국가유공자 대상 정책 포함
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="low_income" id="low_income">
+                            <label class="form-check-label" for="low_income">
+                                <i class="bi bi-hand-holding-heart"></i> 저소득층 대상 정책 포함
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-search"></i> 맞춤형 정책 추천 받기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 추천 결과 영역 -->
+    <div id="recommendationResult" class="mt-4" style="display: none;">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-check-circle"></i> 추천 결과</h5>
+            </div>
+            <div class="card-body" id="resultContent">
+                <!-- 추천 결과가 여기에 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('recommendationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const age = formData.get('age');
+    const region = formData.get('region');
+    const interests = formData.getAll('interests');
+    const disability = formData.get('disability') ? true : false;
+    const veteran = formData.get('veteran') ? true : false;
+    const low_income = formData.get('low_income') ? true : false;
+
+    // 로딩 표시
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 추천 중...';
+    submitBtn.disabled = true;
+
+    // API 호출
+    fetch('{% url "chatbot_web:quick_start_recommend" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            age: age,
+            region: region,
+            interests: interests,
+            disability: disability,
+            veteran: veteran,
+            low_income: low_income
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.disabled = false;
+
+        if (data.error) {
+            alert('오류: ' + data.error);
+            return;
+        }
+
+        // 결과 표시
+        const resultDiv = document.getElementById('recommendationResult');
+        const contentDiv = document.getElementById('resultContent');
+
+        let html = '<div class="mb-4">';
+        html += '<h5>' + data.summary + '</h5>';
+        html += '</div>';
+
+        // Bootstrap 아코디언으로 접기/펼치기 구현
+        html += '<div class="accordion" id="recommendationAccordion">';
+        data.recommendations.forEach(function(rec, index) {
+            const collapseId = 'collapse' + index;
+            html += '<div class="accordion-item">';
+            html += '<h2 class="accordion-header" id="heading' + index + '">';
+            html += '<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#' + collapseId + '" aria-expanded="false">';
+            html += '<strong>' + (index + 1) + '. ' + rec.title + '</strong>';
+            if (rec.region) {
+                html += ' <span class="badge bg-primary ms-2">' + rec.region + '</span>';
+            }
+            html += '</button>';
+            html += '</h2>';
+            html += '<div id="' + collapseId + '" class="accordion-collapse collapse" data-bs-parent="#recommendationAccordion">';
+            html += '<div class="accordion-body">';
+            html += '<p>' + rec.description + '</p>';
+            if (rec.how_to_apply) {
+                html += '<hr><p><strong><i class="bi bi-pencil-square"></i> 신청 방법:</strong><br>' + rec.how_to_apply + '</p>';
+            }
+            if (rec.required_docs) {
+                html += '<p><strong><i class="bi bi-file-earmark-text"></i> 필요 서류:</strong><br>' + rec.required_docs + '</p>';
+            }
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+        });
+        html += '</div>';
+
+        contentDiv.innerHTML = html;
+        resultDiv.style.display = 'block';
+
+        // 결과로 스크롤
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
+    })
+    .catch(error => {
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.disabled = false;
+        alert('오류가 발생했습니다: ' + error);
+    });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

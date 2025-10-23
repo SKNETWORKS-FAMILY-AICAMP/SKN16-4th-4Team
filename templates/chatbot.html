@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">정책 안내 챗봇</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body" style="height: 500px; overflow-y: auto;" id="chatContainer">
+                <div id="chatMessages">
+                    <div class="alert alert-info">
+                        안녕하세요! 노인 정책에 대해 궁금한 것을 물어보세요.
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="questionInput" placeholder="질문을 입력하세요...">
+                    <button class="btn btn-primary" onclick="askQuestion()">전송</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">최근 대화 이력</div>
+            <div class="card-body" style="height: 500px; overflow-y: auto;">
+                {% for chat in chat_history %}
+                <div class="mb-3 pb-2 border-bottom">
+                    <p class="small mb-1"><strong>Q:</strong> {{ chat.question|truncatechars:50 }}</p>
+                    <p class="small text-muted">{{ chat.created_at|date:"Y-m-d H:i" }}</p>
+                </div>
+                {% empty %}
+                <p class="text-muted">대화 이력이 없습니다.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function askQuestion() {
+    const input = document.getElementById('questionInput');
+    const question = input.value.trim();
+
+    if (!question) {
+        alert('질문을 입력해주세요.');
+        return;
+    }
+
+    // 사용자 메시지 표시
+    addMessage('user', question);
+    input.value = '';
+
+    // 로딩 표시
+    const loadingDiv = addMessage('bot', '<div class="spinner-border spinner-border-sm" role="status"></div> 답변을 생성하는 중...', true);
+
+    // API 호출
+    fetch('/api/chatbot/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question: question })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // 로딩 메시지 제거
+        loadingDiv.remove();
+
+        if (data.error) {
+            addMessage('bot', '오류: ' + data.error);
+        } else {
+            let message = data.answer;
+
+            // 품질 점수 표시 (관리자인 경우)
+            {% if user.is_staff %}
+            if (data.quality_score) {
+                const scoreColor = data.quality_score >= 70 ? 'success' : data.quality_score >= 50 ? 'warning' : 'danger';
+                message += `<br><br><span class="badge bg-${scoreColor}">품질 점수: ${data.quality_score}/100</span>`;
+            }
+            {% endif %}
+
+            // 출처 표시
+            if (data.sources && data.sources.length > 0) {
+                message += '<br><br><small class="text-muted"><i class="bi bi-file-text"></i> 출처: ' + data.sources.join(', ') + '</small>';
+            }
+
+            addMessage('bot', message, true);
+        }
+    })
+    .catch(error => {
+        loadingDiv.remove();
+        addMessage('bot', '오류가 발생했습니다: ' + error);
+    });
+}
+
+function addMessage(type, text, allowHtml = false) {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = type === 'user' ? 'alert alert-primary text-end mb-2' : 'alert alert-secondary mb-2';
+
+    if (allowHtml) {
+        div.innerHTML = text;
+    } else {
+        div.innerHTML = text.replace(/\n/g, '<br>');
+    }
+
+    container.appendChild(div);
+
+    // 스크롤 하단으로
+    const chatContainer = document.getElementById('chatContainer');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    return div;
+}
+
+// Enter 키로 전송
+document.getElementById('questionInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        askQuestion();
+    }
+});
+</script>
+{% endblock %}

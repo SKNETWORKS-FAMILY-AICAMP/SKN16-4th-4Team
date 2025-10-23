@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}피드백 분석 - 관리자{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-graph-up"></i> 피드백 분석</h2>
+        <a href="{% url 'chatbot_web:admin_dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-speedometer2"></i> 대시보드로
+        </a>
+    </div>
+
+    <!-- 통계 요약 카드 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">총 피드백 수</h5>
+                    <h2>{{ total_feedbacks }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">평균 평점</h5>
+                    <h2>{{ avg_rating }} <small>/5.0</small></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">긍정 피드백</h5>
+                    <h2>
+                        {% for item in rating_distribution %}
+                            {% if item.rating >= 4 %}{{ item.count }}{% endif %}
+                        {% endfor %}
+                    </h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-warning text-dark">
+                <div class="card-body">
+                    <h5 class="card-title">개선 필요</h5>
+                    <h2>
+                        {% for item in rating_distribution %}
+                            {% if item.rating <= 2 %}{{ item.count }}{% endif %}
+                        {% endfor %}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 평점 분포 차트 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-bar-chart-fill"></i> 평점 분포
+        </div>
+        <div class="card-body">
+            <canvas id="ratingChart" height="80"></canvas>
+        </div>
+    </div>
+
+    <!-- 카테고리 & 감정 분석 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <i class="bi bi-tags-fill"></i> 피드백 카테고리 분석
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-emoji-smile-fill"></i> 감정 분석
+                </div>
+                <div class="card-body">
+                    <canvas id="sentimentChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 카테고리별 평균 평점 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-star-fill"></i> 카테고리별 평균 평점
+        </div>
+        <div class="card-body">
+            <canvas id="categoryRatingChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- 낮은 평점 피드백 (개선 필요) -->
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <i class="bi bi-exclamation-triangle-fill"></i> 낮은 평점 피드백 (개선 필요)
+        </div>
+        <div class="card-body">
+            {% if low_rating_feedbacks %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>사용자</th>
+                            <th>평점</th>
+                            <th>질문</th>
+                            <th>답변</th>
+                            <th>코멘트</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for feedback in low_rating_feedbacks %}
+                        <tr>
+                            <td>{{ feedback.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ feedback.user.username }}</td>
+                            <td>
+                                <span class="badge bg-danger">{{ feedback.rating }}점</span>
+                            </td>
+                            <td>
+                                <small>{{ feedback.message.session.messages.all|first|truncatechars:50 }}</small>
+                            </td>
+                            <td>
+                                <small>{{ feedback.message.content|truncatechars:50 }}</small>
+                            </td>
+                            <td>
+                                {% if feedback.comment %}
+                                    <small>{{ feedback.comment|truncatechars:50 }}</small>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> 낮은 평점 피드백이 없습니다.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 최근 피드백 -->
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-clock-history"></i> 최근 피드백 (7일)
+        </div>
+        <div class="card-body">
+            {% if recent_feedbacks %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>사용자</th>
+                            <th>평점</th>
+                            <th>메시지 내용</th>
+                            <th>코멘트</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for feedback in recent_feedbacks %}
+                        <tr>
+                            <td>{{ feedback.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ feedback.user.username }}</td>
+                            <td>
+                                {% if feedback.rating >= 4 %}
+                                    <span class="badge bg-success">{{ feedback.rating }}점</span>
+                                {% elif feedback.rating == 3 %}
+                                    <span class="badge bg-warning text-dark">{{ feedback.rating }}점</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ feedback.rating }}점</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>{{ feedback.message.content|truncatechars:80 }}</small>
+                            </td>
+                            <td>
+                                {% if feedback.comment %}
+                                    <small>{{ feedback.comment|truncatechars:50 }}</small>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> 최근 7일간 피드백이 없습니다.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// 평점 분포 차트
+const ratingData = {
+    labels: ['1점 (매우 나쁨)', '2점 (나쁨)', '3점 (보통)', '4점 (좋음)', '5점 (매우 좋음)'],
+    datasets: [{
+        label: '피드백 수',
+        data: [
+            {% for i in "12345" %}
+                {% with rating=i|add:"0" %}
+                    {% for item in rating_distribution %}
+                        {% if item.rating == rating|add:"0"|slugify|add:"0" %}{{ item.count }}{% endif %}
+                    {% endfor %}
+                    {% if forloop.last %}{% else %},{% endif %}
+                {% endwith %}
+            {% endfor %}
+        ],
+        backgroundColor: [
+            'rgba(220, 53, 69, 0.8)',   // 빨강 (1점)
+            'rgba(253, 126, 20, 0.8)',  // 주황 (2점)
+            'rgba(255, 193, 7, 0.8)',   // 노랑 (3점)
+            'rgba(25, 135, 84, 0.8)',   // 초록 (4점)
+            'rgba(13, 110, 253, 0.8)'   // 파랑 (5점)
+        ],
+        borderColor: [
+            'rgba(220, 53, 69, 1)',
+            'rgba(253, 126, 20, 1)',
+            'rgba(255, 193, 7, 1)',
+            'rgba(25, 135, 84, 1)',
+            'rgba(13, 110, 253, 1)'
+        ],
+        borderWidth: 1
+    }]
+};
+
+const ctx = document.getElementById('ratingChart').getContext('2d');
+const ratingChart = new Chart(ctx, {
+    type: 'bar',
+    data: ratingData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: '사용자 피드백 평점 분포'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// 카테고리 분포 차트
+const categoryData = {
+    labels: [
+        {% for item in category_distribution %}
+            '{{ item.label }}'{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    datasets: [{
+        label: '피드백 수',
+        data: [
+            {% for item in category_distribution %}
+                {{ item.count }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        backgroundColor: [
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 206, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(153, 102, 255, 0.8)'
+        ]
+    }]
+};
+
+const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+const categoryChart = new Chart(categoryCtx, {
+    type: 'doughnut',
+    data: categoryData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            title: {
+                display: true,
+                text: '피드백 카테고리'
+            }
+        }
+    }
+});
+
+// 감정 분석 차트
+const sentimentData = {
+    labels: [
+        {% for item in sentiment_distribution %}
+            '{{ item.label }}'{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    datasets: [{
+        label: '피드백 수',
+        data: [
+            {% for item in sentiment_distribution %}
+                {{ item.count }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        backgroundColor: [
+            'rgba(40, 167, 69, 0.8)',   // 긍정 - 초록
+            'rgba(108, 117, 125, 0.8)', // 중립 - 회색
+            'rgba(220, 53, 69, 0.8)'    // 부정 - 빨강
+        ]
+    }]
+};
+
+const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+const sentimentChart = new Chart(sentimentCtx, {
+    type: 'pie',
+    data: sentimentData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            title: {
+                display: true,
+                text: '감정 분석'
+            }
+        }
+    }
+});
+
+// 카테고리별 평균 평점 차트
+const categoryRatingData = {
+    labels: [
+        {% for item in category_avg_rating %}
+            '{{ item.label }}'{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    datasets: [{
+        label: '평균 평점',
+        data: [
+            {% for item in category_avg_rating %}
+                {{ item.avg_rating }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        backgroundColor: 'rgba(13, 110, 253, 0.8)',
+        borderColor: 'rgba(13, 110, 253, 1)',
+        borderWidth: 1
+    }]
+};
+
+const categoryRatingCtx = document.getElementById('categoryRatingChart').getContext('2d');
+const categoryRatingChart = new Chart(categoryRatingCtx, {
+    type: 'bar',
+    data: categoryRatingData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: '카테고리별 평균 평점'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 5,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}검색기 최적화{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-search text-primary"></i>
+                    5단계: 검색기 최적화
+                </h1>
+                <a href="{% url 'chatbot_web:chatbot_optimization' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 최적화 대시보드
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-primary">
+                <h5><i class="fas fa-info-circle"></i> 검색기 최적화란?</h5>
+                <p class="mb-0">
+                    벡터 데이터베이스에서 관련 문서를 검색하는 방식을 최적화합니다.
+                    유사도 검색, MMR(Maximum Marginal Relevance), 하이브리드 검색 등 다양한 전략을 비교합니다.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5><i class="fas fa-play-circle"></i> 최적화 실행</h5>
+                    <p class="text-muted">벡터 저장소가 구성되어 있어야 합니다.</p>
+                    <button id="run-retriever" class="btn btn-primary btn-lg">
+                        <i class="fas fa-rocket"></i> 검색기 최적화 시작
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="progress-section" class="row mb-4" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5><i class="fas fa-spinner fa-spin"></i> 최적화 진행 중...</h5>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated"
+                             role="progressbar" style="width: 50%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="results-section" class="row" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow border-left-primary">
+                <div class="card-header">
+                    <h5 class="m-0"><i class="fas fa-check-circle text-primary"></i> 최적화 완료</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">이 단계는 전체 파이프라인 최적화에서 자동으로 실행됩니다.</p>
+                    <a href="{% url 'chatbot_web:optimization_full_pipeline' %}" class="btn btn-primary">
+                        전체 파이프라인 최적화로 이동
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.border-left-primary { border-left: 0.25rem solid #007bff !important; }
+</style>
+{% endblock %}

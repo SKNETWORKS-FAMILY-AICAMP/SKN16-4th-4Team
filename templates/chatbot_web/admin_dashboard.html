@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}관리자 대시보드{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-tachometer-alt text-primary"></i>
+                관리자 대시보드
+            </h1>
+        </div>
+    </div>
+
+    <!-- 통계 카드 -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                총 사용자 수
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_users }}명
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                총 채팅 세션
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_sessions }}개
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                총 메시지 수
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_messages }}개
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-envelope fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                최근 7일 세션
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ recent_sessions }}개
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-week fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 관리 메뉴 -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-cog"></i> 시스템 관리
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'chatbot_web:user_management' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-users text-primary"></i>
+                            사용자 관리
+                            <small class="text-muted d-block">사용자 권한 및 정보 관리</small>
+                        </a>
+                        <a href="{% url 'chatbot_web:chat_logs' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-history text-success"></i>
+                            채팅 로그 조회
+                            <small class="text-muted d-block">사용자 대화 기록 확인</small>
+                        </a>
+                        <a href="{% url 'chatbot_web:validation_chat_logs' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-flask text-warning"></i>
+                            검증용 채팅 로그
+                            <small class="text-muted d-block">관리자 테스트 대화 기록</small>
+                        </a>
+                        <a href="{% url 'chatbot_web:monitoring' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-database text-info"></i>
+                            PostgreSQL 모니터링
+                            <small class="text-muted d-block">데이터베이스 저장 내역 확인</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-robot"></i> RAG 시스템
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'chatbot_web:validation_chat' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-comments text-info"></i>
+                            검증용 채팅
+                            <small class="text-muted d-block">RAG 시스템 테스트 및 검증</small>
+                        </a>
+                        <a href="{% url 'chatbot_web:policy_list' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-file-alt text-secondary"></i>
+                            정책 목록 관리
+                            <small class="text-muted d-block">등록된 정책 문서 확인</small>
+                        </a>
+                        <div class="list-group-item">
+                            <i class="fas fa-database text-muted"></i>
+                            벡터 데이터베이스 상태
+                            <small class="text-success d-block">정상 운영 중</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 챗봇 최적화 (AutoRAG) -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card shadow border-left-primary">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-magic"></i> 챗봇 최적화 (AutoRAG)
+                    </h6>
+                    <a href="{% url 'chatbot_web:chatbot_optimization' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-cog"></i> 최적화 대시보드
+                    </a>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        <i class="fas fa-lightbulb text-warning"></i>
+                        AutoRAG 시스템을 통해 챗봇의 모든 구성 요소를 자동으로 최적화하고 성능을 향상시킬 수 있습니다.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <div class="alert alert-light mb-0">
+                                <i class="fas fa-file-alt text-info"></i>
+                                <strong>텍스트 추출</strong>
+                                <small class="d-block text-muted">PDF/HWP 최적 추출기 선택</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="alert alert-light mb-0">
+                                <i class="fas fa-puzzle-piece text-success"></i>
+                                <strong>청킹 전략</strong>
+                                <small class="d-block text-muted">최적 문서 분할 방식 선택</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="alert alert-light mb-0">
+                                <i class="fas fa-search text-primary"></i>
+                                <strong>검색 최적화</strong>
+                                <small class="d-block text-muted">임베딩, 검색기, RAG 시스템</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- 피드백 분석 -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card shadow border-left-info">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="bi bi-chat-square-heart"></i> 사용자 피드백 분석
+                    </h6>
+                    <a href="{% url 'chatbot_web:feedback_analytics' %}" class="btn btn-sm btn-info">
+                        <i class="bi bi-graph-up"></i> 상세 보기
+                    </a>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        <i class="bi bi-info-circle text-info"></i>
+                        사용자들의 답변 만족도를 확인하고, 개선이 필요한 부분을 파악할 수 있습니다.
+                    </p>
+                    <div class="alert alert-light">
+                        <i class="bi bi-hand-thumbs-up-fill text-success"></i>
+                        피드백 시스템을 통해 RAG 챗봇의 품질을 지속적으로 개선하세요!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 빠른 작업 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt"></i> 빠른 작업
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'chatbot_web:chat_new_session' %}" class="btn btn-primary btn-block">
+                                <i class="fas fa-plus"></i> 새 채팅 시작
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'chatbot_web:validation_chat_new_session' %}" class="btn btn-warning btn-block">
+                                <i class="fas fa-flask"></i> 검증용 채팅 시작
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'admin:index' %}" class="btn btn-secondary btn-block" target="_blank">
+                                <i class="fas fa-tools"></i> Django 관리자
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 대시보드 스타일 -->
+<style>
+.border-left-primary {
+    border-left: 0.25rem solid #007bff !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #28a745 !important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #17a2b8 !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #ffc107 !important;
+}
+
+.text-gray-800 {
+    color: #343a40 !important;
+}
+
+.text-gray-300 {
+    color: #dee2e6 !important;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+.list-group-item-action:hover {
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,77 @@
+{
+  "optimization_target": "balanced",
+  "max_iterations": 5,
+  "early_stopping": true,
+  "performance_threshold": 0.85,
+  "component_weights": {
+    "text_extraction": 0.2,
+    "chunking": 0.25,
+    "embedding": 0.25,
+    "retrieval": 0.3
+  },
+  "search_space": {
+    "chunk_sizes": [200, 400, 600, 800, 1000],
+    "top_k_values": [3, 5, 7, 10],
+    "similarity_thresholds": [0.6, 0.7, 0.8, 0.9],
+    "embedding_dimensions": [384, 512, 768, 1024]
+  },
+  "optimization_strategies": {
+    "text_extraction": {
+      "methods": ["PyPDF2", "pdfplumber", "PyMuPDF", "pdfminer"],
+      "selection_criteria": "speed_and_accuracy",
+      "fallback": "PyPDF2"
+    },
+    "chunking": {
+      "strategies": ["recursive", "semantic", "fixed_size", "sentence"],
+      "size_optimization": true,
+      "overlap_optimization": true,
+      "quality_metrics": ["coherence", "completeness", "relevance"]
+    },
+    "embedding": {
+      "models": ["sentence-transformers", "openai", "huggingface"],
+      "batch_optimization": true,
+      "dimension_selection": "auto",
+      "quality_metrics": ["semantic_similarity", "retrieval_accuracy"]
+    },
+    "retrieval": {
+      "strategies": ["similarity", "mmr", "diversity"],
+      "ranking_optimization": true,
+      "filtering_optimization": true,
+      "quality_metrics": ["precision", "recall", "ndcg"]
+    }
+  },
+  "performance_targets": {
+    "text_extraction": {
+      "min_success_rate": 0.9,
+      "max_processing_time": 5.0,
+      "min_content_quality": 0.8
+    },
+    "chunking": {
+      "min_coherence_score": 0.7,
+      "optimal_chunk_size_range": [300, 700],
+      "max_processing_time": 2.0
+    },
+    "embedding": {
+      "min_similarity_correlation": 0.8,
+      "max_embedding_time": 1.0,
+      "min_retrieval_accuracy": 0.75
+    },
+    "retrieval": {
+      "min_precision_at_5": 0.8,
+      "min_recall_at_10": 0.9,
+      "max_response_time": 0.5
+    }
+  },
+  "stopping_criteria": {
+    "max_time_minutes": 30,
+    "convergence_threshold": 0.01,
+    "min_improvement_rate": 0.05,
+    "patience_iterations": 3
+  },
+  "logging": {
+    "level": "INFO",
+    "save_intermediate_results": true,
+    "detailed_metrics": true,
+    "visualization": false
+  }
+}

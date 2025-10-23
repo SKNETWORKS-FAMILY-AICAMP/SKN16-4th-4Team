@@ -1,0 +1,507 @@
+"""
+RAG 챗봇 시스템 모델
+- 사용자 관리
+- RAG 구성 관리
+- 대화 기록 관리
+"""
+
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+class UserProfile(models.Model):
+    """사용자 프로필 확장"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    
+    # 개인 정보
+    age = models.IntegerField(null=True, blank=True, verbose_name="나이")
+    gender = models.CharField(
+        max_length=10,
+        choices=[('남성', '남성'), ('여성', '여성'), ('기타', '기타')],
+        null=True,
+        blank=True,
+        verbose_name="성별"
+    )
+    region = models.CharField(
+        max_length=50,
+        choices=[
+            ('경남', '경남'),
+            ('경북', '경북'),
+            ('대구', '대구'),
+            ('부산', '부산'),
+            ('전국', '전국'),
+            ('전남', '전남'),
+            ('전북', '전북'),
+            ('서울', '서울'),
+            ('인천', '인천'),
+            ('경기', '경기'),
+            ('강원', '강원'),
+            ('충북', '충북'),
+            ('충남', '충남'),
+            ('세종', '세종'),
+            ('광주', '광주'),
+            ('제주', '제주'),
+        ],
+        blank=True,
+        verbose_name="사는 지역"
+    )
+    
+    # 추가 정보
+    disability = models.BooleanField(default=False, verbose_name="장애 여부")
+    veteran = models.BooleanField(default=False, verbose_name="보훈 대상 여부")
+    low_income = models.BooleanField(default=False, verbose_name="저소득층 여부")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="수정일")
+
+    class Meta:
+        verbose_name = "사용자 프로필"
+        verbose_name_plural = "사용자 프로필들"
+
+    def __str__(self):
+        return f"{self.user.username}의 프로필"
+
+
+# User 생성 시 자동으로 Profile 생성
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
+
+
+class KakaoUser(models.Model):
+    """카카오 로그인 사용자 (일반 User와 별도 테이블)"""
+    kakao_id = models.BigIntegerField(unique=True, verbose_name="카카오 ID")
+    nickname = models.CharField(max_length=100, null=True, blank=True, verbose_name="닉네임")
+    email = models.EmailField(null=True, blank=True, verbose_name="이메일")
+    profile_image = models.URLField(null=True, blank=True, verbose_name="프로필 이미지")
+    thumbnail_image = models.URLField(null=True, blank=True, verbose_name="썸네일 이미지")
+
+    # 토큰 정보
+    access_token = models.TextField(verbose_name="액세스 토큰")
+    refresh_token = models.TextField(null=True, blank=True, verbose_name="리프레시 토큰")
+    token_expires_at = models.DateTimeField(null=True, blank=True, verbose_name="토큰 만료 시각")
+
+    # 사용자 추가 정보
+    age = models.IntegerField(null=True, blank=True, verbose_name="나이")
+    gender = models.CharField(
+        max_length=10,
+        choices=[('male', '남성'), ('female', '여성'), ('other', '기타')],
+        null=True,
+        blank=True,
+        verbose_name="성별"
+    )
+    region = models.CharField(max_length=50, null=True, blank=True, verbose_name="지역")
+
+    # 메타 정보
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="가입일")
+    last_login = models.DateTimeField(null=True, blank=True, verbose_name="최근 로그인")
+
+    class Meta:
+        verbose_name = "카카오 사용자"
+        verbose_name_plural = "카카오 사용자들"
+        db_table = 'kakao_users'
+
+    def __str__(self):
+        return f"카카오:{self.nickname or self.kakao_id}"
+
+
+class RAGConfiguration(models.Model):
+    """RAG 파이프라인 구성 설정"""
+
+    name = models.CharField(max_length=200, verbose_name="구성 이름")
+    description = models.TextField(blank=True, verbose_name="설명")
+
+    # PDF 텍스트 추출 설정
+    pdf_extractor = models.CharField(
+        max_length=50,
+        choices=[
+            ('PyPDF2', 'PyPDF2'),
+            ('pdfplumber', 'PDF Plumber'),
+            ('PyMuPDF', 'PyMuPDF (Fitz)'),
+            ('pdfminer', 'PDFMiner'),
+            ('unstructured', 'Unstructured'),
+        ],
+        default='pdfplumber',
+        verbose_name="PDF 추출기"
+    )
+
+    # HWP 텍스트 추출 설정
+    hwp_extractor = models.CharField(
+        max_length=50,
+        choices=[
+            ('olefile', 'OleFile (HWP 3.0-5.0)'),
+            ('hwpx', 'HWPX (HWP 2014+)'),
+            ('advanced_hwp', 'Advanced HWP (권장)'),
+        ],
+        default='advanced_hwp',
+        verbose_name="HWP 추출기"
+    )
+
+    # OCR 사용 여부
+    use_ocr = models.BooleanField(default=True, verbose_name="OCR 사용 (PDF 실패 시)")
+
+    # 청킹 전략
+    chunking_strategy = models.CharField(
+        max_length=50,
+        choices=[
+            ('fixed_size', 'Fixed Size'),
+            ('sentence', 'Sentence-based'),
+            ('paragraph', 'Paragraph-based'),
+            ('semantic', 'Semantic'),
+            ('recursive', 'Recursive Character'),
+        ],
+        default='recursive',
+        verbose_name="청킹 전략"
+    )
+    chunk_size = models.IntegerField(default=1000, verbose_name="청크 크기")
+    chunk_overlap = models.IntegerField(default=200, verbose_name="청크 오버랩")
+
+    # 임베딩 모델
+    embedding_model = models.CharField(
+        max_length=100,
+        choices=[
+            ('openai', 'OpenAI text-embedding-ada-002'),
+            ('sentence-transformers/all-MiniLM-L6-v2', 'MiniLM-L6-v2 (영어)'),
+            ('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2', 'Multilingual MiniLM'),
+            ('jhgan/ko-sroberta-multitask', 'KoSRoBERTa'),
+            ('BM-K/KoSimCSE-roberta', 'KoSimCSE'),
+        ],
+        default='jhgan/ko-sroberta-multitask',
+        verbose_name="임베딩 모델"
+    )
+
+    # 검색 전략
+    retrieval_strategy = models.CharField(
+        max_length=50,
+        choices=[
+            ('similarity', 'Similarity Search'),
+            ('mmr', 'MMR (Maximal Marginal Relevance)'),
+            ('bm25', 'BM25'),
+            ('ensemble', 'Ensemble (Hybrid)'),
+        ],
+        default='similarity',
+        verbose_name="검색 전략"
+    )
+    top_k = models.IntegerField(default=5, verbose_name="검색 결과 개수")
+
+    # ChromaDB 설정
+    collection_name = models.CharField(max_length=100, unique=True, verbose_name="컬렉션 이름")
+
+    # 메타 정보
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rag_configs')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="수정일")
+    is_active = models.BooleanField(default=True, verbose_name="활성화")
+    is_validation = models.BooleanField(default=False, verbose_name="검증용 구성")
+
+    # 통계
+    document_count = models.IntegerField(default=0, verbose_name="문서 수")
+    chunk_count = models.IntegerField(default=0, verbose_name="청크 수")
+    build_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', '대기 중'),
+            ('building', '구축 중'),
+            ('completed', '완료'),
+            ('failed', '실패'),
+        ],
+        default='pending',
+        verbose_name="구축 상태"
+    )
+    build_started_at = models.DateTimeField(null=True, blank=True, verbose_name="구축 시작 시간")
+    build_completed_at = models.DateTimeField(null=True, blank=True, verbose_name="구축 완료 시간")
+    error_message = models.TextField(blank=True, verbose_name="오류 메시지")
+
+    # 통계 추가
+    total_documents = models.IntegerField(default=0, verbose_name="총 문서 수")
+    total_chunks = models.IntegerField(default=0, verbose_name="총 청크 수")
+
+    class Meta:
+        verbose_name = "RAG 구성"
+        verbose_name_plural = "RAG 구성들"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.collection_name})"
+
+
+class ChatSession(models.Model):
+    """사용자 채팅 세션
+
+    user는 nullable로 변경하여 비로그인(익명) 세션을 지원합니다.
+    """
+
+    # user를 nullable로 변경하여 익명 세션을 허용
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_sessions', null=True, blank=True)
+    rag_config = models.ForeignKey(RAGConfiguration, on_delete=models.SET_NULL, null=True)
+
+    session_id = models.CharField(max_length=100, unique=True, verbose_name="세션 ID")
+    title = models.CharField(max_length=200, default="새 대화", verbose_name="대화 제목")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="수정일")
+
+    class Meta:
+        verbose_name = "채팅 세션"
+        verbose_name_plural = "채팅 세션들"
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.title}"
+
+
+class ChatMessage(models.Model):
+    """채팅 메시지"""
+
+    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name='messages')
+
+    role = models.CharField(
+        max_length=20,
+        choices=[
+            ('user', '사용자'),
+            ('assistant', '챗봇'),
+            ('system', '시스템'),
+        ],
+        verbose_name="역할"
+    )
+    content = models.TextField(verbose_name="내용")
+
+    # 검색 결과 (assistant 메시지인 경우)
+    retrieved_docs = models.JSONField(null=True, blank=True, verbose_name="검색된 문서")
+
+    # 성능 메트릭
+    response_time = models.FloatField(null=True, blank=True, verbose_name="응답 시간(초)")
+    tokens_used = models.IntegerField(null=True, blank=True, verbose_name="사용된 토큰")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
+
+    class Meta:
+        verbose_name = "채팅 메시지"
+        verbose_name_plural = "채팅 메시지들"
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.session.session_id} - {self.role}: {self.content[:50]}"
+
+
+class UserFeedback(models.Model):
+    """사용자 피드백"""
+
+    CATEGORY_CHOICES = [
+        ('feature_request', '기능 요청'),
+        ('bug', '버그'),
+        ('usability', '사용성 문제'),
+        ('praise', '칭찬'),
+        ('other', '기타'),
+    ]
+
+    SENTIMENT_CHOICES = [
+        ('positive', '긍정'),
+        ('neutral', '중립'),
+        ('negative', '부정'),
+    ]
+
+    message = models.ForeignKey(ChatMessage, on_delete=models.CASCADE, related_name='feedbacks')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    rating = models.IntegerField(
+        choices=[(1, '매우 나쁨'), (2, '나쁨'), (3, '보통'), (4, '좋음'), (5, '매우 좋음')],
+        verbose_name="평점"
+    )
+    comment = models.TextField(blank=True, verbose_name="코멘트")
+
+    # 새로 추가된 필드
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="카테고리"
+    )
+    sentiment = models.CharField(
+        max_length=10,
+        choices=SENTIMENT_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="감정"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
+
+    class Meta:
+        verbose_name = "사용자 피드백"
+        verbose_name_plural = "사용자 피드백들"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.rating}점"
+
+
+class SessionRating(models.Model):
+    """채팅 세션 평가"""
+
+    session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    rating = models.DecimalField(
+        max_digits=2,
+        decimal_places=1,
+        verbose_name="별점 (0.5 단위)"
+    )
+    comment = models.TextField(blank=True, verbose_name="코멘트")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
+
+    class Meta:
+        verbose_name = "세션 평가"
+        verbose_name_plural = "세션 평가들"
+        ordering = ['-created_at']
+        unique_together = ['session', 'user']  # 한 사용자는 세션당 한 번만 평가
+
+    def __str__(self):
+        return f"{self.user.username} - 세션 {self.session.session_id[:8]} - {self.rating}점"
+
+
+class ElderlyPolicy(models.Model):
+    """노년 복지 정책"""
+    title = models.CharField(max_length=300, verbose_name="정책명")
+    provider = models.CharField(max_length=100, verbose_name="제공기관")
+    region = models.CharField(
+        max_length=50,
+        blank=True,
+        choices=[
+            ('전국', '전국'),
+            ('서울특별시', '서울특별시'),
+            ('부산광역시', '부산광역시'),
+            ('대구광역시', '대구광역시'),
+            ('인천광역시', '인천광역시'),
+            ('광주광역시', '광주광역시'),
+            ('대전광역시', '대전광역시'),
+            ('울산광역시', '울산광역시'),
+            ('세종특별자치시', '세종특별자치시'),
+            ('경기도', '경기도'),
+            ('강원특별자치도', '강원특별자치도'),
+            ('충청북도', '충청북도'),
+            ('충청남도', '충청남도'),
+            ('전북특별자치도', '전북특별자치도'),
+            ('전라남도', '전라남도'),
+            ('경상북도', '경상북도'),
+            ('경상남도', '경상남도'),
+            ('제주특별자치도', '제주특별자치도'),
+        ],
+        default='전국',
+        verbose_name="지역"
+    )
+    category = models.CharField(max_length=100, blank=True, verbose_name="분야")
+    target = models.TextField(blank=True, verbose_name="대상")
+    benefits = models.TextField(blank=True, verbose_name="혜택내용")
+    how_to_apply = models.TextField(blank=True, verbose_name="신청방법")
+    required_docs = models.TextField(blank=True, verbose_name="구비서류")
+    contact = models.TextField(blank=True, verbose_name="문의처")
+    policy_url = models.URLField(blank=True, verbose_name="정책 링크")
+    description = models.TextField(blank=True, verbose_name="정책 설명")
+    
+    # 메타데이터
+    source_file = models.CharField(max_length=500, blank=True, verbose_name="출처 파일")
+    extracted_text = models.TextField(blank=True, verbose_name="추출된 원문")
+    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="등록일")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="수정일")
+
+    class Meta:
+        verbose_name = "노년 복지 정책"
+        verbose_name_plural = "노년 복지 정책들"
+        ordering = ['region', 'title']
+
+    def __str__(self):
+        return f"[{self.region}] {self.title}"
+
+
+class DocumentChunk(models.Model):
+    """문서 청크(임베딩 전/후 메타 저장)"""
+
+    policy = models.ForeignKey(ElderlyPolicy, on_delete=models.SET_NULL, null=True, blank=True, related_name='chunks')
+    source_path = models.CharField(max_length=1000, blank=True, verbose_name="원본 파일 경로")
+    chunk_index = models.IntegerField(verbose_name="청크 인덱스")
+    text = models.TextField(verbose_name="청크 텍스트")
+    embedding = models.BinaryField(null=True, blank=True, verbose_name="임베딩(바이너리) -- 선택적 저장")
+    metadata = models.JSONField(default=dict, blank=True, verbose_name="메타데이터")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "문서 청크"
+        verbose_name_plural = "문서 청크들"
+        indexes = [models.Index(fields=['chunk_index']), ]
+
+    def __str__(self):
+        return f"Chunk {self.chunk_index} - {self.source_path[:60]}"
+
+
+class RetrieverLog(models.Model):
+    """리트리버(검색) 로그: 검색 쿼리, 결과, 점수 등 기록"""
+
+    query_text = models.TextField(verbose_name="검색 질의")
+    session = models.ForeignKey(ChatSession, on_delete=models.SET_NULL, null=True, blank=True, related_name='retriever_logs')
+    retrieved = models.JSONField(default=list, blank=True, verbose_name="검색 결과 정보(문서 id, score 등)")
+    user_region = models.CharField(max_length=100, blank=True, verbose_name="사용자 지역")
+    elapsed_ms = models.IntegerField(null=True, blank=True, verbose_name="소요 시간(ms)")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "리트리버 로그"
+        verbose_name_plural = "리트리버 로그들"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"RetrieverLog {self.id} - {self.query_text[:60]}"
+
+
+class APIUsage(models.Model):
+    """외부 API 사용 로그 (OpenAI 등)"""
+    provider = models.CharField(max_length=50, default='openai', verbose_name="프로바이더")
+    api_endpoint = models.CharField(max_length=200, blank=True, verbose_name="엔드포인트")
+    request_payload = models.JSONField(null=True, blank=True)
+    response_summary = models.TextField(blank=True)
+    tokens_used = models.IntegerField(null=True, blank=True)
+    cost_estimate = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "API 사용 로그"
+        verbose_name_plural = "API 사용 로그들"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"APIUsage {self.id} - {self.provider}"
+
+
+class Bookmark(models.Model):
+    """사용자 북마크 - 챗봇 Q&A 저장"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookmarks', verbose_name="사용자")
+    question = models.TextField(verbose_name="질문")
+    answer = models.TextField(verbose_name="답변")
+    chatbot_type = models.CharField(
+        max_length=20,
+        choices=[('regular', '일반'), ('validation', '검증용')],
+        default='regular',
+        verbose_name="챗봇 유형"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
+
+    class Meta:
+        verbose_name = "북마크"
+        verbose_name_plural = "북마크들"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username}의 북마크 - {self.question[:30]}..."

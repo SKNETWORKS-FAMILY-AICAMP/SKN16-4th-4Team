@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h1 class="display-4 mb-4">
+        <i class="fas fa-robot text-primary"></i>
+        노인 정책 안내 챗봇
+    </h1>
+    <p class="lead text-muted">노인분들을 위한 맞춤형 복지정책 정보를 AI로 쉽게 찾아보세요</p>
+
+    <div class="row mt-5 justify-content-center">
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">정책 목록</h5>
+                    <p class="card-text">지역별 노인 복지 정책을 한눈에 확인하세요</p>
+                    <a href="{% url 'chatbot_web:policy_list' %}" class="btn btn-primary">
+                        <i class="fas fa-list"></i> 보러가기
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-comments fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">AI 챗봇</h5>
+                    <p class="card-text">궁금한 정책을 자연어로 물어보세요</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'chatbot_web:chat' %}" class="btn btn-success">
+                            <i class="fas fa-comments"></i> 질문하기
+                        </a>
+                    {% else %}
+                        <a href="{% url 'chatbot_web:login' %}" class="btn btn-secondary">
+                            <i class="fas fa-sign-in-alt"></i> 로그인 필요
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-circle fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">내 프로필</h5>
+                    <p class="card-text">지역과 정보를 설정하여 맞춤 정책을 받아보세요</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'chatbot_web:profile' %}" class="btn btn-info">
+                            <i class="fas fa-cog"></i> 설정하기
+                        </a>
+                    {% else %}
+                        <a href="{% url 'chatbot_web:register' %}" class="btn btn-outline-info">
+                            <i class="fas fa-user-plus"></i> 회원가입
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 특징 소개 -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4">
+                <i class="fas fa-star text-warning"></i>
+                서비스 특징
+            </h3>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-map-marker-alt fa-2x text-primary mr-3"></i>
+                <div>
+                    <h6 class="mb-1">지역별 맞춤 정보</h6>
+                    <small class="text-muted">거주 지역에 따른 맞춤형 복지정책 안내</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-brain fa-2x text-success mr-3"></i>
+                <div>
+                    <h6 class="mb-1">AI 기반 검색</h6>
+                    <small class="text-muted">자연어 질문으로 쉽고 정확한 정책 검색</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-shield-alt fa-2x text-info mr-3"></i>
+                <div>
+                    <h6 class="mb-1">정확한 정보</h6>
+                    <small class="text-muted">복지로 공식 정책 문서 기반 신뢰할 수 있는 답변</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-clock fa-2x text-warning mr-3"></i>
+                <div>
+                    <h6 class="mb-1">24시간 이용</h6>
+                    <small class="text-muted">언제든지 편리하게 정책 정보 확인 가능</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 빠른 시작 가이드 -->
+    {% if not user.is_authenticated %}
+    <div class="alert alert-info mt-5">
+        <h5>
+            <i class="fas fa-rocket"></i>
+            빠른 시작 가이드
+        </h5>
+        <ol class="text-left mb-0">
+            <li><strong>회원가입</strong>을 하여 서비스에 가입하세요</li>
+            <li><strong>프로필 설정</strong>에서 거주 지역과 정보를 입력하세요</li>
+            <li><strong>AI 챗봇</strong>에게 궁금한 정책을 질문해보세요</li>
+            <li><strong>정책 목록</strong>에서 더 많은 정책을 둘러보세요</li>
+        </ol>
+    </div>
+    {% endif %}
+</div>
+
+<!-- 홈페이지 스타일 -->
+<style>
+.card:hover {
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+}
+
+.card-body i.fa-3x {
+    transition: color 0.3s ease;
+}
+
+.card:hover .card-body i.fa-3x {
+    transform: scale(1.1);
+}
+
+.d-flex i.fa-2x {
+    min-width: 60px;
+}
+</style>
+{% endblock %}
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">내 정보</h5>
+                    <p class="card-text">맞춤형 정책을 위한 정보 입력</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile' %}" class="btn btn-info">수정하기</a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="btn btn-secondary">가입하기</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

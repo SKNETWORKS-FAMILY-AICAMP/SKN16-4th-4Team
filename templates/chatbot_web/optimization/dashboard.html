@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+
+{% block title %}챗봇 최적화 (AutoRAG){% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-magic text-primary"></i>
+                    챗봇 최적화 (AutoRAG)
+                </h1>
+                <a href="{% url 'chatbot_web:admin_dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 관리자 대시보드
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 설명 섹션 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle"></i> AutoRAG 시스템이란?</h5>
+                <p class="mb-0">
+                    AutoRAG는 RAG(Retrieval-Augmented Generation) 챗봇의 모든 구성 요소를 자동으로 최적화하는 시스템입니다.
+                    텍스트 추출, 청킹 전략, 임베딩 모델, 검색 방식 등을 평가하여 최적의 조합을 찾아냅니다.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 최적화 단계 카드 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-3"><i class="fas fa-list-ol"></i> 최적화 단계</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 1단계: 텍스트 추출 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow h-100 border-left-info">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-info text-white p-3 mr-3">
+                            <h4 class="mb-0">1</h4>
+                        </div>
+                        <h5 class="mb-0">텍스트 추출</h5>
+                    </div>
+                    <p class="text-muted">
+                        PDF, HWP 파일에서 텍스트를 추출하는 최적의 방법을 선택합니다.
+                    </p>
+                    <ul class="small">
+                        <li>PDF: PDFPlumber, PyMuPDF, PyPDF2</li>
+                        <li>HWP: olefile, hwp5</li>
+                    </ul>
+                    <a href="{% url 'chatbot_web:optimization_text_extraction' %}" class="btn btn-info btn-block">
+                        <i class="fas fa-play"></i> 실행
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2단계: 청킹 전략 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow h-100 border-left-success">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-success text-white p-3 mr-3">
+                            <h4 class="mb-0">2</h4>
+                        </div>
+                        <h5 class="mb-0">청킹 전략</h5>
+                    </div>
+                    <p class="text-muted">
+                        문서를 적절한 크기로 분할하는 최적의 전략을 선택합니다.
+                    </p>
+                    <ul class="small">
+                        <li>고정 크기, 재귀 분할, 문장 단위</li>
+                        <li>의미 기반 분할, 슬라이딩 윈도우</li>
+                    </ul>
+                    <a href="{% url 'chatbot_web:optimization_chunking' %}" class="btn btn-success btn-block">
+                        <i class="fas fa-play"></i> 실행
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3단계: 임베딩 모델 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow h-100 border-left-warning">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-warning text-white p-3 mr-3">
+                            <h4 class="mb-0">3</h4>
+                        </div>
+                        <h5 class="mb-0">임베딩 모델</h5>
+                    </div>
+                    <p class="text-muted">
+                        텍스트를 벡터로 변환하는 최적의 임베딩 모델을 선택합니다.
+                    </p>
+                    <ul class="small">
+                        <li>OpenAI text-embedding-3-small/large</li>
+                        <li>SentenceTransformer 한국어 모델</li>
+                    </ul>
+                    <a href="{% url 'chatbot_web:optimization_embedding' %}" class="btn btn-warning btn-block">
+                        <i class="fas fa-play"></i> 실행
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4단계: 벡터 저장소 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow h-100 border-left-secondary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-secondary text-white p-3 mr-3">
+                            <h4 class="mb-0">4</h4>
+                        </div>
+                        <h5 class="mb-0">벡터 저장소</h5>
+                    </div>
+                    <p class="text-muted">
+                        선택된 임베딩 모델로 벡터 저장소를 구성합니다.
+                    </p>
+                    <ul class="small">
+                        <li>ChromaDB 기반</li>
+                        <li>최적 임베딩 모델 적용</li>
+                    </ul>
+                    <div class="btn btn-secondary btn-block disabled">
+                        <i class="fas fa-check"></i> 자동 구성
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5단계: 검색기 최적화 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow h-100 border-left-primary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-primary text-white p-3 mr-3">
+                            <h4 class="mb-0">5</h4>
+                        </div>
+                        <h5 class="mb-0">검색기 최적화</h5>
+                    </div>
+                    <p class="text-muted">
+                        벡터 검색 방식을 최적화합니다.
+                    </p>
+                    <ul class="small">
+                        <li>유사도 검색, MMR, 하이브리드</li>
+                        <li>Top-K 파라미터 최적화</li>
+                    </ul>
+                    <a href="{% url 'chatbot_web:optimization_retriever' %}" class="btn btn-primary btn-block">
+                        <i class="fas fa-play"></i> 실행
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6단계: RAG 시스템 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card shadow h-100 border-left-danger">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-danger text-white p-3 mr-3">
+                            <h4 class="mb-0">6</h4>
+                        </div>
+                        <h5 class="mb-0">RAG 시스템</h5>
+                    </div>
+                    <p class="text-muted">
+                        전체 RAG 시스템을 정교한 메트릭으로 평가합니다.
+                    </p>
+                    <ul class="small">
+                        <li>검색 품질, 답변 품질, 컨텍스트 품질</li>
+                        <li>12가지 평가 지표 적용</li>
+                    </ul>
+                    <a href="{% url 'chatbot_web:optimization_rag_system' %}" class="btn btn-danger btn-block">
+                        <i class="fas fa-play"></i> 실행
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 전체 파이프라인 최적화 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow border-left-primary">
+                <div class="card-header py-3">
+                    <h5 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-rocket"></i> 전체 파이프라인 자동 최적화
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        위의 모든 단계를 자동으로 순차 실행하여 최적의 RAG 파이프라인을 구성합니다.
+                        각 단계의 최적 설정을 찾고, 최종적으로 챗봇 시스템의 성능을 종합 평가합니다.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>최적화 목표</label>
+                                <select id="optimization-target" class="form-control">
+                                    <option value="balanced">균형 (Balanced)</option>
+                                    <option value="speed">속도 우선 (Speed)</option>
+                                    <option value="quality">품질 우선 (Quality)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <label>평가 쿼리 (줄바꿈으로 구분)</label>
+                            <textarea id="evaluation-queries" class="form-control" rows="3">기초연금이란 무엇인가요?
+노인장기요양보험 신청 방법은?
+65세 이상 의료비 지원 제도는?</textarea>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button id="run-full-optimization" class="btn btn-primary btn-lg">
+                            <i class="fas fa-magic"></i> 전체 파이프라인 최적화 실행
+                        </button>
+                        <small class="text-muted d-block mt-2">
+                            * 전체 최적화는 5~10분 정도 소요될 수 있습니다.
+                        </small>
+                    </div>
+
+                    <!-- 진행 상황 표시 -->
+                    <div id="optimization-progress" class="mt-4" style="display: none;">
+                        <h5>최적화 진행 중...</h5>
+                        <div class="progress">
+                            <div id="optimization-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                 role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div id="optimization-status" class="mt-2 text-muted"></div>
+                    </div>
+
+                    <!-- 결과 표시 -->
+                    <div id="optimization-results" class="mt-4" style="display: none;">
+                        <h5><i class="fas fa-check-circle text-success"></i> 최적화 완료!</h5>
+                        <div id="results-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.border-left-info {
+    border-left: 0.25rem solid #17a2b8 !important;
+}
+.border-left-success {
+    border-left: 0.25rem solid #28a745 !important;
+}
+.border-left-warning {
+    border-left: 0.25rem solid #ffc107 !important;
+}
+.border-left-secondary {
+    border-left: 0.25rem solid #6c757d !important;
+}
+.border-left-primary {
+    border-left: 0.25rem solid #007bff !important;
+}
+.border-left-danger {
+    border-left: 0.25rem solid #dc3545 !important;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    transition: all 0.3s ease;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+</style>
+
+<script>
+// 전체 파이프라인 최적화 실행
+document.getElementById('run-full-optimization').addEventListener('click', function() {
+    const optimizationTarget = document.getElementById('optimization-target').value;
+    const evaluationQueries = document.getElementById('evaluation-queries').value
+        .split('\n')
+        .filter(q => q.trim() !== '');
+
+    // UI 업데이트
+    document.getElementById('optimization-progress').style.display = 'block';
+    document.getElementById('optimization-results').style.display = 'none';
+    this.disabled = true;
+
+    // AJAX 요청
+    fetch("{% url 'chatbot_web:api_run_full_optimization' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            optimization_target: optimizationTarget,
+            evaluation_queries: evaluationQueries
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('optimization-progress').style.display = 'none';
+        document.getElementById('run-full-optimization').disabled = false;
+
+        if (data.success) {
+            const result = data.result;
+            document.getElementById('optimization-results').style.display = 'block';
+
+            let resultHtml = `
+                <div class="alert alert-success">
+                    <h5><strong>종합 점수:</strong> ${(result.overall_score * 100).toFixed(1)}점</h5>
+                </div>
+                <pre class="bg-light p-3 rounded">${result.optimization_summary}</pre>
+            `;
+
+            document.getElementById('results-content').innerHTML = resultHtml;
+        } else {
+            alert('최적화 중 오류가 발생했습니다: ' + data.error);
+        }
+    })
+    .catch(error => {
+        document.getElementById('optimization-progress').style.display = 'none';
+        document.getElementById('run-full-optimization').disabled = false;
+        alert('요청 중 오류가 발생했습니다: ' + error);
+    });
+});
+</script>
+{% endblock %}

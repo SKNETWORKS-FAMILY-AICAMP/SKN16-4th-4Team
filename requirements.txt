@@ -1,0 +1,85 @@
+# 노인복지 정책 RAG 챗봇 시스템 - Python 3.12 호환 Requirements
+
+# Core Python packages
+python-dotenv>=1.0.0
+pandas>=2.0.0,<2.2.0
+# numpy binary wheel for Python 3.12 compatibility
+numpy>=1.24.0,<1.27.0
+
+# Django framework
+Django>=4.2.0,<5.0.0
+django-cors-headers>=4.0.0
+
+# LangChain ecosystem (stable versions)
+langchain-core>=0.1.20,<0.3.0
+langchain>=0.1.0,<0.3.0
+langchain-openai>=0.0.2,<0.2.0
+langchain-community>=0.0.10,<0.3.0
+
+# LangGraph workflow system
+langgraph>=0.0.20,<0.2.0
+
+# Vector database - use compatible versions
+chromadb>=0.4.0,<0.5.0
+faiss-cpu>=1.7.0,<1.9.0
+
+# Text embeddings and transformers - Python 3.12 compatible
+sentence-transformers>=2.2.0,<3.0.0
+transformers>=4.30.0,<5.0.0
+torch>=2.0.0,<2.3.0
+
+# PDF text extraction libraries
+PyPDF2>=3.0.0
+pdfplumber>=0.9.0
+PyMuPDF>=1.20.0
+pdfminer.six>=20220319
+
+# HWP text extraction libraries
+olefile>=0.46
+
+# Machine learning and NLP - stable versions
+scikit-learn>=1.3.0,<1.5.0
+nltk>=3.8.0,<3.9.0
+
+# Web UI frameworks
+gradio>=4.0.0,<5.0.0
+streamlit>=1.25.0,<1.35.0
+
+# Data visualization
+plotly>=5.0.0,<6.0.0
+matplotlib>=3.6.0,<3.9.0
+seaborn>=0.11.0,<0.14.0
+
+# API clients
+openai>=1.0.0,<2.0.0
+
+# Utilities
+tqdm>=4.60.0
+requests>=2.25.0,<3.0.0
+pyyaml>=6.0
+loguru>=0.7.0
+
+# Database connectivity
+dj-database-url>=1.0.0
+psycopg2-binary>=2.9.6
+
+# Web server
+gunicorn>=21.2.0
+whitenoise>=6.5.0
+
+# Additional packages for production
+python-decouple>=3.8
+django-environ>=0.11.0
+Pillow>=10.0.0
+djangorestframework>=3.14.0
+django-extensions>=3.2.3
+
+# PDF processing (additional)
+pypdf>=3.15.0
+
+# Token counting library used for estimating tokens during ingestion (tiktoken is used by OpenAI models)
+tiktoken>=0.4.0,<0.6.0
+
+# Optional LangChain ↔ Chroma compatibility/integration package
+# This helps if you migrate to the langchain-chroma integration wrapper
+langchain-chroma>=0.0.1,<0.3.0

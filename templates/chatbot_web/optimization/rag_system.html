@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}RAG 시스템 최적화{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-robot text-danger"></i>
+                    6단계: RAG 시스템 평가
+                </h1>
+                <a href="{% url 'chatbot_web:chatbot_optimization' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 최적화 대시보드
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-danger">
+                <h5><i class="fas fa-info-circle"></i> RAG 시스템 평가란?</h5>
+                <p>최적화된 구성으로 전체 RAG 시스템을 평가합니다. 12가지 정교한 메트릭을 사용합니다:</p>
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>검색 품질:</strong>
+                        <ul class="small">
+                            <li>Precision</li>
+                            <li>Recall</li>
+                            <li>F1 Score</li>
+                            <li>MRR</li>
+                            <li>NDCG</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>답변 품질:</strong>
+                        <ul class="small">
+                            <li>Relevance</li>
+                            <li>Faithfulness</li>
+                            <li>Completeness</li>
+                            <li>Conciseness</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>컨텍스트 품질:</strong>
+                        <ul class="small">
+                            <li>Relevance</li>
+                            <li>Diversity</li>
+                            <li>Coverage</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5><i class="fas fa-info-circle text-info"></i> 전체 파이프라인 필요</h5>
+                    <p class="text-muted">
+                        RAG 시스템 평가는 이전 단계들이 모두 완료되어야 실행할 수 있습니다.
+                        전체 파이프라인 최적화를 통해 모든 단계를 자동으로 실행하세요.
+                    </p>
+                    <a href="{% url 'chatbot_web:optimization_full_pipeline' %}" class="btn btn-danger btn-lg">
+                        <i class="fas fa-rocket"></i> 전체 파이프라인 최적화로 이동
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.border-left-danger { border-left: 0.25rem solid #dc3545 !important; }
+</style>
+{% endblock %}

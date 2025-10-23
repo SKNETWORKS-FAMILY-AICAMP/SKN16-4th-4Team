@@ -1,0 +1,655 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}챗봇 - 노인 복지 정책 RAG 챗봇{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-chat-dots-fill"></i> 노인 복지 정책 챗봇</h2>
+    </div>
+
+{% if session.rag_config %}
+<div class="alert alert-info mb-4">
+    <i class="bi bi-info-circle"></i> <strong>현재 RAG 구성:</strong> {{ session.rag_config.name }}
+    <span class="badge bg-primary">PDF: {{ session.rag_config.get_pdf_extractor_display }}</span>
+    <span class="badge bg-success">HWP: {{ session.rag_config.get_hwp_extractor_display }}</span>
+    <span class="badge bg-info">{{ session.rag_config.embedding_model|truncatechars:15 }}</span>
+    <span class="badge bg-warning text-dark">{{ session.rag_config.get_retrieval_strategy_display }}</span>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body" style="height: 500px; overflow-y: auto;" id="chatContainer">
+                <div id="chatMessages">
+                    <div class="alert alert-secondary">
+                        <img src="{% static 'photos/artificial-intelligence_9325602.png' %}" alt="AI" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px;"> 안녕하세요! 노인 복지 정책에 대해 궁금한 것을 자유롭게 물어보세요.
+                        <hr class="my-2">
+                        <div class="mt-2">
+                            <p class="mb-2"><i class="bi bi-lightbulb"></i> <strong>예시 질문 (클릭하면 입력됩니다):</strong></p>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary btn-sm text-start" onclick="setQuestion('노인 복지 정책에는 어떤 것들이 있나요?')">
+                                    <i class="bi bi-chat-dots"></i> 노인 복지 정책에는 어떤 것들이 있나요?
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm text-start" onclick="setQuestion('기초연금은 누가 받을 수 있나요?')">
+                                    <i class="bi bi-cash-coin"></i> 기초연금은 누가 받을 수 있나요?
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm text-start" onclick="setQuestion('노인 장기요양보험 신청 방법을 알려주세요')">
+                                    <i class="bi bi-hospital"></i> 노인 장기요양보험 신청 방법을 알려주세요
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% for chat_msg in chat_messages %}
+                    <div class="alert alert-{% if chat_msg.role == 'user' %}primary text-end{% else %}secondary{% endif %} mb-2" {% if chat_msg.role != 'user' %}data-answer="{{ chat_msg.content|escapejs }}" data-question="" data-message-id="{{ chat_msg.id }}"{% endif %}>
+                        {% if chat_msg.role == 'user' %}
+                            <i class="bi bi-person-circle"></i> {{ chat_msg.content }}
+                        {% else %}
+                            <img src="{% static 'photos/artificial-intelligence_9325602.png' %}" alt="AI" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 3px;"> <span class="answer-text">{{ chat_msg.content|linebreaks }}</span>
+                            {% if chat_msg.retrieved_docs %}
+                            <hr>
+                            <small class="text-muted">
+                                <i class="bi bi-file-text"></i> 검색된 문서: {{ chat_msg.retrieved_docs|length }}개
+                                <br>
+                                <strong>출처:</strong>
+                                {% for doc in chat_msg.retrieved_docs %}
+                                    {% if doc.metadata and doc.metadata.source %}
+                                        {% load static %}
+                                        <span class="badge bg-info text-dark">{{ doc.metadata.source|default:"정책문서"|cut:".pdf"|cut:".PDF"|cut:".hwp"|cut:".HWP"|cut:".docx"|cut:".DOCX" }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </small>
+                            {% endif %}
+                            <hr class="my-2">
+                            <div class="d-flex gap-2 align-items-center flex-wrap">
+                                <button class="btn btn-sm btn-outline-primary" onclick="copyAnswer(this)">
+                                    <i class="bi bi-clipboard"></i> 복사
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" onclick="bookmarkAnswer(this, 'regular')">
+                                    <i class="bi bi-bookmark-star"></i> 북마크
+                                </button>
+                                <div class="btn-group" role="group" aria-label="피드백">
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="submitFeedback(this, 5)" title="도움이 되었어요">
+                                        <i class="bi bi-hand-thumbs-up-fill"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="submitFeedback(this, 1)" title="도움이 안 되었어요">
+                                        <i class="bi bi-hand-thumbs-down-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="questionInput" placeholder="질문을 입력하세요..." onkeypress="if(event.key==='Enter') askQuestion()">
+                    <button class="btn btn-primary" onclick="askQuestion()">
+                        <i class="bi bi-send"></i> 전송
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history"></i> 대화 정보
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><i class="bi bi-star-fill text-warning"></i> <strong>세션 평가</strong></label>
+                    <div class="d-flex justify-content-center mb-2" id="starRating">
+                        <i class="bi bi-star star-icon" data-rating="1" onclick="setRating(1)"></i>
+                        <i class="bi bi-star star-icon" data-rating="2" onclick="setRating(2)"></i>
+                        <i class="bi bi-star star-icon" data-rating="3" onclick="setRating(3)"></i>
+                        <i class="bi bi-star star-icon" data-rating="4" onclick="setRating(4)"></i>
+                        <i class="bi bi-star star-icon" data-rating="5" onclick="setRating(5)"></i>
+                    </div>
+                    <p class="text-center small text-muted mb-2" id="ratingText">별을 클릭하여 평가해주세요</p>
+                    <button class="btn btn-warning btn-sm w-100" onclick="submitSessionRating()" id="submitRatingBtn" disabled>
+                        <i class="bi bi-send"></i> 평가 제출
+                    </button>
+                </div>
+                <hr>
+                <div class="d-grid gap-2">
+                    <button onclick="clearChatHistory()" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash"></i> 대화 내역 초기화
+                    </button>
+                    <a href="{% url 'chatbot_web:home' %}" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-house"></i> 홈으로
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const SESSION_ID = '{{ session.session_id }}';
+let lastQuestion = '';
+
+localStorage.setItem('chat_session_id', SESSION_ID);
+
+function clearChatHistory() {
+    if (confirm('대화 내역을 모두 삭제하고 새로 시작하시겠습니까?')) {
+        localStorage.removeItem('chat_session_id');
+        window.location.href = '{% url "chatbot_web:chat_new_session" %}';
+    }
+}
+
+function askQuestion() {
+    const input = document.getElementById('questionInput');
+    const question = input.value.trim();
+
+    if (!question) {
+        alert('질문을 입력해주세요.');
+        return;
+    }
+
+    lastQuestion = question;
+    const questionDiv = addMessage('user', question);
+    input.value = '';
+
+    const loadingDiv = addMessage('bot', '<div class="spinner-border spinner-border-sm" role="status"></div> 답변을 생성하는 중...', true);
+
+    fetch('{% url "chatbot_web:chat_api_message" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            session_id: SESSION_ID,
+            message: question
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingDiv.remove();
+
+        if (data.error) {
+            addMessage('bot', '<i class="bi bi-exclamation-triangle"></i> 오류: ' + data.error, true);
+        } else {
+            const answerDiv = addMessage('bot', data.response, false, question);
+
+            // message_id 설정 (피드백 기능용)
+            if (data.message_id) {
+                answerDiv.setAttribute('data-message-id', data.message_id);
+            }
+
+            setTimeout(() => {
+                questionDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    })
+    .catch(error => {
+        loadingDiv.remove();
+        addMessage('bot', '<i class="bi bi-exclamation-triangle"></i> 오류가 발생했습니다: ' + error, true);
+    });
+}
+
+function addMessage(type, text, allowHtml = false, question = '') {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = type === 'user' ? 'alert alert-primary text-end mb-2' : 'alert alert-secondary mb-2';
+
+    if (type === 'user') {
+        div.innerHTML = '<i class="bi bi-person-circle"></i> ' + escapeHtml(text);
+    } else {
+        if (question) {
+            div.setAttribute('data-question', question);
+            div.setAttribute('data-answer', text);
+        }
+
+        let contentHtml = '';
+        if (allowHtml) {
+            contentHtml = '<img src="{% static 'photos/artificial-intelligence_9325602.png' %}" alt="AI" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 3px;"> <span class="answer-text">' + text + '</span>';
+        } else {
+            contentHtml = '<img src="{% static 'photos/artificial-intelligence_9325602.png' %}" alt="AI" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 3px;"> <span class="answer-text">' + escapeHtml(text).replace(/\n/g, '<br>') + '</span>';
+        }
+
+        // 복사, 북마크, 피드백 버튼 추가
+        contentHtml += `
+            <hr class="my-2">
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <button class="btn btn-sm btn-outline-primary" onclick="copyAnswer(this)">
+                    <i class="bi bi-clipboard"></i> 복사
+                </button>
+                <button class="btn btn-sm btn-outline-success" onclick="bookmarkAnswer(this, 'regular')">
+                    <i class="bi bi-bookmark-star"></i> 북마크
+                </button>
+                <div class="btn-group" role="group" aria-label="피드백">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="submitQuickFeedback(this, 5)" title="도움이 되었어요">
+                        <i class="bi bi-hand-thumbs-up-fill"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="submitQuickFeedback(this, 1)" title="도움이 안 되었어요">
+                        <i class="bi bi-hand-thumbs-down-fill"></i>
+                    </button>
+                </div>
+                <button class="btn btn-sm btn-outline-info" onclick="toggleFeedbackBox(this)">
+                    <i class="bi bi-chat-dots"></i> 피드백 남기기
+                </button>
+            </div>
+            <div class="feedback-box mt-2" style="display: none;">
+                <textarea class="form-control form-control-sm feedback-comment" rows="3" placeholder="상세한 피드백을 남겨주세요..."></textarea>
+                <div class="mt-2">
+                    <div class="btn-group btn-group-sm me-2" role="group">
+                        <button class="btn btn-outline-success feedback-rating" data-rating="5" onclick="selectRating(this)">
+                            <i class="bi bi-emoji-smile"></i> 매우 좋음
+                        </button>
+                        <button class="btn btn-outline-primary feedback-rating" data-rating="4" onclick="selectRating(this)">
+                            <i class="bi bi-hand-thumbs-up"></i> 좋음
+                        </button>
+                        <button class="btn btn-outline-secondary feedback-rating" data-rating="3" onclick="selectRating(this)">
+                            <i class="bi bi-dash-circle"></i> 보통
+                        </button>
+                        <button class="btn btn-outline-warning feedback-rating" data-rating="2" onclick="selectRating(this)">
+                            <i class="bi bi-hand-thumbs-down"></i> 나쁨
+                        </button>
+                        <button class="btn btn-outline-danger feedback-rating" data-rating="1" onclick="selectRating(this)">
+                            <i class="bi bi-emoji-frown"></i> 매우 나쁨
+                        </button>
+                    </div>
+                    <button class="btn btn-sm btn-primary" onclick="submitDetailedFeedback(this)">
+                        <i class="bi bi-send"></i> 제출
+                    </button>
+                </div>
+            </div>
+        `;
+
+        div.innerHTML = contentHtml;
+    }
+
+    container.appendChild(div);
+
+    const chatContainer = document.getElementById('chatContainer');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    return div;
+}
+
+function copyAnswer(button) {
+    const answerDiv = button.closest('.alert');
+    const answerText = answerDiv.querySelector('.answer-text').innerText;
+
+    navigator.clipboard.writeText(answerText).then(function() {
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check"></i> 복사됨!';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-primary');
+
+        setTimeout(() => {
+            button.innerHTML = originalHtml;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
+        }, 2000);
+    }, function(err) {
+        console.error('복사 실패:', err);
+        alert('복사에 실패했습니다. 다시 시도해주세요.');
+    });
+}
+
+function bookmarkAnswer(button, chatbotType) {
+    const answerDiv = button.closest('.alert');
+    const question = answerDiv.getAttribute('data-question') || lastQuestion;
+    const answer = answerDiv.getAttribute('data-answer') || answerDiv.querySelector('.answer-text').innerText;
+
+    if (!question) {
+        alert('질문 정보를 찾을 수 없습니다.');
+        return;
+    }
+
+    fetch('{% url "chatbot_web:bookmark_save" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            question: question,
+            answer: answer,
+            chatbot_type: chatbotType
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-check"></i> 저장됨!';
+            button.classList.add('btn-success');
+            button.classList.remove('btn-outline-success');
+
+            setTimeout(() => {
+                button.innerHTML = originalHtml;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-success');
+            }, 2000);
+        } else {
+            alert('북마크 저장 실패: ' + (data.error || '알 수 없는 오류'));
+        }
+    })
+    .catch(error => {
+        console.error('북마크 저장 오류:', error);
+        alert('북마크 저장 중 오류가 발생했습니다.');
+    });
+}
+
+// 빠른 피드백 (엄지 버튼)
+function submitQuickFeedback(button, rating) {
+    const answerDiv = button.closest('.alert');
+    const messageId = answerDiv.getAttribute('data-message-id');
+
+    if (!messageId) {
+        console.warn('메시지 ID를 찾을 수 없습니다. 페이지 새로고침 후 피드백을 남길 수 있습니다.');
+
+        const btnGroup = button.closest('.btn-group');
+        const originalHtml = btnGroup.innerHTML;
+        btnGroup.innerHTML = '<span class="btn btn-sm btn-success disabled"><i class="bi bi-check"></i> 감사합니다!</span>';
+
+        setTimeout(() => {
+            btnGroup.innerHTML = originalHtml;
+        }, 3000);
+        return;
+    }
+
+    fetch('{% url "chatbot_web:feedback_submit" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            message_id: messageId,
+            rating: rating,
+            comment: ''
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const btnGroup = button.closest('.btn-group');
+            const originalHtml = btnGroup.innerHTML;
+            btnGroup.innerHTML = '<span class="btn btn-sm btn-success disabled"><i class="bi bi-check"></i> 감사합니다!</span>';
+
+            setTimeout(() => {
+                btnGroup.innerHTML = originalHtml;
+            }, 3000);
+        } else {
+            console.error('피드백 저장 실패:', data.error);
+        }
+    })
+    .catch(error => {
+        console.error('피드백 제출 오류:', error);
+    });
+}
+
+// 피드백 박스 토글
+function toggleFeedbackBox(button) {
+    const answerDiv = button.closest('.alert');
+    const feedbackBox = answerDiv.querySelector('.feedback-box');
+
+    if (feedbackBox.style.display === 'none') {
+        feedbackBox.style.display = 'block';
+        button.innerHTML = '<i class="bi bi-x"></i> 닫기';
+        button.classList.remove('btn-outline-info');
+        button.classList.add('btn-info');
+    } else {
+        feedbackBox.style.display = 'none';
+        button.innerHTML = '<i class="bi bi-chat-dots"></i> 피드백 남기기';
+        button.classList.remove('btn-info');
+        button.classList.add('btn-outline-info');
+    }
+}
+
+// 평점 선택
+function selectRating(button) {
+    const feedbackBox = button.closest('.feedback-box');
+    const ratingButtons = feedbackBox.querySelectorAll('.feedback-rating');
+
+    // 모든 버튼 비활성화
+    ratingButtons.forEach(btn => {
+        btn.classList.remove('active');
+        const originalClass = btn.getAttribute('data-rating') == 5 ? 'btn-outline-success' :
+                            btn.getAttribute('data-rating') == 4 ? 'btn-outline-primary' :
+                            btn.getAttribute('data-rating') == 3 ? 'btn-outline-secondary' :
+                            btn.getAttribute('data-rating') == 2 ? 'btn-outline-warning' : 'btn-outline-danger';
+        btn.className = 'btn ' + originalClass + ' feedback-rating';
+    });
+
+    // 선택된 버튼 활성화
+    button.classList.add('active');
+    const activeClass = button.getAttribute('data-rating') == 5 ? 'btn-success' :
+                       button.getAttribute('data-rating') == 4 ? 'btn-primary' :
+                       button.getAttribute('data-rating') == 3 ? 'btn-secondary' :
+                       button.getAttribute('data-rating') == 2 ? 'btn-warning' : 'btn-danger';
+    button.classList.remove('btn-outline-success', 'btn-outline-primary', 'btn-outline-secondary', 'btn-outline-warning', 'btn-outline-danger');
+    button.classList.add(activeClass);
+}
+
+// 상세 피드백 제출
+function submitDetailedFeedback(button) {
+    const feedbackBox = button.closest('.feedback-box');
+    const answerDiv = button.closest('.alert');
+    const messageId = answerDiv.getAttribute('data-message-id');
+    const comment = feedbackBox.querySelector('.feedback-comment').value.trim();
+    const selectedRatingBtn = feedbackBox.querySelector('.feedback-rating.active');
+
+    if (!messageId) {
+        alert('메시지 ID를 찾을 수 없습니다. 페이지를 새로고침 후 다시 시도해주세요.');
+        return;
+    }
+
+    if (!selectedRatingBtn) {
+        alert('평점을 선택해주세요.');
+        return;
+    }
+
+    if (!comment) {
+        alert('피드백 내용을 입력해주세요.');
+        return;
+    }
+
+    const rating = parseInt(selectedRatingBtn.getAttribute('data-rating'));
+
+    // 버튼 비활성화
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 제출 중...';
+
+    fetch('{% url "chatbot_web:feedback_submit" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            message_id: messageId,
+            rating: rating,
+            comment: comment
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 성공 메시지
+            feedbackBox.innerHTML = '<div class="alert alert-success mb-0"><i class="bi bi-check-circle"></i> 피드백이 저장되었습니다. 감사합니다!</div>';
+
+            // 피드백 남기기 버튼 숨기기
+            const feedbackBtn = answerDiv.querySelector('[onclick*="toggleFeedbackBox"]');
+            if (feedbackBtn) {
+                feedbackBtn.style.display = 'none';
+            }
+        } else {
+            alert('피드백 저장 실패: ' + (data.error || '알 수 없는 오류'));
+            button.disabled = false;
+            button.innerHTML = '<i class="bi bi-send"></i> 제출';
+        }
+    })
+    .catch(error => {
+        console.error('피드백 제출 오류:', error);
+        alert('피드백 제출 중 오류가 발생했습니다.');
+        button.disabled = false;
+        button.innerHTML = '<i class="bi bi-send"></i> 제출';
+    });
+}
+
+function setQuestion(text) {
+    document.getElementById('questionInput').value = text;
+    document.getElementById('questionInput').focus();
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const chatContainer = document.getElementById('chatContainer');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // 별점 평가 CSS 추가
+    const style = document.createElement('style');
+    style.textContent = `
+        .star-icon {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s;
+            margin: 0 2px;
+        }
+        .star-icon:hover,
+        .star-icon.active {
+            color: #ffc107;
+        }
+        .star-icon.half {
+            background: linear-gradient(90deg, #ffc107 50%, #ddd 50%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// 별점 관련 변수
+let currentRating = 0;
+let hoverRating = 0;
+
+// 별점 설정 (0.5 단위)
+function setRating(rating) {
+    const stars = document.querySelectorAll('.star-icon');
+    const existingRating = currentRating;
+
+    // 같은 별을 클릭하면 0.5점 단위로 토글
+    if (Math.floor(rating) === Math.floor(existingRating) && existingRating % 1 === 0) {
+        currentRating = rating - 0.5;
+    } else {
+        currentRating = rating;
+    }
+
+    updateStars(currentRating);
+    document.getElementById('ratingText').textContent = currentRating.toFixed(1) + '점';
+    document.getElementById('submitRatingBtn').disabled = false;
+}
+
+// 별 표시 업데이트
+function updateStars(rating) {
+    const stars = document.querySelectorAll('.star-icon');
+    stars.forEach((star, index) => {
+        const starValue = index + 1;
+        star.classList.remove('active', 'half');
+
+        if (starValue <= Math.floor(rating)) {
+            star.classList.add('active');
+        } else if (starValue === Math.ceil(rating) && rating % 1 !== 0) {
+            star.classList.add('half');
+            star.classList.replace('bi-star', 'bi-star-half');
+        } else {
+            star.classList.replace('bi-star-half', 'bi-star');
+            star.classList.replace('bi-star-fill', 'bi-star');
+        }
+
+        if (star.classList.contains('active')) {
+            star.classList.replace('bi-star', 'bi-star-fill');
+            star.classList.replace('bi-star-half', 'bi-star-fill');
+        }
+    });
+}
+
+// 세션 평가 제출
+function submitSessionRating() {
+    if (currentRating === 0) {
+        alert('별점을 선택해주세요.');
+        return;
+    }
+
+    const submitBtn = document.getElementById('submitRatingBtn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 제출 중...';
+    submitBtn.disabled = true;
+
+    fetch('{% url "chatbot_web:session_rating_submit" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            session_id: SESSION_ID,
+            rating: currentRating,
+            comment: ''
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('ratingText').textContent = '평가가 저장되었습니다! 감사합니다.';
+            document.getElementById('ratingText').classList.add('text-success');
+            submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> 평가 완료';
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                document.getElementById('ratingText').classList.remove('text-success');
+            }, 3000);
+        } else {
+            alert('평가 저장 실패: ' + (data.error || '알 수 없는 오류'));
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('평가 제출 오류:', error);
+        alert('평가 제출 중 오류가 발생했습니다.');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+</script>
+{% endblock %}

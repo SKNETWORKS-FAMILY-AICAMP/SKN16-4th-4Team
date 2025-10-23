@@ -1,0 +1,58 @@
+{
+  "auto_initialize": true,
+  "parallel_execution": false,
+  "result_storage": true,
+  "benchmark_settings": {
+    "max_files": 5,
+    "max_texts": 3,
+    "max_queries": 3,
+    "timeout": 30,
+    "repetitions": 1
+  },
+  "component_settings": {
+    "text_extraction": {
+      "enabled": true,
+      "default_extractors": ["PyPDF2", "pdfplumber", "PyMuPDF"],
+      "max_file_size_mb": 50
+    },
+    "chunking": {
+      "enabled": true,
+      "default_strategies": ["recursive", "semantic", "fixed_size"],
+      "chunk_size_range": [200, 1000]
+    },
+    "embedding": {
+      "enabled": true,
+      "default_models": ["sentence-transformers"],
+      "batch_size": 32
+    },
+    "retrieval": {
+      "enabled": true,
+      "default_strategies": ["similarity", "mmr"],
+      "top_k": 5
+    }
+  },
+  "output_settings": {
+    "save_detailed_results": true,
+    "create_visualizations": false,
+    "export_formats": ["json", "csv"],
+    "compress_results": false
+  },
+  "performance_thresholds": {
+    "text_extraction": {
+      "min_success_rate": 0.8,
+      "max_processing_time": 10.0
+    },
+    "chunking": {
+      "min_chunk_quality": 0.6,
+      "max_processing_time": 5.0
+    },
+    "embedding": {
+      "min_success_rate": 0.9,
+      "max_processing_time": 3.0
+    },
+    "retrieval": {
+      "min_relevance_score": 0.7,
+      "max_processing_time": 1.0
+    }
+  }
+}

@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}전체 파이프라인 최적화{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-rocket text-primary"></i>
+                    전체 파이프라인 자동 최적화
+                </h1>
+                <a href="{% url 'chatbot_web:chatbot_optimization' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 최적화 대시보드
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle"></i> 전체 파이프라인 최적화란?</h5>
+                <p class="mb-0">
+                    RAG 챗봇의 모든 구성 요소(텍스트 추출, 청킹, 임베딩, 검색, RAG 시스템)를 자동으로 순차 최적화합니다.
+                    각 단계의 최적 설정을 찾고, 최종적으로 전체 시스템 성능을 평가합니다.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="m-0"><i class="fas fa-cog"></i> 최적화 설정</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label><strong>최적화 목표</strong></label>
+                                <select id="optimization-target" class="form-control">
+                                    <option value="balanced">균형 (Balanced)</option>
+                                    <option value="speed">속도 우선 (Speed)</option>
+                                    <option value="quality">품질 우선 (Quality)</option>
+                                </select>
+                                <small class="text-muted">최적화 시 우선 고려할 목표를 선택하세요.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label><strong>평가 쿼리 (줄바꿈으로 구분)</strong></label>
+                                <textarea id="evaluation-queries" class="form-control" rows="4">기초연금이란 무엇인가요?
+노인장기요양보험 신청 방법은?
+65세 이상 의료비 지원 제도는?</textarea>
+                                <small class="text-muted">시스템 평가에 사용할 질문들을 입력하세요.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button id="run-full-optimization" class="btn btn-primary btn-lg btn-block">
+                            <i class="fas fa-rocket"></i> 전체 파이프라인 최적화 시작
+                        </button>
+                        <small class="text-muted d-block mt-2 text-center">
+                            ⚠️ 전체 최적화는 5~10분 정도 소요될 수 있습니다.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 진행 상황 -->
+    <div id="optimization-progress" class="row mb-4" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5><i class="fas fa-spinner fa-spin"></i> 최적화 진행 중...</h5>
+                    <div class="progress" style="height: 30px;">
+                        <div id="optimization-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                             role="progressbar" style="width: 0%">
+                            <span id="progress-text">0%</span>
+                        </div>
+                    </div>
+                    <div id="optimization-status" class="mt-3 text-muted">
+                        <p class="mb-1"><strong>현재 단계:</strong> 초기화 중...</p>
+                        <ul id="step-list" class="small">
+                            <li>1단계: 텍스트 추출 최적화</li>
+                            <li>2단계: 청킹 전략 최적화</li>
+                            <li>3단계: 임베딩 모델 최적화</li>
+                            <li>4단계: 벡터 저장소 구성</li>
+                            <li>5단계: 검색기 최적화</li>
+                            <li>6단계: RAG 시스템 평가</li>
+                            <li>7단계: 전체 파이프라인 평가</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 결과 -->
+    <div id="optimization-results" class="row" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow border-left-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="m-0"><i class="fas fa-check-circle"></i> 최적화 완료!</h5>
+                </div>
+                <div class="card-body">
+                    <div id="results-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.border-left-success { border-left: 0.25rem solid #28a745 !important; }
+</style>
+
+<script>
+document.getElementById('run-full-optimization').addEventListener('click', function() {
+    const optimizationTarget = document.getElementById('optimization-target').value;
+    const evaluationQueries = document.getElementById('evaluation-queries').value
+        .split('\n')
+        .filter(q => q.trim() !== '');
+
+    // UI 업데이트
+    document.getElementById('optimization-progress').style.display = 'block';
+    document.getElementById('optimization-results').style.display = 'none';
+    this.disabled = true;
+
+    // 진행 표시 시뮬레이션
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += 2;
+        if (progress > 90) progress = 90;
+        document.getElementById('optimization-progress-bar').style.width = progress + '%';
+        document.getElementById('progress-text').textContent = progress + '%';
+    }, 500);
+
+    // AJAX 요청
+    fetch("{% url 'chatbot_web:api_run_full_optimization' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            optimization_target: optimizationTarget,
+            evaluation_queries: evaluationQueries
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        clearInterval(progressInterval);
+        document.getElementById('optimization-progress-bar').style.width = '100%';
+        document.getElementById('progress-text').textContent = '100%';
+
+        setTimeout(() => {
+            document.getElementById('optimization-progress').style.display = 'none';
+            document.getElementById('run-full-optimization').disabled = false;
+
+            if (data.success) {
+                const result = data.result;
+                document.getElementById('optimization-results').style.display = 'block';
+
+                let resultHtml = `
+                    <div class="alert alert-success">
+                        <h4><i class="fas fa-trophy"></i> 종합 점수: <strong>${(result.overall_score * 100).toFixed(1)}점</strong></h4>
+                    </div>
+
+                    <h5 class="mt-4"><i class="fas fa-list"></i> 최적화 요약</h5>
+                    <pre class="bg-light p-3 rounded" style="white-space: pre-wrap;">${result.optimization_summary}</pre>
+
+                    <h5 class="mt-4"><i class="fas fa-cogs"></i> 추천 설정</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>구성 요소</th>
+                                    <th>선택된 옵션</th>
+                                    <th>점수</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                for (const [key, value] of Object.entries(result.recommended_config)) {
+                    resultHtml += `
+                        <tr>
+                            <td><strong>${key}</strong></td>
+                            <td>${value.selected}</td>
+                            <td><span class="badge badge-success">${(value.score * 100).toFixed(1)}점</span></td>
+                        </tr>
+                    `;
+                }
+
+                resultHtml += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                document.getElementById('results-content').innerHTML = resultHtml;
+            } else {
+                alert('최적화 중 오류가 발생했습니다:\n\n' + data.error);
+                if (data.traceback) {
+                    console.error('Traceback:', data.traceback);
+                }
+            }
+        }, 500);
+    })
+    .catch(error => {
+        clearInterval(progressInterval);
+        document.getElementById('optimization-progress').style.display = 'none';
+        document.getElementById('run-full-optimization').disabled = false;
+        alert('요청 중 오류가 발생했습니다: ' + error);
+    });
+});
+</script>
+{% endblock %}
