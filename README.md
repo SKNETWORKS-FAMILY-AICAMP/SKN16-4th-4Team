@@ -448,7 +448,7 @@ This project is licensed under the MIT License.
 
 **SKN16-4th-4Team**
 
-- 프로젝트 기간: 2025.10
+- 프로젝트 기간: 2025.10.17 ~ 2025.10.19
 - 기술 스택: Django, OpenAI, LangChain, ChromaDB, Docker
 - 배포: AWS Lightsail
 
